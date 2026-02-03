@@ -1377,4 +1377,55 @@ createSceneSnapshot() {
     shutdown() {
         super.shutdown();
     }
+
+    /**
+     * カメラをフェードさせます。JSONイベントノードから呼び出されます。
+     * @param {object} params - { type: 'in'|'out', time: ms, color: '0xRRGGBB' }
+     */
+    cameraFade(params) {
+        const time = parseInt(params.time, 10) || 1000;
+        const type = params.type || 'out';
+        const colorStr = params.color || '0x000000';
+        
+        // 16進数文字列を数値に変換
+        const red = parseInt(colorStr.substring(2, 4), 16);
+        const green = parseInt(colorStr.substring(4, 6), 16);
+        const blue = parseInt(colorStr.substring(6, 8), 16);
+
+        const camera = this.cameras.main;
+
+        if (type === 'in') {
+            camera.fadeIn(time, red, green, blue);
+        } else {
+            camera.fadeOut(time, red, green, blue);
+        }
+    }
+
+    /**
+     * ゲームフローイベントを発火させます。JSONイベントノードから呼び出されます。
+     * @param {object} params - { event: string, data: string(JSON) }
+     */
+    fireGameFlowEvent(params) {
+        const eventName = params.event;
+        let eventData = {};
+        if (params.data) {
+            try {
+                const jsonString = params.data.replace(/'/g, '"');
+                eventData = JSON.parse(jsonString);
+            } catch (e) {
+                console.error(`[BaseGameScene] Invalid data format for game flow event: ${params.data}`, e);
+            }
+        }
+        
+        // EngineAPI 経由での発火を試みる
+        const systemScene = this.scene.get('SystemScene');
+        if (systemScene && systemScene.gameFlowManager) {
+            systemScene.gameFlowManager.handleEvent(eventName, eventData);
+        } else {
+            const engineAPI = this.registry.get('engineAPI');
+            if (engineAPI) {
+                engineAPI.fireGameFlowEvent(eventName, eventData);
+            }
+        }
+    }
 }
