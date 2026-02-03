@@ -98,7 +98,8 @@
         "JumpScene.json",
         "TitleScene.json",
         "pause_menu.json",
-        "trial_demo.json"
+        "trial_demo.json",
+        "TrialScene.json"
       ]
     },
     "//": "--- ここにタイルセット用の定義を追加 ---",

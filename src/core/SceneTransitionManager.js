@@ -113,7 +113,7 @@ export default class SceneTransitionManager {
             }
 
             // 3. カメラのフェードインは、入力が有効になった後で行う
-            this.systemScene.cameras.main.fadeFrom(300, 0, 0, 0); // コールバックはもう不要
+            this.systemScene.cameras.main.fadeIn(300, 0, 0, 0);
 
             // 4. 遷移完了イベントも、このタイミングで発行してよい
             this.systemScene.events.emit('transition-complete', sceneKey);
