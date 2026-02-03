@@ -60,7 +60,8 @@ export default class SystemScene extends Phaser.Scene {
         // console.log("[SystemScene] All managers have been instantiated.");
 
         EngineAPI.init(this);
-        // console.log('[SystemScene] EngineAPI has been initialized with all managers.');
+        this.registry.set('engineAPI', EngineAPI);
+        // console.log('[SystemScene] EngineAPI has been initialized and registered.');
 
         const uiSceneConfig = { physics: { matter: { enable: false } } };
         if (!this.scene.get('UIScene')) {

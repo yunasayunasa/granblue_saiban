@@ -13,7 +13,7 @@ export default class TitleScene extends BaseGameScene {
         //    initSceneWithDataを呼び出すだけ。
         //    ジョイスティックも、物理エンジンも、カメラの境界設定も、
         //    TitleSceneには不要。
-        super.create(); 
+        super.create();
         this.initSceneWithData();
     }
 
@@ -23,7 +23,7 @@ export default class TitleScene extends BaseGameScene {
         console.log('[TitleScene] Data-driven setup complete. Playing title music.');
         const soundManager = this.registry.get('soundManager');
         if (soundManager) {
-            soundManager.playBgm('title_music_key'); // ★ あなたのタイトルBGMのキーに書き換えてください
+            soundManager.playBgm('bgm_action');
         }
     }
 

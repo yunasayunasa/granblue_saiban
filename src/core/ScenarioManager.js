@@ -30,10 +30,10 @@ export default class ScenarioManager {
         this.tagHandlers.set(tagName, handler);
     }
 
-   
- // ScenarioManager.js の next() と parse() を置き換える
 
-       // --- 新しいゲームループの開始点 ---
+    // ScenarioManager.js の next() と parse() を置き換える
+
+    // --- 新しいゲームループの開始点 ---
     next() {
         // 待機フラグを解除して、ゲームループを開始する
         this.isWaitingClick = false;
@@ -42,10 +42,10 @@ export default class ScenarioManager {
         this.isEnd = false;
         // ループが既に動いている場合は、重複して実行しないようにする
         if (this.isLoopRunning) return;
-        
+
         this.gameLoop();
     }
-  // ★★★ 追加: ScenarioManagerを停止させるメソッド ★★★
+    // ★★★ 追加: ScenarioManagerを停止させるメソッド ★★★
     stop() {
         this.isStopped = true;
         this.isEnd = true; // gameLoopを抜けるようにする
@@ -57,12 +57,12 @@ export default class ScenarioManager {
         }
     }
     // --- 新しいメインループ ---
-       async gameLoop() {
+    async gameLoop() {
         this.isLoopRunning = true;
         // console.log(`[gameLoop] >> ループ開始 (Line: ${this.currentLine})`);
 
         while (!this.isEnd && !this.isWaitingClick && !this.isWaitingChoice && !this.isStopped) {
-            
+
             if (this.currentLine >= this.scenario.length) {
                 this.isEnd = true;
                 this.messageWindow.setText('（シナリオ終了）', false);
@@ -74,21 +74,21 @@ export default class ScenarioManager {
             this.currentLine++;
 
             // console.log(`[gameLoop] -> Line ${processingLine} のパースを開始: "${line}"`);
-            
+
             await this.parse(line);
 
             // console.log(`[gameLoop] <- Line ${processingLine} のパースが完了。`);
         }
-        
+
         this.isLoopRunning = false;
         // console.log(`[gameLoop] << ループ停止。isEnd=${this.isEnd}, isWaitingClick=${this.isWaitingClick}, isWaitingChoice=${this.isWaitingChoice}, Line: ${this.currentLine}`);
     }
-     // --- クリック処理 ---
+    // --- クリック処理 ---
     onClick() {
-       
-        
+
+
         if (this.isEnd) return;
-        
+
         if (this.isWaitingChoice) return;
 
         if (this.messageWindow.isTyping) {
@@ -98,92 +98,92 @@ export default class ScenarioManager {
 
         if (this.isWaitingClick) {
             this.messageWindow.hideNextArrow();
-            this.next(); 
+            this.next();
         }
     }
 
 
- // --- parseメソッドは、状態を変更するだけ ---
+    // --- parseメソッドは、状態を変更するだけ ---
     // ScenarioManager.js の parse メソッド (最終版 Ver.2)
 
-    
 
-async parse(line) {
-    const trimedLine = line.trim();
 
-    // if文のスキップ処理 (変更なし)
-    const ifState = this.ifStack.length > 0 ? this.ifStack[this.ifStack.length - 1] : null;
-    if (ifState && ifState.skipping) {
-        const { tagName } = this.parseTag(trimedLine);
-        if (['if', 'elsif', 'else', 'endif'].includes(tagName)) {
-            const handler = this.tagHandlers.get(tagName);
-            if (handler) await handler(this, this.parseTag(trimedLine).params);
+    async parse(line) {
+        const trimedLine = line.trim();
+
+        // if文のスキップ処理 (変更なし)
+        const ifState = this.ifStack.length > 0 ? this.ifStack[this.ifStack.length - 1] : null;
+        if (ifState && ifState.skipping) {
+            const { tagName } = this.parseTag(trimedLine);
+            if (['if', 'elsif', 'else', 'endif'].includes(tagName)) {
+                const handler = this.tagHandlers.get(tagName);
+                if (handler) await handler(this, this.parseTag(trimedLine).params);
+            }
+            return;
         }
-        return;
-    }
 
-    // --- 通常実行 ---
-    if (trimedLine.startsWith(';') || trimedLine.startsWith('*') || trimedLine.startsWith('@')) {
-        // コメント、ラベル、アセットは無視
-    } 
-    else if (trimedLine.startsWith('[')) {
-        // --- タグ行 ---
-        const { tagName, params } = this.parseTag(trimedLine);
-        const handler = this.tagHandlers.get(tagName);
+        // --- 通常実行 ---
+        if (trimedLine.startsWith(';') || trimedLine.startsWith('*') || trimedLine.startsWith('@')) {
+            // コメント、ラベル、アセットは無視
+        }
+        else if (trimedLine.startsWith('[')) {
+            // --- タグ行 ---
+            const { tagName, params } = this.parseTag(trimedLine);
+            const handler = this.tagHandlers.get(tagName);
 
-        if (handler) {
-            // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-            // ★★★ これが全てを解決する、唯一の修正です ★★★
-            // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-            
-            // 全てのパラメータの「値」に対して、変数展開を試みる
-            for (const key in params) {
-                if (typeof params[key] === 'string') {
-                    // [eval]タグのexp属性の場合は、中身を展開しないようにするなどの配慮は不要。
-                    // embedVariablesが`&`記号を探すので、"f.hoge=0"のような文字列は変更されない。
-                    params[key] = this.embedVariables(params[key]);
+            if (handler) {
+                // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+                // ★★★ これが全てを解決する、唯一の修正です ★★★
+                // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+
+                // 全てのパラメータの「値」に対して、変数展開を試みる
+                for (const key in params) {
+                    if (typeof params[key] === 'string') {
+                        // [eval]タグのexp属性の場合は、中身を展開しないようにするなどの配慮は不要。
+                        // embedVariablesが`&`記号を探すので、"f.hoge=0"のような文字列は変更されない。
+                        params[key] = this.embedVariables(params[key]);
+                    }
                 }
+
+                // 修正されたparamsでハンドラを実行
+                await handler(this, params);
+
+            } else {
+                console.warn(`未定義のタグです: [${tagName}]`);
+            }
+        }
+        else if (trimedLine.length > 0) {
+            // --- セリフまたは地の文 ---
+            const expandedLine = this.embedVariables(trimedLine);
+            let speakerName = null;
+            let dialogue = expandedLine; // ★ 変数展開後のテキストを使う
+            const speakerMatch = expandedLine.match(/^([a-zA-Z0-9_]+):/);
+
+            if (speakerMatch) {
+                speakerName = speakerMatch[1];
+                dialogue = expandedLine.substring(speakerName.length + 1).trim();
             }
 
-            // 修正されたparamsでハンドラを実行
-            await handler(this, params);
+            this.stateManager.addHistory(speakerName, dialogue);
+            this.highlightSpeaker(speakerName);
+            const wrappedLine = this.manualWrap(dialogue);
+            const useTyping = (this.mode !== 'skip');
 
-        } else {
-            console.warn(`未定義のタグです: [${tagName}]`);
+            await this.messageWindow.setText(wrappedLine, useTyping, speakerName);
         }
-    } 
-    else if (trimedLine.length > 0) {
-    // --- セリフまたは地の文 ---
-         const expandedLine = this.embedVariables(trimedLine);
-       let speakerName = null;
-        let dialogue = expandedLine; // ★ 変数展開後のテキストを使う
-        const speakerMatch = expandedLine.match(/^([a-zA-Z0-9_]+):/);
-        
-        if (speakerMatch) {
-            speakerName = speakerMatch[1];
-            dialogue = expandedLine.substring(speakerName.length + 1).trim();
-        }
-        
-        this.stateManager.addHistory(speakerName, dialogue);
-        this.highlightSpeaker(speakerName);
-        const wrappedLine = this.manualWrap(dialogue);
-        const useTyping = (this.mode !== 'skip');
-        
-        await this.messageWindow.setText(wrappedLine, useTyping, speakerName);
-    } 
-}
-     // (constructor, next, parseなどの他の部分は、あなたの正常に動作しているコードのままでOKです)
-// ★★★ loadScenarioメソッドだけを、以下のコードで完全に置き換えてください ★★★
+    }
+    // (constructor, next, parseなどの他の部分は、あなたの正常に動作しているコードのままでOKです)
+    // ★★★ loadScenarioメソッドだけを、以下のコードで完全に置き換えてください ★★★
 
-    
-     // (constructor, next, parseなどの他の部分は、あなたの正常に動作しているコードのままでOKです)
-// ★★★ loadScenarioメソッドだけを、以下のコードで完全に置き換えてください ★★★
 
-     /**
-     * 指定されたシナリオをロードし、解析して実行準備を整える (最終版)
-     * @param {string} scenarioKey - 'scene2.ks' のようなファイル名
-     * @param {string|null} targetLabel - ジャンプ先のラベル (例: '*start')
-     */
+    // (constructor, next, parseなどの他の部分は、あなたの正常に動作しているコードのままでOKです)
+    // ★★★ loadScenarioメソッドだけを、以下のコードで完全に置き換えてください ★★★
+
+    /**
+    * 指定されたシナリオをロードし、解析して実行準備を整える (最終版)
+    * @param {string} scenarioKey - 'scene2.ks' のようなファイル名
+    * @param {string|null} targetLabel - ジャンプ先のラベル (例: '*start')
+    */
     async loadScenario(scenarioKey, targetLabel = null) {
         // console.log(`%c[loadScenario] START: ${scenarioKey}`, "color: yellow; font-weight: bold;");
         let rawText;
@@ -195,7 +195,7 @@ async parse(line) {
         } else {
             // (動的ロードのロジックは変更なし)
             await new Promise(resolve => {
-                this.scene.load.text(keyWithoutExt, `assets/${scenarioKey}`);
+                this.scene.load.text(keyWithoutExt, `assets/scenarios/${scenarioKey}${scenarioKey.endsWith('.ks') ? '' : '.ks'}`);
                 this.scene.load.once('complete', resolve);
                 this.scene.load.start();
             });
@@ -211,7 +211,7 @@ async parse(line) {
         // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
         // ★★★ ここが新しい解決策です ★★★
         // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        
+
         // --- 2. 取得したテキストを解析し、プロパティを更新 ---
         // (古い`load`メソッドの仕事を、ここに持ってくる)
         this.scenario = rawText.split(/\r\n|\n|\r/).filter(line => line.trim() !== '');
@@ -232,14 +232,14 @@ async parse(line) {
                     const [key, value] = part.split('=');
                     params[key] = value;
                 });
-                
+
                 const { type, key, path } = params;
                 if (!type || !key || !path) continue;
 
                 if ((type === 'image' && !this.scene.textures.exists(key)) ||
-                (type === 'audio' && !this.scene.cache.audio.has(key))) {
-                assetsToLoad.push({ type, key, path });
-            }
+                    (type === 'audio' && !this.scene.cache.audio.has(key))) {
+                    assetsToLoad.push({ type, key, path });
+                }
             }
             if (trimedLine.startsWith('*')) break;
         }
@@ -247,7 +247,7 @@ async parse(line) {
         // --- 3. 動的ロードの実行 ---
         if (assetsToLoad.length > 0) {
             // console.log("追加アセットの動的ロードが必要です:", assetsToLoad);
-            
+
             await new Promise(resolve => {
                 this.scene.scene.launch('LoadingScene', {
                     assets: assetsToLoad,
@@ -261,7 +261,7 @@ async parse(line) {
         if (targetLabel) {
             this.jumpTo(targetLabel);
         }
-        
+
         // console.log(`%c[loadScenario] END: ${scenarioKey}`, "color: yellow; font-weight: bold;");
     }
     jumpTo(target) {
@@ -278,10 +278,10 @@ async parse(line) {
         // console.log(`.......... ScenarioManager.embedVariables 開始: "${line}"`);
 
         return line.replace(/&((f|sf)\.[a-zA-Z0-9_.-]+)/g, (match, exp) => {
-             // console.log(`.............. embedVariables: 変数展開を試みます -> ${exp}`);
-             
+            // console.log(`.............. embedVariables: 変数展開を試みます -> ${exp}`);
+
             // ★★★ 修正箇所: stateManager.eval -> stateManager.getValue ★★★
-            const value = this.stateManager.getValue(exp); 
+            const value = this.stateManager.getValue(exp);
 
             if (value === undefined || value === null) {
                 return `(undef: ${exp})`;
@@ -308,7 +308,7 @@ async parse(line) {
         }
         return { tagName, params };
     }
-    
+
     manualWrap(text) {
         // ★★★ 1. 最初に[br]を改行コード(\n)にすべて置換する ★★★
         const textWithBr = text.replace(/\[br\]/g, '\n');
@@ -328,7 +328,7 @@ async parse(line) {
                 const char = singleLine[i];
                 const testLine = lineBuffer + char;
                 const metrics = this.scene.add.text(0, 0, testLine, style).setVisible(false);
-                
+
                 if (metrics.width > textBoxWidth && lineBuffer.length > 0) {
                     wrappedText += lineBuffer + '\n';
                     lineBuffer = char;
@@ -339,12 +339,12 @@ async parse(line) {
             }
             wrappedText += lineBuffer + '\n'; // 各行の終わりにも改行を追加
         }
-        
+
         // 最後に余分な改行が残ることがあるので、削除する
         return wrappedText.trimEnd();
     }
 
-   highlightSpeaker(speakerName) {
+    highlightSpeaker(speakerName) {
         const bright = 0xffffff;
         const dark = 0x888888;
         for (const name in this.scene.characters) {
@@ -362,13 +362,13 @@ async parse(line) {
 
 
     // ★★★ モードを切り替えるためのメソッド ★★★
-       setMode(newMode) {
+    setMode(newMode) {
         if (this.mode === newMode && newMode !== 'skip') {
-             // スキップモードでない時に同じボタンが押されたら、モードをノーマルに戻す
-             this.mode = 'normal';
-             if (this.autoTimer) this.autoTimer.remove();
-             // console.log(`モード変更: ${newMode} -> normal`);
-             return;
+            // スキップモードでない時に同じボタンが押されたら、モードをノーマルに戻す
+            this.mode = 'normal';
+            if (this.autoTimer) this.autoTimer.remove();
+            // console.log(`モード変更: ${newMode} -> normal`);
+            return;
         }
 
         // console.log(`モード変更: ${this.mode} -> ${newMode}`);
@@ -396,31 +396,31 @@ async parse(line) {
         // isWaitingClickを強制的に解除し、次の行へ
         this.isWaitingClick = false;
         this.next();
-        
+
         // ★★★ 非常に短い遅延で、自分自身をもう一度呼び出す ★★★
         // これにより、ブラウザをフリーズさせずに高速なループを実現する
         setTimeout(() => this.skipLoop(), 0);
     }
     // ★★★ オートモードのタイマーを開始するメソッド ★★★
     // ScenarioManager.js の startAutoMode メソッド
-startAutoMode() {
-    // isWaitingClick状態の時だけタイマーを開始
-    if (this.mode === 'auto' && this.isWaitingClick) {
-        const autoDelay = this.configManager.getValue('autoDelay') || 2000;
-        this.autoTimer = this.scene.time.addEvent({
-            delay: autoDelay,
-            callback: () => {
-                // プレイヤーがクリックしたのと同じ処理を呼び出す
-                this.onClick(); 
-            },
-            callbackScope: this
-        });
+    startAutoMode() {
+        // isWaitingClick状態の時だけタイマーを開始
+        if (this.mode === 'auto' && this.isWaitingClick) {
+            const autoDelay = this.configManager.getValue('autoDelay') || 2000;
+            this.autoTimer = this.scene.time.addEvent({
+                delay: autoDelay,
+                callback: () => {
+                    // プレイヤーがクリックしたのと同じ処理を呼び出す
+                    this.onClick();
+                },
+                callbackScope: this
+            });
+        }
     }
-}
-  /**
-     * 現在のシナリオの進行状況をオブジェクトとして返す
-     * @returns {object}
-     */
+    /**
+       * 現在のシナリオの進行状況をオブジェクトとして返す
+       * @returns {object}
+       */
     getScenarioState() {
         return {
             fileName: this.currentFile,
