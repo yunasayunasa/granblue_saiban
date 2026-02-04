@@ -21,6 +21,8 @@ export default class TrialSegmentManager {
     }
 
     start() {
+        console.log('[TrialSegmentManager] start() called.');
+
         // コンポーネントの検索
         this.scene.updatableComponents.forEach(comp => {
             if (comp.constructor.name === 'InteractionMenuComponent') {
@@ -33,9 +35,14 @@ export default class TrialSegmentManager {
         });
 
         const layoutData = this.scene.loadData || this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
+        console.log('[TrialSegmentManager] Layout Data:', layoutData ? 'Found' : 'Not Found');
+
         if (layoutData && layoutData.trial_data) {
+            console.log('[TrialSegmentManager] Trial Data found. Starting loop...');
             this.segmentData = layoutData.trial_data;
             this.startDebateLoop();
+        } else {
+            console.warn('[TrialSegmentManager] No trial_data found in layout JSON.');
         }
     }
 
@@ -51,8 +58,10 @@ export default class TrialSegmentManager {
     spawnNextTestimony() {
         if (!this.isFlowing || this.scene.isPaused) return;
 
+        console.log(`[TrialSegmentManager] Spawning testimony index: ${this.currentTestimonyIndex}`);
         const testimonyData = this.segmentData.testimonies[this.currentTestimonyIndex];
         if (!testimonyData) {
+            console.log('[TrialSegmentManager] End of testimonies. Looping back to 0.');
             this.currentTestimonyIndex = 0;
             // ★ 再帰呼び出しではなく、次フレーム以降に委ねる（安定性のため）
             this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
