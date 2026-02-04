@@ -545,7 +545,13 @@ export default class BaseGameScene extends Phaser.Scene {
 
         // --- 1. カスタムデータ保存 ---
         if (data.data) for (const key in data.data) gameObject.setData(key, data.data[key]);
-        if (data.components) gameObject.setData('components', data.components);
+        if (data.components) {
+            // ★★★ 【正規化】オブジェクト形式を配列形式に変換して保存 ★★★
+            const normalized = Array.isArray(data.components)
+                ? data.components
+                : Object.entries(data.components).map(([type, params]) => ({ type, params }));
+            gameObject.setData('components', normalized);
+        }
         if (data.events) gameObject.setData('events', data.events);
         if (data.layer) gameObject.setData('layer', data.layer);
         if (data.group) gameObject.setData('group', data.group);
@@ -791,15 +797,20 @@ export default class BaseGameScene extends Phaser.Scene {
         // その責務はinitComponentsAndEventsに移譲する。
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
-        const currentData = target.getData('components') || [];
-        if (!currentData.some(c => c.type === componentType)) {
-            currentData.push({ type: componentType, params: params });
-            target.setData('components', currentData);
+        let componentsData = target.getData('components') || [];
+        // ★ ここでも念のため正規化（不正なデータがセットされた場合へのガード）
+        if (!Array.isArray(componentsData)) {
+            componentsData = Object.entries(componentsData).map(([type, params]) => ({ type, params }));
+        }
+
+        if (!componentsData.some(c => c.type === componentType)) {
+            componentsData.push({ type: componentType, params: params });
+            target.setData('components', componentsData);
         }
 
         const editor = this.plugins.get('EditorPlugin');
         if (editor && editor.isEnabled && typeof editor.onComponentAdded === 'function') {
-            editor.onComponent - Added(target, componentType, params);
+            editor.onComponentAdded(target, componentType, params);
         }
 
         // ★★★ 生成したインスタンスを返す ★★★
