@@ -9,6 +9,10 @@ export default class InteractionMenuComponent {
         this.onSelection = params.onSelection || null;
 
         this.gameObject.setVisible(false);
+
+        if (this.scene.updatableComponents) {
+            this.scene.updatableComponents.add(this);
+        }
     }
 
     show(highlightData) {

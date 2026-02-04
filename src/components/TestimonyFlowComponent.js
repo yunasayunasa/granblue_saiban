@@ -15,9 +15,15 @@ export default class TestimonyFlowComponent {
         this.isComplete = false;
         this.typeTimer = null;
 
-        // 初期状態はテキストを空に
-        if (typeof gameObject.setText === 'function') {
-            gameObject.setText("");
+        // 初期状態のテキスト処理
+        if (gameObject.type === 'Container') {
+            this.textObject = gameObject.list.find(obj => obj.type === 'Text');
+        } else if (gameObject.type === 'Text') {
+            this.textObject = gameObject;
+        }
+
+        if (this.textObject) {
+            this.textObject.setText("");
         }
 
         // シーンの更新ループに登録
@@ -49,8 +55,8 @@ export default class TestimonyFlowComponent {
             this.charIndex++;
             const visibleText = this.fullText.substring(0, this.charIndex);
 
-            if (typeof this.gameObject.setText === 'function') {
-                this.gameObject.setText(visibleText);
+            if (this.textObject) {
+                this.textObject.setText(visibleText);
             }
 
             // タイプ音再生
@@ -64,9 +70,9 @@ export default class TestimonyFlowComponent {
 
     playTypeSound() {
         const systemScene = this.scene.scene.get('SystemScene');
-        if (systemScene && systemScene.soundManager) {
-            // 'popopo' を使用
-            systemScene.soundManager.playSe('popopo');
+        const soundManager = systemScene?.registry.get('soundManager');
+        if (soundManager) {
+            soundManager.playSe('popopo');
         }
     }
 
@@ -77,16 +83,14 @@ export default class TestimonyFlowComponent {
         this.gameObject.x -= (this.moveSpeed * delta) / 1000;
 
         // 画面外判定
-        const width = this.gameObject.width || 0;
-        if (this.gameObject.x < -width - 100) {
+        if (this.gameObject.x < -1200) { // 十分に左へ
             this.onExitScreen();
         }
     }
 
     onExitScreen() {
-        // ループさせる場合は座標を戻す、そうでない場合は破棄するなどの処理
-        // 今回は単純に右端に戻してループとする（暫定）
-        this.gameObject.x = this.scene.cameras.main.width + 100;
+        // ★ 修正：ループさせず、破棄する（Manager側が新しいものを生成するため）
+        this.gameObject.destroy();
     }
 
     destroy() {

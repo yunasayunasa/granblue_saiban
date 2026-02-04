@@ -32,7 +32,7 @@ export default class TrialSegmentManager {
             }
         });
 
-        const layoutData = this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
+        const layoutData = this.scene.loadData || this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
         if (layoutData && layoutData.trial_data) {
             this.segmentData = layoutData.trial_data;
             this.startDebateLoop();
@@ -54,7 +54,8 @@ export default class TrialSegmentManager {
         const testimonyData = this.segmentData.testimonies[this.currentTestimonyIndex];
         if (!testimonyData) {
             this.currentTestimonyIndex = 0;
-            this.spawnNextTestimony();
+            // ★ 再帰呼び出しではなく、次フレーム以降に委ねる（安定性のため）
+            this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
             return;
         }
 
@@ -67,8 +68,9 @@ export default class TrialSegmentManager {
     }
 
     createTestimonyObject(data) {
+        // Y座標の重なりを避けるための計算。3行でループ。
         const x = this.scene.cameras.main.width + 100;
-        const y = 200 + (this.activeTestimonies.length % 3) * 100;
+        const y = 200 + (this.currentTestimonyIndex % 3) * 120;
 
         const container = this.scene.add.container(x, y);
         const textObj = this.scene.add.text(0, 0, data.text, {
@@ -79,6 +81,10 @@ export default class TrialSegmentManager {
         });
         container.add(textObj);
 
+        // コンテナのクリック範囲を設定（テキストのサイズに合わせる）
+        container.setSize(textObj.width, textObj.height);
+        container.setInteractive({ useHandCursor: true });
+
         this.scene.addComponent(container, 'TestimonyFlowComponent', {
             text: data.text,
             speed: 50,
@@ -86,17 +92,16 @@ export default class TrialSegmentManager {
         });
 
         // ハイライト設定
-        if (data.highlights) {
-            data.highlights.forEach(h => {
-                const index = data.text.indexOf(h.text);
-                if (index !== -1) {
-                    textObj.setInteractive({ useHandCursor: true });
-                    textObj.on('pointerdown', () => this.onHighlightClicked(h));
+        if (data.highlights && data.highlights.length > 0) {
+            // 黄色のハイライトがある場合、コンテナ全体を黄色っぽく見せ、クリック可能にする
+            // 本来は部分的な色変えが必要だが、一旦プロトタイプ版として全体に適用
+            textObj.setTint(0xffff00);
 
-                    // ハイライトされたテキストの一部を色変えっぽく見せる（プロトタイプ版）
-                    // 本格的にはBBCodeText等を使うが、ここでは「クリック可能」であることを優先
-                    textObj.setTint(0xffff00);
-                }
+            // 重要：ハイライトデータを持たせる
+            container.on('pointerdown', () => {
+                // コンソーログでクリックを確認
+                console.log('[TrialManager] Testimony clicked:', data.text);
+                this.onHighlightClicked(data.highlights[0]);
             });
         }
 
@@ -104,13 +109,18 @@ export default class TrialSegmentManager {
     }
 
     onHighlightClicked(highlightData) {
-        if (this.isInteracting) return;
+        if (this.isInteracting || !this.isFlowing) return;
 
+        console.log('[TrialManager] highlight clicked. data:', highlightData);
         this.scene.events.emit('PAUSE_TRIAL');
         this.isInteracting = true;
 
         if (this.interactionMenu) {
             this.interactionMenu.show(highlightData);
+        } else {
+            console.warn('[TrialManager] interactionMenu not found. resuming...');
+            this.isInteracting = false;
+            this.scene.events.emit('RESUME_TRIAL');
         }
     }
 
@@ -122,7 +132,7 @@ export default class TrialSegmentManager {
         } else if (choice.action === 'update_testimony') {
             this.updateTestimony(choice.target, choice.new_text);
         } else {
-            // ペナルティ等の処理をここに追加可能
+            console.log('[TrialManager] Incorrect choice or no action.');
             this.isInteracting = false;
             this.scene.events.emit('RESUME_TRIAL');
         }
@@ -134,7 +144,7 @@ export default class TrialSegmentManager {
             testimony.text = newText;
 
             if (this.progressIndicator) {
-                this.progressIndicator.show("議論進行…", 2000);
+                this.progressIndicator.show("証言変更…", 2000);
                 this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', () => {
                     this.isInteracting = false;
                     this.scene.events.emit('RESUME_TRIAL');
@@ -147,17 +157,20 @@ export default class TrialSegmentManager {
     }
 
     proceedToNextPhase() {
-        console.log('論破成功！次のフェーズへ。');
-        // 本来はノベルシーンへの復帰や次の裁判JSONへの切り替えを行う
+        console.log('論破成功！');
         if (this.progressIndicator) {
             this.progressIndicator.show("論破！！", 3000);
+            this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', () => {
+                // ここで次のシーンやフラグ更新などを行う
+            });
         }
     }
 
     update(time, delta) {
-        // 画面外に出た証言の破棄
+        // 画面外、または破棄済みオブジェクトのクリーンアップ
         this.activeTestimonies = this.activeTestimonies.filter(obj => {
-            if (obj.x < -1500) { // 十分に左へ
+            if (!obj || !obj.active) return false;
+            if (obj.x < -1500) {
                 obj.destroy();
                 return false;
             }

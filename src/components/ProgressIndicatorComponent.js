@@ -6,6 +6,10 @@ export default class ProgressIndicatorComponent {
         this.scene = scene;
         this.gameObject = gameObject; // テキストオブジェクト
         this.gameObject.setVisible(false);
+
+        if (this.scene.updatableComponents) {
+            this.scene.updatableComponents.add(this);
+        }
     }
 
     show(message = "議論進行…", duration = 2000) {
