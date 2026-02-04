@@ -33,9 +33,10 @@ export default class TrialScene extends BaseGameScene {
         console.log(`[TrialScene] Object setup complete. Initializing trial logic.`);
 
         // 議論開始イベントの待機
+        // 議論開始イベントの待機
         this.events.on('START_DEBATE', this.startDebate, this);
-        this.events.on('PAUSE_TRIAL', this.setPause, this, true);
-        this.events.on('RESUME_TRIAL', this.setPause, this, false);
+        this.events.on('PAUSE_TRIAL', () => this.setPause(true));
+        this.events.on('RESUME_TRIAL', () => this.setPause(false));
 
         // シーン初期データの状態反映 (タイマーなど)
         if (this.loadData && this.loadData.currentTime) {
