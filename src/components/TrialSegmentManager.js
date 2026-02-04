@@ -98,16 +98,20 @@ export default class TrialSegmentManager {
         container.setSize(textObj.width, textObj.height);
         container.setInteractive({ useHandCursor: true });
 
-        this.scene.addComponent(container, 'TestimonyFlowComponent', {
+        const flowComponent = this.scene.addComponent(container, 'TestimonyFlowComponent', {
             text: data.text,
             speed: 50,
             moveSpeed: 120
         });
 
+        // ★★★ 【重要修正】動的に追加したコンポーネントは手動で開始する必要がある ★★★
+        if (flowComponent && typeof flowComponent.start === 'function') {
+            flowComponent.start();
+        }
+
         // ハイライト設定
         if (data.highlights && data.highlights.length > 0) {
             // 黄色のハイライトがある場合、コンテナ全体を黄色っぽく見せ、クリック可能にする
-            // 本来は部分的な色変えが必要だが、一旦プロトタイプ版として全体に適用
             textObj.setTint(0xffff00);
 
             // 重要：ハイライトデータを持たせる
@@ -125,15 +129,23 @@ export default class TrialSegmentManager {
         if (this.isInteracting || !this.isFlowing) return;
 
         console.log('[TrialManager] highlight clicked. data:', highlightData);
-        this.scene.events.emit('PAUSE_TRIAL');
-        this.isInteracting = true;
+
+        // ★ 遅延検索: クリックされた瞬間にメニューを探す（確実に存在するため）
+        if (!this.interactionMenu) {
+            const menuObj = this.scene.children.getByName('interaction_menu');
+            if (menuObj && menuObj.components && menuObj.components.InteractionMenuComponent) {
+                this.interactionMenu = menuObj.components.InteractionMenuComponent;
+                this.interactionMenu.onSelection = (choice) => this.handleChoice(choice);
+                console.log('[TrialSegmentManager] InteractionMenuComponent found (Lazy load).');
+            }
+        }
 
         if (this.interactionMenu) {
+            this.scene.events.emit('PAUSE_TRIAL');
+            this.isInteracting = true;
             this.interactionMenu.show(highlightData);
         } else {
-            console.warn('[TrialManager] interactionMenu not found. resuming...');
-            this.isInteracting = false;
-            this.scene.events.emit('RESUME_TRIAL');
+            console.warn('[TrialManager] interactionMenu still not found.');
         }
     }
 
