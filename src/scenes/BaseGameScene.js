@@ -443,7 +443,12 @@ export default class BaseGameScene extends Phaser.Scene {
             return new Phaser.GameObjects.Sprite(this, 0, 0, textureKey);
         }
 
-        // --- ケース3: デフォルト (Image) の場合 (変更なし) ---
+        // --- ケース3: タイプが 'container' または 'Container' の場合 ---
+        if (layout.type === 'container' || layout.type === 'Container') {
+            return new Phaser.GameObjects.Container(this, 0, 0);
+        }
+
+        // --- ケース4: デフォルト (Image) の場合 (変更なし) ---
 
         return new Phaser.GameObjects.Image(this, 0, 0, textureKey);
 
