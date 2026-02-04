@@ -16,7 +16,17 @@ export default class InteractionMenuComponent {
     }
 
     show(highlightData) {
-        this.gameObject.removeAll(true);
+        // ★ 修正: removeAllが使えない場合を考慮し、手動で子要素を破棄
+        if (typeof this.gameObject.removeAll === 'function') {
+            this.gameObject.removeAll(true);
+        } else if (this.gameObject.list) {
+            // Containerのlistプロパティを直接操作して破棄
+            while (this.gameObject.list.length > 0) {
+                const child = this.gameObject.list[0];
+                child.destroy();
+            }
+        }
+
         this.gameObject.setVisible(true);
 
         const choices = highlightData.choices || [

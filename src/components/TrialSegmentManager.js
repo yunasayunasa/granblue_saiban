@@ -111,13 +111,32 @@ export default class TrialSegmentManager {
 
         // ハイライト設定
         if (data.highlights && data.highlights.length > 0) {
-            // 黄色のハイライトがある場合、コンテナ全体を黄色っぽく見せ、クリック可能にする
-            textObj.setTint(0xffff00);
+            // ★ 修正: 色変え(setTint)は全体が変わってしまい分かりにくいため廃止。
+            // 代わりに、テキスト自体を加工して【】で囲むことで強調箇所を示す。
+            let modifiedText = data.text;
+            data.highlights.forEach(h => {
+                // 単純置換
+                modifiedText = modifiedText.replace(h.text, `【${h.text}】`);
+            });
 
-            // 重要：ハイライトデータを持たせる
+            // コンポーネントのテキストを更新（タイピング開始前なので間に合う）
+            // container内のTextオブジェクトも更新しておく必要がある
+            textObj.setText(modifiedText);
+
+            // FlowComponent側にも新しいテキストを伝える
+            if (flowComponent) {
+                flowComponent.fullText = modifiedText;
+            }
+
+            // コンテナもサイズ再計算（文字数が増えたため）
+            // updateTextなどでサイズが即時反映されない場合があるため少し余裕を持たせるか、
+            // 次のフレームで更新されるのを待つが、ここでは簡易的に再セット
+            textObj.updateText();
+            container.setSize(textObj.width, textObj.height);
+
+            // 重要：インタラクション設定
             container.on('pointerdown', () => {
-                // コンソーログでクリックを確認
-                console.log('[TrialManager] Testimony clicked:', data.text);
+                console.log('[TrialManager] Testimony clicked:', modifiedText);
                 this.onHighlightClicked(data.highlights[0]);
             });
         }
