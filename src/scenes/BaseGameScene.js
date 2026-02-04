@@ -830,7 +830,8 @@ export default class BaseGameScene extends Phaser.Scene {
         // --- 2. コンポーネント更新ループ ---
         if (this.updatableComponents) {
             this.updatableComponents.forEach(component => {
-                if (component.gameObject.scene && component.gameObject.active) {
+                // ★ 修正：component.update が存在する場合のみ実行する
+                if (component.gameObject.scene && component.gameObject.active && typeof component.update === 'function') {
                     component.update(time, delta);
                 }
             });
