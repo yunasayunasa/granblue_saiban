@@ -23,16 +23,20 @@ export default class TrialSegmentManager {
     start() {
         console.log('[TrialSegmentManager] start() called.');
 
-        // コンポーネントの検索
-        this.scene.updatableComponents.forEach(comp => {
-            if (comp.constructor.name === 'InteractionMenuComponent') {
-                this.interactionMenu = comp;
-                comp.onSelection = (choice) => this.handleChoice(choice);
-            }
-            if (comp.constructor.name === 'ProgressIndicatorComponent') {
-                this.progressIndicator = comp;
-            }
-        });
+        // ★ 修正: インスタンス化の順序に依存しないよう、GameObject名から検索して取得する
+        const menuObj = this.scene.children.getByName('interaction_menu');
+        if (menuObj && menuObj.components && menuObj.components.InteractionMenuComponent) {
+            this.interactionMenu = menuObj.components.InteractionMenuComponent;
+            this.interactionMenu.onSelection = (choice) => this.handleChoice(choice);
+            console.log('[TrialSegmentManager] InteractionMenuComponent found via GameObject.');
+        } else {
+            console.warn('[TrialSegmentManager] InteractionMenuComponent NOT found.');
+        }
+
+        const indicatorObj = this.scene.children.getByName('progress_indicator');
+        if (indicatorObj && indicatorObj.components && indicatorObj.components.ProgressIndicatorComponent) {
+            this.progressIndicator = indicatorObj.components.ProgressIndicatorComponent;
+        }
 
         const layoutData = this.scene.loadData || this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
         console.log('[TrialSegmentManager] Layout Data:', layoutData ? 'Found' : 'Not Found');
