@@ -1,0 +1,51 @@
+{
+    "_comment_title": "▼▼▼ 議論パート（Trial Segment）設定ファイル ▼▼▼",
+    "_comment_desc": "このファイルをコピーして、新しい議論パートを作成してください。不要な _comment 行は削除しても動作に影響ありません。",
+    "trial_data": {
+        "_comment_interval": "証言が切り替わる速度（ミリ秒）。4000 = 4秒。",
+        "interval": 4000,
+        "testimonies": [
+            {
+                "_comment_id": "証言ID。一意の文字列にしてください（例: t1, t2...）。",
+                "id": "t1",
+                "text": "ここに証言のテキストを入力します。（何もしない通常の証言）",
+                "highlights": []
+            },
+            {
+                "id": "t2",
+                "text": "ここに重要な証言を入力します。ハイライトしたい単語を含めてください。",
+                "highlights": [
+                    {
+                        "_comment_highlight": "highlight: 反応させる単語。テキスト内に含まれている必要があります。",
+                        "text": "重要な単語",
+                        "choices": [
+                            {
+                                "_comment_normal": "--- 通常の選択肢（不正解） ---",
+                                "text": "つきつける：証拠品A（不正解）",
+                                "correct": false,
+                                "_comment_failure": "失敗時に再生するシナリオファイルのパス（assets/scenarios/ からの相対パス）。省略すると何も再生せずペナルティのみ。",
+                                "failure_scenario": "chapter1/bad_end.ks"
+                            },
+                            {
+                                "_comment_success": "--- 正解の選択肢 ---",
+                                "text": "つきつける：決定的な証拠（正解）",
+                                "correct": true,
+                                "_comment_scenario": "成功時に再生するシナリオファイルのパス。",
+                                "success_scenario": "chapter1/success_event.ks",
+                                "_comment_next": "シナリオ再生後に読み込む、次の議論データのパス（assets/data/ からの相対パス）。省略すると現在の議論が続きます。",
+                                "next_trial_data": "scenes/chapter1_trial_part2.json"
+                            },
+                            {
+                                "_comment_update": "--- 証言を書き換える選択肢（ゆさぶる等） ---",
+                                "text": "ゆさぶる：もっと詳しく",
+                                "action": "update_testimony",
+                                "target": "t2",
+                                "new_text": "証言が書き換わります。これで新たな矛盾が出るかもしれません。"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

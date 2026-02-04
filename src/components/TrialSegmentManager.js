@@ -2,6 +2,8 @@
  * 裁判セグメントの進行を管理するコンポーネント。
  * JSONから証言データをロードし、TestimonyFlowComponentを持つオブジェクトを生成・制御する。
  */
+import EngineAPI from '../core/EngineAPI.js'; // EngineAPIをインポート
+
 export default class TrialSegmentManager {
     constructor(scene, gameObject, params) {
         this.scene = scene;
@@ -168,15 +170,65 @@ export default class TrialSegmentManager {
         }
     }
 
-    handleChoice(choice) {
+    async handleChoice(choice) {
         console.log('[TrialManager] Choice selected:', choice.text);
 
-        if (choice.correct) {
-            this.proceedToNextPhase();
-        } else if (choice.action === 'update_testimony') {
+        // 1. テキスト更新アクション (ゆさぶる等)
+        if (choice.action === 'update_testimony') {
             this.updateTestimony(choice.target, choice.new_text);
+            return;
+        }
+
+        // 2. シナリオ再生の準備
+        let scenarioFile = null;
+        let isSuccess = false;
+
+        if (choice.correct) {
+            console.log('[TrialManager] Correct choice!');
+            isSuccess = true;
+            scenarioFile = choice.success_scenario;
         } else {
-            console.log('[TrialManager] Incorrect choice or no action.');
+            console.log('[TrialManager] Incorrect choice.');
+            scenarioFile = choice.failure_scenario;
+        }
+
+        // 3. シナリオがあればオーバーレイで実行
+        if (scenarioFile) {
+            // フルパスでない場合は補完 (assets/scenarios/ は EngineAPI側で補完される場合もあるが、念のため)
+            // EngineAPI.runScenarioAsOverlay は 'scenarios/hoge.ks' のようなパスを期待していると仮定するか、
+            // そのまま渡して ScenarioManager 側で補完させる。既存実装に従う。
+            // ここでは assets/scenarios/ からの相対パスがJSONに書かれていると想定。
+
+            try {
+                console.log(`[TrialManager] Playing scenario: ${scenarioFile}`);
+                await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, scenarioFile, true);
+                console.log('[TrialManager] Scenario finished.');
+            } catch (e) {
+                console.warn('[TrialManager] Scenario execution failed or skipped:', e);
+            }
+        } else if (isSuccess) {
+            // シナリオ未指定だが正解の場合、簡易エフェクトだけ出す
+            if (this.progressIndicator) {
+                await new Promise(resolve => {
+                    this.progressIndicator.show("論破！！", 3000);
+                    this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', resolve);
+                });
+            }
+        }
+
+        // 4. シナリオ終了後の処理
+        if (isSuccess) {
+            if (choice.next_trial_data) {
+                this.loadNextTrialData(choice.next_trial_data);
+            } else {
+                console.log('[TrialManager] No next trial data. Resuming current loop (or ending).');
+                // 次がない場合はどうするか？ひとまず再開
+                this.isInteracting = false;
+                this.scene.events.emit('RESUME_TRIAL');
+            }
+        } else {
+            // 失敗時は元の議論に戻る（ペナルティ処理などあればここに追加）
+            console.log('[TrialManager] Returning to discussion...');
             this.isInteracting = false;
             this.scene.events.emit('RESUME_TRIAL');
         }
@@ -200,14 +252,39 @@ export default class TrialSegmentManager {
         }
     }
 
-    proceedToNextPhase() {
-        console.log('論破成功！');
-        if (this.progressIndicator) {
-            this.progressIndicator.show("論破！！", 3000);
-            this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', () => {
-                // ここで次のシーンやフラグ更新などを行う
-            });
-        }
+    loadNextTrialData(jsonPath) {
+        console.log(`[TrialManager] Loading next trial data: ${jsonPath}`);
+
+        // Loaderを使って動的にJSONをロード
+        // 注: PhaserのLoaderはシーン開始時以外は使いにくいが、start()させることでいけるか、
+        // あるいは fetch API で取ってくるか。EngineAPIやBaseGameSceneの仕組みを使うのが安全。
+        // ここでは簡易的に BaseGameScene の loadData キャッシュは使えないため、
+        // load.json -> once('complete') パターンで実装する。
+
+        const key = `trial_data_${Date.now()}`;
+        this.scene.load.json(key, `assets/data/${jsonPath}`);
+        this.scene.load.once('complete', () => {
+            const nextData = this.scene.cache.json.get(key);
+            if (nextData && nextData.trial_data) {
+                this.cleanupCurrentSegment();
+                this.segmentData = nextData.trial_data;
+                this.currentTestimonyIndex = 0;
+                this.startDebateLoop(); // 新しいデータでループ開始
+                this.isInteracting = false;
+                this.scene.events.emit('RESUME_TRIAL');
+            } else {
+                console.error('[TrialManager] Failed to load valid trial data.');
+                this.isInteracting = false;
+                this.scene.events.emit('RESUME_TRIAL');
+            }
+        });
+        this.scene.load.start();
+    }
+
+    cleanupCurrentSegment() {
+        // 現在画面に出ている証言をすべて消す
+        this.activeTestimonies.forEach(obj => obj.destroy());
+        this.activeTestimonies = [];
     }
 
     update(time, delta) {

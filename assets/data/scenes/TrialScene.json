@@ -53,11 +53,13 @@
             "choices": [
               {
                 "text": "反論：飴を舐めていた",
-                "correct": true
+                "correct": true,
+                "success_scenario": "chapter1/trial_test_success.ks"
               },
               {
                 "text": "賛成：空腹だったはずだ",
-                "correct": false
+                "correct": false,
+                "failure_scenario": "chapter1/trial_test_failure.ks"
               },
               {
                 "text": "疑問：本当に何も？",
