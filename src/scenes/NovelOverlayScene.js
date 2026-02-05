@@ -34,7 +34,7 @@ export default class NovelOverlayScene extends Phaser.Scene {
         if (this.startScenario) {
             const key = this.startScenario.replace('.ks', '');
             if (!this.cache.text.has(key)) {
-                this.load.text(key, `assets/scenario/${this.startScenario}`);
+                this.load.text(key, `assets/scenarios/${this.startScenario}`);
             }
         }
     }

@@ -23,6 +23,9 @@ export default class TrialSegmentManager {
         if (this.scene.updatableComponents) {
             this.scene.updatableComponents.add(this);
         }
+
+        // イベントリスナー登録
+        this.scene.events.on('RESTART_DEBATE_REQUEST', () => this.restartDebate());
     }
 
     start() {
@@ -43,19 +46,9 @@ export default class TrialSegmentManager {
             this.progressIndicator = indicatorObj.components.ProgressIndicatorComponent;
         }
 
-        // キャラ画像取得
-        this.charaImages.left = this.scene.children.getByName('character_left');
-        this.charaImages.center = this.scene.children.getByName('character_center');
-        this.charaImages.right = this.scene.children.getByName('character_right');
-        console.log('[TrialSegmentManager] Character images found:',
-            'left:', !!this.charaImages.left,
-            'center:', !!this.charaImages.center,
-            'right:', !!this.charaImages.right);
-
-        // 初期化時に全て非表示にする
-        if (this.charaImages.left) this.charaImages.left.setVisible(false);
-        if (this.charaImages.center) this.charaImages.center.setVisible(false);
-        if (this.charaImages.right) this.charaImages.right.setVisible(false);
+        // キャラ画像取得 (ここではログのみ、実際の取得は遅延させる)
+        console.log('[TrialSegmentManager] Pre-caching characters...');
+        this._findCharacterImages();
 
         const layoutData = this.scene.loadData || this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
         console.log('[TrialSegmentManager] Layout Data:', layoutData ? 'Found' : 'Not Found');
@@ -95,6 +88,7 @@ export default class TrialSegmentManager {
                 EngineAPI.runScenarioAsOverlay(this.scene.scene.key, this.segmentData.loop_scenario, true)
                     .then(() => {
                         console.log('Loop scenario finished. Restarting loop.');
+                        this.cleanupCurrentSegment(); // ★ 古い証言を破棄
                         this.isFlowing = true;
                         this.currentTestimonyIndex = 0;
                         this.scene.isPaused = false; // ★ ポーズ状態をリセット
@@ -103,6 +97,7 @@ export default class TrialSegmentManager {
                     })
                     .catch(err => {
                         console.error('[TrialSegmentManager] Loop scenario error:', err);
+                        this.cleanupCurrentSegment(); // エラー時も古い証言を破棄
                         // エラー時も再ループを試みる
                         this.isFlowing = true;
                         this.currentTestimonyIndex = 0;
@@ -112,6 +107,7 @@ export default class TrialSegmentManager {
             }
 
             console.log('[TrialSegmentManager] Looping back to 0 immediately.');
+            this.cleanupCurrentSegment(); // ★ 古い証言を破棄
             this.currentTestimonyIndex = 0;
             // ★ 再帰呼び出しではなく、次フレーム以降に委ねる（安定性のため）
             this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
@@ -131,8 +127,23 @@ export default class TrialSegmentManager {
         });
     }
 
+    // キャラ画像を一括検索する内部メソッド
+    _findCharacterImages() {
+        if (!this.charaImages.left) this.charaImages.left = this.scene.children.getByName('character_left');
+        if (!this.charaImages.center) this.charaImages.center = this.scene.children.getByName('character_center');
+        if (!this.charaImages.right) this.charaImages.right = this.scene.children.getByName('character_right');
+
+        console.log('[TrialSegmentManager] Character status check:',
+            'L:', !!this.charaImages.left,
+            'C:', !!this.charaImages.center,
+            'R:', !!this.charaImages.right);
+    }
+
     // キャラ表示切り替えメソッド
     updateCharacterDisplay(index) {
+        // 画像がまだ見つかっていない場合は検索を試みる (Lazy Load)
+        this._findCharacterImages();
+
         // 全て非表示
         if (this.charaImages.left) this.charaImages.left.setVisible(false);
         if (this.charaImages.center) this.charaImages.center.setVisible(false);
@@ -146,8 +157,8 @@ export default class TrialSegmentManager {
 
         if (target) {
             target.setVisible(true);
-            console.log('[TrialSegmentManager] Showing character at position:', pos);
-            // 簡易パンアップ演出: 本来はTween推奨だが、ここではY座標リセット程度
+            console.log('[TrialSegmentManager] Showing character for index', index, 'at position:', pos);
+            // 簡易パンアップ演出風 (Y座標を少し下げてからTween等したほうが良いが、今は即時)
         } else {
             console.warn('[TrialSegmentManager] No character image for position:', pos);
         }
@@ -278,7 +289,7 @@ export default class TrialSegmentManager {
 
         // 1. テキスト更新アクション (ゆさぶる等)
         if (choice.action === 'update_testimony') {
-            this.updateTestimony(choice.target, choice.new_text, choice.new_highlights); // ★ highlightも渡す
+            await this.updateTestimony(choice.target, choice.new_text, choice.new_highlights);
             return;
         }
 
@@ -337,7 +348,7 @@ export default class TrialSegmentManager {
         }
     }
 
-    updateTestimony(targetId, newText, newHighlights) {
+    async updateTestimony(targetId, newText, newHighlights) {
         // 1. データ上の修正
         const testimony = this.segmentData.testimonies.find(t => t.id === targetId);
         if (testimony) {
@@ -381,8 +392,6 @@ export default class TrialSegmentManager {
 
             // FlowComponentのfullTextも更新
             if (activeObj.components && activeObj.components.TestimonyFlowComponent) {
-                // FlowComponentへ渡すテキストも加工済みのものにするか生か？
-                // 表示用テキストを渡すのが安全
                 let flowText = newText;
                 if (newHighlights && newHighlights.length > 0) {
                     newHighlights.forEach(h => {
@@ -395,10 +404,11 @@ export default class TrialSegmentManager {
 
         if (this.progressIndicator) {
             this.progressIndicator.show("証言変更…", 2000);
-            this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', () => {
-                this.isInteracting = false;
-                this.scene.events.emit('RESUME_TRIAL');
+            await new Promise(resolve => {
+                this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', resolve);
             });
+            this.isInteracting = false;
+            this.scene.events.emit('RESUME_TRIAL');
         } else {
             this.isInteracting = false;
             this.scene.events.emit('RESUME_TRIAL');
