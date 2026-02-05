@@ -10,6 +10,10 @@ export default class TestimonyFlowComponent {
         this.fullText = params.text || gameObject.text || "";
         this.typingSpeed = params.speed || 50;
         this.moveSpeed = params.moveSpeed || 100;
+        // ★ style: 'scroll' (default) or 'typewriter'
+        this.style = params.style || 'scroll';
+        this.waitAfterType = 2000; // タイプ完了後の待機時間（typewriter用）
+
         this.charIndex = 0;
         this.isTyping = false;
         this.isComplete = false;
@@ -65,6 +69,13 @@ export default class TestimonyFlowComponent {
             this.isTyping = false;
             this.isComplete = true;
             if (this.typeTimer) this.typeTimer.remove();
+
+            // ★ typewriterモードの場合、完了後に一定時間待って消える
+            if (this.style === 'typewriter') {
+                this.scene.time.delayedCall(this.waitAfterType, () => {
+                    this.onExitScreen();
+                });
+            }
         }
     }
 
@@ -79,12 +90,15 @@ export default class TestimonyFlowComponent {
     update(time, delta) {
         if (this.scene.isPaused) return;
 
-        // 横移動
-        this.gameObject.x -= (this.moveSpeed * delta) / 1000;
+        // ★ scrollモードのみ移動する
+        if (this.style === 'scroll') {
+            // 横移動
+            this.gameObject.x -= (this.moveSpeed * delta) / 1000;
 
-        // 画面外判定
-        if (this.gameObject.x < -1200) { // 十分に左へ
-            this.onExitScreen();
+            // 画面外判定
+            if (this.gameObject.x < -1200) { // 十分に左へ
+                this.onExitScreen();
+            }
         }
     }
 

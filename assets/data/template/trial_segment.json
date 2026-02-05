@@ -8,6 +8,8 @@
             {
                 "_comment_id": "証言ID。一意の文字列にしてください（例: t1, t2...）。",
                 "id": "t1",
+                "_comment_style": "証言の表示スタイル。'scroll'（右から左へ）または 'typewriter'（中央固定タイプ）。省略時はscroll。",
+                "style": "scroll",
                 "text": "ここに証言のテキストを入力します。（何もしない通常の証言）",
                 "highlights": []
             },

@@ -84,8 +84,20 @@ export default class TrialSegmentManager {
 
     createTestimonyObject(data) {
         // Y座標の重なりを避けるための計算。3行でループ。
-        const x = this.scene.cameras.main.width + 100;
-        const y = 200 + (this.currentTestimonyIndex % 3) * 120;
+        // デフォルトスタイルは 'scroll'
+        const style = data.style || 'scroll';
+
+        // 配置計算
+        let x, y;
+        if (style === 'typewriter') {
+            // 中央配置: 画面幅の中央, Y軸は少し上寄りなど
+            x = this.scene.cameras.main.width / 2;
+            y = 300;
+        } else {
+            // scroll (従来通り)
+            x = this.scene.cameras.main.width + 100;
+            y = 200 + (this.currentTestimonyIndex % 3) * 120;
+        }
 
         const container = this.scene.add.container(x, y);
         const textObj = this.scene.add.text(0, 0, data.text, {
@@ -94,6 +106,11 @@ export default class TrialSegmentManager {
             stroke: '#000000',
             strokeThickness: 6
         });
+
+        // typewriterの場合は中央揃えにする
+        if (style === 'typewriter') {
+            textObj.setOrigin(0.5, 0.5);
+        }
         container.add(textObj);
 
         // コンテナのクリック範囲を設定（テキストのサイズに合わせる）
@@ -103,7 +120,8 @@ export default class TrialSegmentManager {
         const flowComponent = this.scene.addComponent(container, 'TestimonyFlowComponent', {
             text: data.text,
             speed: 50,
-            moveSpeed: 120
+            moveSpeed: 120,
+            style: style // ★ スタイルを渡す
         });
 
         // ★★★ 【重要修正】動的に追加したコンポーネントは手動で開始する必要がある ★★★
