@@ -63,6 +63,7 @@
   ],
   "trial_data": {
     "interval": 4000,
+    "loop_scenario": "chapter1/loop_end.ks",
     "testimonies": [
       {
         "id": "t1",
@@ -92,7 +93,24 @@
                 "text": "疑問：本当に何も？",
                 "action": "update_testimony",
                 "target": "t2",
-                "new_text": "誰とも会っていませんし、ガムしか噛んでいません。"
+                "new_text": "誰とも会っていませんし、ガムしか噛んでいません。",
+                "new_highlights": [
+                  {
+                    "text": "ガム",
+                    "choices": [
+                      {
+                        "text": "反論：ガムは食べ物だ！",
+                        "correct": true,
+                        "success_scenario": "chapter1/trial_test_success.ks"
+                      },
+                      {
+                        "text": "賛成：それは食事ではない",
+                        "correct": false,
+                        "failure_scenario": "chapter1/trial_test_failure.ks"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }

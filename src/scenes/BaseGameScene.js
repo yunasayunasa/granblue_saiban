@@ -594,6 +594,8 @@ export default class BaseGameScene extends Phaser.Scene {
         gameObject.setAngle(data.angle || 0);
         gameObject.setAlpha(data.alpha ?? 1);
         if (data.depth !== undefined) gameObject.setDepth(data.depth);
+        // ★ visible プロパティ対応
+        if (data.visible !== undefined) gameObject.setVisible(data.visible);
 
         // Yソート対象なら、原点を自動的に足元に設定
         if (gameObject.getData('isYSortable') === true) {
