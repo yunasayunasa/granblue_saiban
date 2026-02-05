@@ -26,6 +26,22 @@ export default class TrialSegmentManager {
 
         // イベントリスナー登録
         this.scene.events.on('RESTART_DEBATE_REQUEST', () => this.restartDebate());
+        this.scene.events.on('RESUME_TRIAL', () => {
+            console.log('[TrialManager] RESUME_TRIAL received.');
+            this.isInteracting = false;
+            // 議論中かつポーズされていないなら、証言生成の連鎖が止まっている可能性があるため再開させる
+            if (this.isFlowing && !this.scene.isPaused) {
+                // 二重起動を防ぐため、少し待ってから実行
+                this.scene.time.delayedCall(500, () => {
+                    if (this.isFlowing && !this.scene.isPaused && !this.isInteracting) {
+                        this.spawnNextTestimony();
+                    }
+                });
+            }
+        });
+
+        // 連鎖タイマーの参照保持用
+        this.spawnTimer = null;
     }
 
     start() {
@@ -72,7 +88,16 @@ export default class TrialSegmentManager {
     }
 
     spawnNextTestimony() {
-        if (!this.isFlowing || this.scene.isPaused) return;
+        if (!this.isFlowing || this.scene.isPaused || this.isInteracting) {
+            console.log('[TrialSegmentManager] Spawn skipped (paused or interacting)');
+            return;
+        }
+
+        // 既存のタイマーがあればキャンセル
+        if (this.spawnTimer) {
+            this.spawnTimer.remove();
+            this.spawnTimer = null;
+        }
 
         console.log(`[TrialSegmentManager] Spawning testimony index: ${this.currentTestimonyIndex}`);
 
@@ -122,7 +147,7 @@ export default class TrialSegmentManager {
 
         this.currentTestimonyIndex++;
 
-        this.scene.time.delayedCall(this.segmentData.interval || 4000, () => {
+        this.spawnTimer = this.scene.time.delayedCall(this.segmentData.interval || 4000, () => {
             this.spawnNextTestimony();
         });
     }
@@ -198,7 +223,8 @@ export default class TrialSegmentManager {
 
         // コンテナのクリック範囲を設定（テキストのサイズに合わせる）
         container.setSize(textObj.width, textObj.height);
-        container.setInteractive({ useHandCursor: true });
+        // ★ Phaser 3.60のContainerでは、ヒットエリアを明示的に指定するのが安全
+        container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains);
 
         // ★ IDを保存 (後で検索できるように)
         if (data.id) {
@@ -241,6 +267,9 @@ export default class TrialSegmentManager {
             // 次のフレームで更新されるのを待つが、ここでは簡易的に再セット
             textObj.updateText();
             container.setSize(textObj.width, textObj.height);
+            // サイズが変わったのでヒットエリアも再設定
+            container.input.hitArea.setTo(0, 0, textObj.width, textObj.height);
+            container.setInteractive({ useHandCursor: true });
 
             // 重要：インタラクション設定
             container.on('pointerdown', () => {
@@ -448,6 +477,13 @@ export default class TrialSegmentManager {
         // 現在画面に出ている証言をすべて消す
         this.activeTestimonies.forEach(obj => obj.destroy());
         this.activeTestimonies = [];
+        this.isInteracting = false; // ★ インタラクション状態もリセット
+
+        // タイマーもクリアしておく
+        if (this.spawnTimer) {
+            this.spawnTimer.remove();
+            this.spawnTimer = null;
+        }
     }
 
     // ★ 冒頭からやり直す（リセット）
