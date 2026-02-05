@@ -17,6 +17,9 @@ export default class TrialSegmentManager {
         this.interactionMenu = null;
         this.progressIndicator = null;
 
+        // キャラクター画像のキャッシュ
+        this.charaImages = { left: null, center: null, right: null };
+
         if (this.scene.updatableComponents) {
             this.scene.updatableComponents.add(this);
         }
@@ -35,10 +38,14 @@ export default class TrialSegmentManager {
             console.warn('[TrialSegmentManager] InteractionMenuComponent NOT found.');
         }
 
-        const indicatorObj = this.scene.children.getByName('progress_indicator');
         if (indicatorObj && indicatorObj.components && indicatorObj.components.ProgressIndicatorComponent) {
             this.progressIndicator = indicatorObj.components.ProgressIndicatorComponent;
         }
+
+        // キャラ画像取得
+        this.charaImages.left = this.scene.children.getByName('character_left');
+        this.charaImages.center = this.scene.children.getByName('character_center');
+        this.charaImages.right = this.scene.children.getByName('character_right');
 
         const layoutData = this.scene.loadData || this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
         console.log('[TrialSegmentManager] Layout Data:', layoutData ? 'Found' : 'Not Found');
@@ -65,21 +72,64 @@ export default class TrialSegmentManager {
         if (!this.isFlowing || this.scene.isPaused) return;
 
         console.log(`[TrialSegmentManager] Spawning testimony index: ${this.currentTestimonyIndex}`);
-        const testimonyData = this.segmentData.testimonies[this.currentTestimonyIndex];
-        if (!testimonyData) {
-            console.log('[TrialSegmentManager] End of testimonies. Looping back to 0.');
+
+        // インデックスが範囲を超えているかチェック (ループ判定)
+        if (this.currentTestimonyIndex >= this.segmentData.testimonies.length) {
+            console.log('[TrialSegmentManager] End of testimonies.');
+
+            // ループシナリオがある場合
+            if (this.segmentData.loop_scenario) {
+                console.log(`[TrialSegmentManager] Playing loop scenario: ${this.segmentData.loop_scenario}`);
+                this.isFlowing = false; // 一時停止
+
+                EngineAPI.runScenarioAsOverlay(this.scene.scene.key, this.segmentData.loop_scenario, true)
+                    .then(() => {
+                        console.log('Loop scenario finished. Restarting loop.');
+                        this.isFlowing = true;
+                        this.currentTestimonyIndex = 0;
+                        this.scene.events.emit('RESUME_TRIAL'); // ポーズ解除などのため念のため
+                        this.spawnNextTestimony();
+                    });
+                return;
+            }
+
+            console.log('[TrialSegmentManager] Looping back to 0 immediately.');
             this.currentTestimonyIndex = 0;
             // ★ 再帰呼び出しではなく、次フレーム以降に委ねる（安定性のため）
             this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
             return;
         }
 
+        const testimonyData = this.segmentData.testimonies[this.currentTestimonyIndex];
         this.createTestimonyObject(testimonyData);
+
+        // キャラ表示切り替え
+        this.updateCharacterDisplay(this.currentTestimonyIndex);
+
         this.currentTestimonyIndex++;
 
         this.scene.time.delayedCall(this.segmentData.interval || 4000, () => {
             this.spawnNextTestimony();
         });
+    }
+
+    // キャラ表示切り替えメソッド
+    updateCharacterDisplay(index) {
+        // 全て非表示
+        if (this.charaImages.left) this.charaImages.left.setVisible(false);
+        if (this.charaImages.center) this.charaImages.center.setVisible(false);
+        if (this.charaImages.right) this.charaImages.right.setVisible(false);
+
+        // インデックスに応じて表示 (0:左, 1:右, 2:中 のローテーションとする)
+        const pos = index % 3;
+        const target = (pos === 0) ? this.charaImages.left :
+            (pos === 1) ? this.charaImages.right :
+                this.charaImages.center;
+
+        if (target) {
+            target.setVisible(true);
+            // 簡易パンアップ演出: 本来はTween推奨だが、ここではY座標リセット程度
+        }
     }
 
     createTestimonyObject(data) {
@@ -104,7 +154,8 @@ export default class TrialSegmentManager {
             fontSize: '32px',
             color: '#ffffff',
             stroke: '#000000',
-            strokeThickness: 6
+            strokeThickness: 6,
+            wordWrap: { width: 800, useAdvancedWrap: true } // ★ 複数行表示対応
         });
 
         // typewriterの場合は中央揃えにする
@@ -206,7 +257,7 @@ export default class TrialSegmentManager {
 
         // 1. テキスト更新アクション (ゆさぶる等)
         if (choice.action === 'update_testimony') {
-            this.updateTestimony(choice.target, choice.new_text);
+            this.updateTestimony(choice.target, choice.new_text, choice.new_highlights); // ★ highlightも渡す
             return;
         }
 
@@ -265,13 +316,16 @@ export default class TrialSegmentManager {
         }
     }
 
-    updateTestimony(targetId, newText) {
+    updateTestimony(targetId, newText, newHighlights) {
         // 1. データ上の修正
         const testimony = this.segmentData.testimonies.find(t => t.id === targetId);
         if (testimony) {
             testimony.text = newText;
-            // 必要ならハイライトもクリアまたは更新するべきだが、今回はテキスト変更のみ
-            testimony.highlights = []; // ハイライトは無効化しておく（矛盾が解消された等のため）
+            if (newHighlights) {
+                testimony.highlights = newHighlights;
+            } else {
+                testimony.highlights = []; // ハイライトは無効化 (クリア)
+            }
         }
 
         // 2. 画面上の修正 (Activeなものがあれば即時反映)
@@ -280,16 +334,41 @@ export default class TrialSegmentManager {
             // Container内のTextを探す
             const textObj = activeObj.list.find(child => child.type === 'Text');
             if (textObj) {
-                textObj.setText(newText);
-                // コンテナサイズ更新
+                // ハイライトがある場合はテキスト加工が必要
+                let displayText = newText;
+                if (newHighlights && newHighlights.length > 0) {
+                    newHighlights.forEach(h => {
+                        displayText = displayText.replace(h.text, `【${h.text}】`);
+                    });
+                }
+
+                textObj.setText(displayText);
                 textObj.updateText();
                 activeObj.setSize(textObj.width, textObj.height);
+
+                // イベント再設定: 一度オフにしてから再開
+                activeObj.off('pointerdown');
+                activeObj.setInteractive({ useHandCursor: true });
+
+                if (newHighlights && newHighlights.length > 0) {
+                    activeObj.on('pointerdown', () => {
+                        console.log('[TrialManager] Updated testimony clicked:', displayText);
+                        this.onHighlightClicked(newHighlights[0]); // 簡易的に最初のハイライトを使用
+                    });
+                }
             }
-            // FlowComponentのfullTextも更新しないと、文字送り中に戻ってしまう可能性がある
-            // コンポーネント取得
+
+            // FlowComponentのfullTextも更新
             if (activeObj.components && activeObj.components.TestimonyFlowComponent) {
-                activeObj.components.TestimonyFlowComponent.fullText = newText;
-                // もし文字送りが終わっていてもテキストは更新済みなのでOK
+                // FlowComponentへ渡すテキストも加工済みのものにするか生か？
+                // 表示用テキストを渡すのが安全
+                let flowText = newText;
+                if (newHighlights && newHighlights.length > 0) {
+                    newHighlights.forEach(h => {
+                        flowText = flowText.replace(h.text, `【${h.text}】`);
+                    });
+                }
+                activeObj.components.TestimonyFlowComponent.fullText = flowText;
             }
         }
 

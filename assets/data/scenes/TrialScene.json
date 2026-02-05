@@ -34,6 +34,31 @@
       "components": {
         "ProgressIndicatorComponent": {}
       }
+    },
+    {
+      "name": "character_left",
+      "type": "image",
+      "x": 200,
+      "y": 400,
+      "texture": "yuna_angry",
+      "_comment": "仮のキャラ画像。textureキーは適宜変更してください",
+      "visible": false
+    },
+    {
+      "name": "character_center",
+      "type": "image",
+      "x": 640,
+      "y": 400,
+      "texture": "yuna_angry",
+      "visible": false
+    },
+    {
+      "name": "character_right",
+      "type": "image",
+      "x": 1080,
+      "y": 400,
+      "texture": "yuna_angry",
+      "visible": false
     }
   ],
   "trial_data": {

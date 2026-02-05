@@ -29,11 +29,18 @@ export default class InteractionMenuComponent {
 
         this.gameObject.setVisible(true);
 
-        const choices = highlightData.choices || [
-            { text: "反論する", type: "contradict" },
-            { text: "賛成する", type: "agree" },
-            { text: "問い詰める", type: "doubt" }
-        ];
+        this.gameObject.setVisible(true);
+
+        if (!highlightData) {
+            console.error('[InteractionMenu] highlightData is missing!');
+            return;
+        }
+
+        const choices = highlightData.choices || [];
+        if (choices.length === 0) {
+            console.warn('[InteractionMenu] No choices defined.');
+            // デフォルトを入れるか、何もしないか。ここではスキップ
+        }
 
         choices.forEach((choice, index) => {
             this.createChoiceButton(choice, index);

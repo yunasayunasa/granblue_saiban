@@ -38,6 +38,7 @@
   ],
   "trial_data": {
     "interval": 4000,
+    "loop_scenario": "chapter1/loop_end.ks",
     "testimonies": [
       {
         "id": "t1",
