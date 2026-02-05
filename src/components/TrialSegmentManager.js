@@ -117,6 +117,11 @@ export default class TrialSegmentManager {
         container.setSize(textObj.width, textObj.height);
         container.setInteractive({ useHandCursor: true });
 
+        // ★ IDを保存 (後で検索できるように)
+        if (data.id) {
+            container.setData('id', data.id);
+        }
+
         const flowComponent = this.scene.addComponent(container, 'TestimonyFlowComponent', {
             text: data.text,
             speed: 50,
@@ -261,20 +266,42 @@ export default class TrialSegmentManager {
     }
 
     updateTestimony(targetId, newText) {
+        // 1. データ上の修正
         const testimony = this.segmentData.testimonies.find(t => t.id === targetId);
         if (testimony) {
             testimony.text = newText;
+            // 必要ならハイライトもクリアまたは更新するべきだが、今回はテキスト変更のみ
+            testimony.highlights = []; // ハイライトは無効化しておく（矛盾が解消された等のため）
+        }
 
-            if (this.progressIndicator) {
-                this.progressIndicator.show("証言変更…", 2000);
-                this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', () => {
-                    this.isInteracting = false;
-                    this.scene.events.emit('RESUME_TRIAL');
-                });
-            } else {
+        // 2. 画面上の修正 (Activeなものがあれば即時反映)
+        const activeObj = this.activeTestimonies.find(obj => obj.getData('id') === targetId);
+        if (activeObj) {
+            // Container内のTextを探す
+            const textObj = activeObj.list.find(child => child.type === 'Text');
+            if (textObj) {
+                textObj.setText(newText);
+                // コンテナサイズ更新
+                textObj.updateText();
+                activeObj.setSize(textObj.width, textObj.height);
+            }
+            // FlowComponentのfullTextも更新しないと、文字送り中に戻ってしまう可能性がある
+            // コンポーネント取得
+            if (activeObj.components && activeObj.components.TestimonyFlowComponent) {
+                activeObj.components.TestimonyFlowComponent.fullText = newText;
+                // もし文字送りが終わっていてもテキストは更新済みなのでOK
+            }
+        }
+
+        if (this.progressIndicator) {
+            this.progressIndicator.show("証言変更…", 2000);
+            this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', () => {
                 this.isInteracting = false;
                 this.scene.events.emit('RESUME_TRIAL');
-            }
+            });
+        } else {
+            this.isInteracting = false;
+            this.scene.events.emit('RESUME_TRIAL');
         }
     }
 

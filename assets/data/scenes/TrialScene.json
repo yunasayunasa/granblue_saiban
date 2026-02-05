@@ -41,6 +41,8 @@
     "testimonies": [
       {
         "id": "t1",
+        "_comment_style": "証言の表示スタイル。'scroll'（右から左へ）または 'typewriter'（中央固定タイプ）。省略時はscroll。",
+        "style": "typewriter",
         "text": "私は昨日の夜、ずっと部屋にいました。",
         "highlights": []
       },

@@ -100,6 +100,12 @@ export default class TrialScene extends BaseGameScene {
 
     setPause(pause) {
         this.isPaused = pause;
+
+        // ★ タイマーイベントも停止・再開させる
+        if (this.time) {
+            this.time.paused = pause;
+        }
+
         // シーン内の全オブジェクトの物理/アニメーション停止
         if (pause) {
             this.matter.world.pause();
