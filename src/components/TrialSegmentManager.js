@@ -38,6 +38,7 @@ export default class TrialSegmentManager {
             console.warn('[TrialSegmentManager] InteractionMenuComponent NOT found.');
         }
 
+        const indicatorObj = this.scene.children.getByName('progress_indicator');
         if (indicatorObj && indicatorObj.components && indicatorObj.components.ProgressIndicatorComponent) {
             this.progressIndicator = indicatorObj.components.ProgressIndicatorComponent;
         }
@@ -46,6 +47,11 @@ export default class TrialSegmentManager {
         this.charaImages.left = this.scene.children.getByName('character_left');
         this.charaImages.center = this.scene.children.getByName('character_center');
         this.charaImages.right = this.scene.children.getByName('character_right');
+
+        // 初期化時に全て非表示にする
+        if (this.charaImages.left) this.charaImages.left.setVisible(false);
+        if (this.charaImages.center) this.charaImages.center.setVisible(false);
+        if (this.charaImages.right) this.charaImages.right.setVisible(false);
 
         const layoutData = this.scene.loadData || this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
         console.log('[TrialSegmentManager] Layout Data:', layoutData ? 'Found' : 'Not Found');
