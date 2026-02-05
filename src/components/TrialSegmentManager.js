@@ -47,6 +47,10 @@ export default class TrialSegmentManager {
         this.charaImages.left = this.scene.children.getByName('character_left');
         this.charaImages.center = this.scene.children.getByName('character_center');
         this.charaImages.right = this.scene.children.getByName('character_right');
+        console.log('[TrialSegmentManager] Character images found:',
+            'left:', !!this.charaImages.left,
+            'center:', !!this.charaImages.center,
+            'right:', !!this.charaImages.right);
 
         // 初期化時に全て非表示にする
         if (this.charaImages.left) this.charaImages.left.setVisible(false);
@@ -93,8 +97,16 @@ export default class TrialSegmentManager {
                         console.log('Loop scenario finished. Restarting loop.');
                         this.isFlowing = true;
                         this.currentTestimonyIndex = 0;
+                        this.scene.isPaused = false; // ★ ポーズ状態をリセット
                         this.scene.events.emit('RESUME_TRIAL'); // ポーズ解除などのため念のため
-                        this.spawnNextTestimony();
+                        this.scene.time.delayedCall(100, () => this.spawnNextTestimony()); // ★ 少し遅延させて安定性向上
+                    })
+                    .catch(err => {
+                        console.error('[TrialSegmentManager] Loop scenario error:', err);
+                        // エラー時も再ループを試みる
+                        this.isFlowing = true;
+                        this.currentTestimonyIndex = 0;
+                        this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
                     });
                 return;
             }
@@ -134,7 +146,10 @@ export default class TrialSegmentManager {
 
         if (target) {
             target.setVisible(true);
+            console.log('[TrialSegmentManager] Showing character at position:', pos);
             // 簡易パンアップ演出: 本来はTween推奨だが、ここではY座標リセット程度
+        } else {
+            console.warn('[TrialSegmentManager] No character image for position:', pos);
         }
     }
 
