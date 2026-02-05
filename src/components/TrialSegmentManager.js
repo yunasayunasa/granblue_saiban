@@ -191,6 +191,14 @@ export default class TrialSegmentManager {
     async handleChoice(choice) {
         console.log('[TrialManager] Choice selected:', choice.text);
 
+        // 0. 「戻る」ボタン: 何もせず議論再開
+        if (choice.isBack) {
+            console.log('[TrialManager] Back button selected. Resuming.');
+            this.isInteracting = false;
+            this.scene.events.emit('RESUME_TRIAL');
+            return;
+        }
+
         // 1. テキスト更新アクション (ゆさぶる等)
         if (choice.action === 'update_testimony') {
             this.updateTestimony(choice.target, choice.new_text);
@@ -303,6 +311,16 @@ export default class TrialSegmentManager {
         // 現在画面に出ている証言をすべて消す
         this.activeTestimonies.forEach(obj => obj.destroy());
         this.activeTestimonies = [];
+    }
+
+    // ★ 冒頭からやり直す（リセット）
+    restartDebate() {
+        console.log('[TrialManager] Restarting debate loop...');
+        this.cleanupCurrentSegment();
+        this.currentTestimonyIndex = 0;
+        this.startDebateLoop();
+        this.isInteracting = false;
+        this.scene.events.emit('RESUME_TRIAL');
     }
 
     update(time, delta) {

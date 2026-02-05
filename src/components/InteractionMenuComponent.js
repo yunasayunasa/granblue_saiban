@@ -39,6 +39,12 @@ export default class InteractionMenuComponent {
             this.createChoiceButton(choice, index);
         });
 
+        // ★ 修正: 「戻る」ボタンを追加
+        this.createChoiceButton({
+            text: "戻る",
+            isBack: true
+        }, choices.length);
+
         // 背景などの装飾
         // ...
     }

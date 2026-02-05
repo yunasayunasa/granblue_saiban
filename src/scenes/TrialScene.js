@@ -38,6 +38,15 @@ export default class TrialScene extends BaseGameScene {
         this.events.on('PAUSE_TRIAL', () => this.setPause(true));
         this.events.on('RESUME_TRIAL', () => this.setPause(false));
 
+        // ★ リセット要求の処理
+        this.events.on('RESTART_DEBATE_REQUEST', () => {
+            console.log('[TrialScene] Received RESTART_DEBATE_REQUEST');
+            const trialManager = this.children.getByName('trial_manager');
+            if (trialManager && trialManager.components && trialManager.components.TrialSegmentManager) {
+                trialManager.components.TrialSegmentManager.restartDebate();
+            }
+        });
+
         // シーン初期データの状態反映 (タイマーなど)
         if (this.loadData && this.loadData.currentTime) {
             this.currentTime = this.loadData.currentTime;
