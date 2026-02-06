@@ -250,6 +250,9 @@ export default class BaseGameScene extends Phaser.Scene {
         if (data.layer) {
             if (!this.layer[data.layer]) {
                 this.layer[data.layer] = this.add.container(0, 0).setName(data.layer);
+                // ★ レイヤーごとのデフォルト深度を設定
+                const depths = { 'Background': 0, 'Gameplay': 10, 'UI': 100, 'Overlay': 1000 };
+                if (depths[data.layer] !== undefined) this.layer[data.layer].setDepth(depths[data.layer]);
             }
             this.layer[data.layer].add(gameObject);
         } else if (!gameObject.parentContainer) {
@@ -394,7 +397,11 @@ export default class BaseGameScene extends Phaser.Scene {
             arr.forEach(a => a());
         }
         if (this.updatableComponents) {
-            this.updatableComponents.forEach(c => { if (c.gameObject.active && c.update) try { c.update(time, delta); } catch (e) { } });
+            this.updatableComponents.forEach(c => {
+                // ★ gameObject が存在し、かつアクティブな場合のみ update を実行
+                const target = c.gameObject;
+                if ((!target || target.active) && c.update) try { c.update(time, delta); } catch (e) { }
+            });
         }
         if (this.ySortEnabled) {
             this.children.list.filter(o => o.active && o.getData('layer') === 'Gameplay').forEach(obj => {
