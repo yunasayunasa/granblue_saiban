@@ -27,8 +27,9 @@ export default class TrialSegmentManager {
         // イベントリスナー登録
         this.scene.events.on('RESTART_DEBATE_REQUEST', () => this.restartDebate());
         this.scene.events.on('RESUME_TRIAL', () => {
-            console.log('[TrialManager] RESUME_TRIAL received.');
+            console.log('[TrialManager] RESUME_TRIAL received. Forcing input.enabled = true');
             this.isInteracting = false;
+            this.scene.input.enabled = true; // ★ 強制的に復帰
             // 議論中かつポーズされていないなら、証言生成の連鎖が止まっている可能性があるため再開させる
             if (this.isFlowing && !this.scene.isPaused) {
                 // 二重起動を防ぐため、少し待ってから実行
@@ -208,7 +209,7 @@ export default class TrialSegmentManager {
             y = 200 + (this.currentTestimonyIndex % 3) * 120;
         }
 
-        const container = this.scene.add.container(x, y);
+        const container = this.scene.add.container(x, y).setDepth(1000); // ★ 高いDepthを設定
         const textObj = this.scene.add.text(0, 0, data.text, {
             fontSize: '32px',
             color: '#ffffff',
@@ -226,10 +227,10 @@ export default class TrialSegmentManager {
         // コンテナのクリック範囲を設定（テキストのサイズに合わせる）
         container.setSize(textObj.width, textObj.height);
 
-        // ★ 指マーク（Hand Cursor）を有効化し、ヒットエリアを正確に設定
-        container.setInteractive({ useHandCursor: true });
-        container.input.hitArea = new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height);
-        container.input.hitAreaCallback = Phaser.Geom.Rectangle.Contains;
+        // ★ Phaser 3.60のContainerでは、明示的にヒットエリアを指定し、カーソルをpointerに設定する
+        container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
+            .on('pointerover', () => { if (container.input.enabled) container.scene.input.setDefaultCursor('pointer'); })
+            .on('pointerout', () => { container.scene.input.setDefaultCursor('default'); });
 
         // ★ IDを保存 (後で検索できるように)
         if (data.id) {
@@ -420,10 +421,9 @@ export default class TrialSegmentManager {
 
                 // イベント再設定
                 activeObj.off('pointerdown');
-                activeObj.setInteractive({ useHandCursor: true });
-                if (activeObj.input && activeObj.input.hitArea) {
-                    activeObj.input.hitArea.setTo(0, 0, textObj.width, textObj.height);
-                }
+                activeObj.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
+                    .on('pointerover', () => { if (activeObj.input.enabled) activeObj.scene.input.setDefaultCursor('pointer'); })
+                    .on('pointerout', () => { activeObj.scene.input.setDefaultCursor('default'); });
 
                 if (newHighlights && newHighlights.length > 0) {
                     activeObj.on('pointerdown', () => {

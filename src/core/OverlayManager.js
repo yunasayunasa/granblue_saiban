@@ -30,7 +30,7 @@ export default class OverlayManager {
         // 毎回新しいインスタンスで起動するために、キーをユニークにするという手もあるが、
         // shutdownを待つ方が確実。ここではまずaddする。
         if (!this.systemScene.scene.get(sceneToLaunch)) {
-             this.systemScene.scene.add(sceneToLaunch, NovelOverlayScene, false);
+            this.systemScene.scene.add(sceneToLaunch, NovelOverlayScene, false);
         }
 
         this.systemScene.scene.launch(sceneToLaunch, {
@@ -73,18 +73,19 @@ export default class OverlayManager {
             const sceneToResumeKey = this.systemScene.sceneStack.length > 0
                 ? this.systemScene.sceneStack[this.systemScene.sceneStack.length - 1]
                 : null;
-            
+
             if (sceneToResumeKey) {
                 const uiScene = this.systemScene.scene.get('UIScene');
                 if (uiScene) {
                     uiScene.onSceneTransition(sceneToResumeKey);
                 }
             }
-            
+
             if (data.inputWasBlocked) {
                 const returnScene = this.systemScene.scene.get(data.returnTo);
-                if (returnScene?.scene.isPaused()) {
+                if (returnScene) {
                     returnScene.input.enabled = true;
+                    console.log(`[OverlayManager] Interaction restored for scene: ${data.returnTo}`);
                 }
             }
 
