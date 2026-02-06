@@ -53,13 +53,16 @@ export default class TestimonyFlowComponent {
     }
 
     typeNextChar() {
-        if (this.scene.isPaused) return;
+        if (this.scene.isPaused || !this.gameObject || !this.gameObject.active) {
+            if (this.typeTimer) this.typeTimer.remove();
+            return;
+        }
 
         if (this.charIndex < this.fullText.length) {
             this.charIndex++;
             const visibleText = this.fullText.substring(0, this.charIndex);
 
-            if (this.textObject) {
+            if (this.textObject && this.textObject.active) {
                 this.textObject.setText(visibleText);
             }
 
@@ -71,9 +74,11 @@ export default class TestimonyFlowComponent {
             if (this.typeTimer) this.typeTimer.remove();
 
             // ★ typewriterモードの場合、完了後に一定時間待って消える
-            if (this.style === 'typewriter') {
+            if (this.style === 'typewriter' && this.gameObject && this.gameObject.active) {
                 this.scene.time.delayedCall(this.waitAfterType, () => {
-                    this.onExitScreen();
+                    if (this.gameObject && this.gameObject.active) {
+                        this.onExitScreen();
+                    }
                 });
             }
         }
@@ -88,7 +93,7 @@ export default class TestimonyFlowComponent {
     }
 
     update(time, delta) {
-        if (this.scene.isPaused) return;
+        if (this.scene.isPaused || !this.gameObject || !this.gameObject.active) return;
 
         // ★ scrollモードのみ移動する
         if (this.style === 'scroll') {

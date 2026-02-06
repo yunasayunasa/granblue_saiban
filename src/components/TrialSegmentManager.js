@@ -357,6 +357,12 @@ export default class TrialSegmentManager {
             try {
                 console.log(`[TrialManager] Playing scenario: ${scenarioFile}`);
                 await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, scenarioFile, true);
+
+                // ★ 修正: シナリオ終了後、既にリセット（restart_trial）が呼ばれている場合は後続処理を中断
+                if (!this.isFlowing && this.currentTestimonyIndex === 0) {
+                    console.log('[TrialManager] Scene was reset during scenario. Aborting handleChoice post-processing.');
+                    return;
+                }
                 console.log('[TrialManager] Scenario finished.');
             } catch (e) {
                 console.warn('[TrialManager] Scenario execution failed or skipped:', e);
@@ -383,6 +389,9 @@ export default class TrialSegmentManager {
             }
         } else {
             // 失敗時は元の議論に戻る（ペナルティ処理などあればここに追加）
+            // ★ すでにリセットされている場合はスキップ
+            if (!this.isFlowing && this.currentTestimonyIndex === 0) return;
+
             console.log('[TrialManager] Returning to discussion...');
             this.isInteracting = false;
             this.scene.events.emit('RESUME_TRIAL');
@@ -488,16 +497,22 @@ export default class TrialSegmentManager {
     }
 
     cleanupCurrentSegment() {
-        // 現在画面に出ている証言をすべて消す
-        this.activeTestimonies.forEach(obj => obj.destroy());
-        this.activeTestimonies = [];
-        this.isInteracting = false; // ★ インタラクション状態もリセット
+        console.log('[TrialManager] Cleaning up current segment...');
 
-        // タイマーもクリアしておく
+        // タイマーを確実に停止
         if (this.spawnTimer) {
             this.spawnTimer.remove();
             this.spawnTimer = null;
         }
+
+        // 現在画面に出ている証言をすべて消す
+        this.activeTestimonies.forEach(obj => {
+            if (obj && obj.active) {
+                obj.destroy();
+            }
+        });
+        this.activeTestimonies = [];
+        this.isInteracting = false; // ★ インタラクション状態もリセット
     }
 
     // ★ 冒頭からやり直す（リセット）
