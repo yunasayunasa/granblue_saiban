@@ -13,7 +13,20 @@ export default class ProgressIndicatorComponent {
     }
 
     show(message = "議論進行…", duration = 2000) {
-        this.gameObject.setText(message);
+        let textObj = null;
+        if (this.gameObject.setText) {
+            textObj = this.gameObject;
+        } else if (this.gameObject.list) {
+            // Container の場合は子要素から Text を探す
+            textObj = this.gameObject.list.find(child => child.setText || child.type === 'Text');
+        }
+
+        if (textObj) {
+            textObj.setText(message);
+        } else {
+            console.warn('[ProgressIndicator] No text object found to set message:', message);
+        }
+
         this.gameObject.setVisible(true);
         this.gameObject.setAlpha(0);
 
