@@ -12,7 +12,7 @@ export default class TestimonyFlowComponent {
         this.moveSpeed = params.moveSpeed || 100;
         // ★ style: 'scroll' (default) or 'typewriter'
         this.style = params.style || 'scroll';
-        this.waitAfterType = 2000; // タイプ完了後の待機時間（typewriter用）
+        this.waitAfterType = 800; // ★ 短縮：タイプ完了後の待機時間 (2000 -> 800)
 
         this.charIndex = 0;
         this.isTyping = false;
@@ -103,7 +103,9 @@ export default class TestimonyFlowComponent {
             this.gameObject.x -= (this.moveSpeed * delta * timeScale) / 1000;
 
             // 画面外判定
-            if (this.gameObject.x < -1200) { // 十分に左へ
+            // 固定値 -1200 ではなく、オブジェクトの幅に基づいて「見えなくなったらすぐ」次へ
+            const width = this.textObject ? this.textObject.width : 400;
+            if (this.gameObject.x < -width - 50) {
                 this.onExitScreen();
             }
         }

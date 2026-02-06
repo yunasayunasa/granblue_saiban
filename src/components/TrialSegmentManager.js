@@ -565,6 +565,7 @@ export default class TrialSegmentManager {
         });
         this.activeTestimonies = [];
         this.isInteracting = false; // ★ インタラクション状態もリセット
+        this.waitingForNext = false; // ★ 次周回への誤爆防止
     }
 
     // ★ 冒頭からやり直す（リセット）
