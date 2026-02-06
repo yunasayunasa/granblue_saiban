@@ -18,9 +18,9 @@ export default class BaseGameScene extends Phaser.Scene {
         this.joystick = null;
 
         this._sceneSettingsApplied = false;
-        this.ySortEnabled = false; // ★ シーンのYソートが有効かどうかのフラグ
-        this.ySortableObjects = []; // ★ Yソート対象のオブジェクトを保持する配列
-
+        this.ySortEnabled = false;
+        this.ySortableObjects = new Set(); // ★ ArrayからSetに変更
+        this.layer = {}; // ★ レイヤーコンテナを保持するオブジェクトを追加
     }
     /**
     * ★★★ 新規メソッド ★★★
@@ -246,6 +246,17 @@ export default class BaseGameScene extends Phaser.Scene {
             gameObject.setScale(data.scaleX ?? 1, data.scaleY ?? 1);
         }
 
+        // ★ レイヤーまたは表示リストへの追加ロジックを復元
+        if (data.layer) {
+            if (!this.layer[data.layer]) {
+                this.layer[data.layer] = this.add.container(0, 0).setName(data.layer);
+            }
+            this.layer[data.layer].add(gameObject);
+        } else if (!gameObject.parentContainer) {
+            // 親コンテナ（Container内の子要素）でなければ、シーンに直接追加
+            this.add.existing(gameObject);
+        }
+
         if (gameObject instanceof Phaser.GameObjects.Graphics && data.draw) this.applyGraphicsProperties(gameObject, data.draw);
 
         if (gameObject instanceof Phaser.GameObjects.Container && data.list) {
@@ -253,7 +264,12 @@ export default class BaseGameScene extends Phaser.Scene {
                 const child = this.createObjectFromLayout(childLayout);
                 if (child) {
                     this.applyProperties(child, childLayout);
-                    gameObject.add(child);
+                    // Container.add(child) はすでに行われる（applyProperties内で再帰的に呼ばれるため不要だが、
+                    // 明示的にここで呼ぶか、applyProperties側のロジックに任せるか。
+                    // 現状の applyProperties の data.layer がない場合は add.existing されるので注意。
+                    // Containerの子要素の場合は parentContainer がセットされるはずだが、
+                    // new 直後はセットされていないため、第二引数等で制御する必要がある。
+                    if (!child.parentContainer) gameObject.add(child);
                     this.initComponentsAndEvents(child);
                 }
             });
