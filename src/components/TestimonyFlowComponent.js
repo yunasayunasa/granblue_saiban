@@ -95,10 +95,12 @@ export default class TestimonyFlowComponent {
     update(time, delta) {
         if (this.scene.isPaused || !this.gameObject || !this.gameObject.active) return;
 
+        const timeScale = this.scene.time.timeScale;
+
         // ★ scrollモードのみ移動する
         if (this.style === 'scroll') {
-            // 横移動
-            this.gameObject.x -= (this.moveSpeed * delta) / 1000;
+            // 横移動 (timeScaleを考慮)
+            this.gameObject.x -= (this.moveSpeed * delta * timeScale) / 1000;
 
             // 画面外判定
             if (this.gameObject.x < -1200) { // 十分に左へ
@@ -108,8 +110,13 @@ export default class TestimonyFlowComponent {
     }
 
     onExitScreen() {
-        // ★ 修正：ループさせず、破棄する（Manager側が新しいものを生成するため）
-        this.gameObject.destroy();
+        // ★ 終了イベントを発行（Manager側が次を出すタイミングを計るため）
+        this.scene.events.emit('TESTIMONY_FINISHED');
+
+        // 破棄
+        if (this.gameObject && this.gameObject.active) {
+            this.gameObject.destroy();
+        }
     }
 
     destroy() {

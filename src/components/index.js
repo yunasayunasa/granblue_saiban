@@ -20,6 +20,7 @@ import TestimonyFlowComponent from './TestimonyFlowComponent.js';
 import TrialSegmentManager from './TrialSegmentManager.js';
 import InteractionMenuComponent from './InteractionMenuComponent.js';
 import ProgressIndicatorComponent from './ProgressIndicatorComponent.js';
+import TrialTimerComponent from './TrialTimerComponent.js';
 
 
 
@@ -52,6 +53,7 @@ export const ComponentRegistry = {
     TrialSegmentManager,
     InteractionMenuComponent,
     ProgressIndicatorComponent,
+    TrialTimerComponent,
 
 
     //UI系

@@ -43,6 +43,27 @@ export default class TrialSegmentManager {
 
         // 連鎖タイマーの参照保持用
         this.spawnTimer = null;
+
+        // 証言終了イベントの待機フラグ
+        this.waitingForNext = false;
+
+        // イベントリスナー登録
+        this.scene.events.on('TESTIMONY_FINISHED', () => {
+            if (this.waitingForNext && this.isFlowing && !this.scene.isPaused && !this.isInteracting) {
+                console.log('[TrialManager] TESTIMONY_FINISHED received. Spawning next.');
+                this.waitingForNext = false;
+                this.spawnNextTestimony();
+            }
+        });
+
+        // タイムアップイベント
+        this.scene.events.on('TRIAL_TIMEOUT', () => {
+            console.warn('[TrialManager] TRIAL_TIMEOUT received!');
+            this.handleTimeout();
+        });
+
+        // 早送りキー (Shift)
+        this.fastForwardKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
     }
 
     start() {
@@ -64,19 +85,41 @@ export default class TrialSegmentManager {
                 this.progressIndicator = indicatorObj.components.ProgressIndicatorComponent;
             }
 
+            // 早送りボタンの初期化
+            const ffButton = this.scene.children.getByName('fast_forward_button');
+            if (ffButton) {
+                ffButton.setInteractive(new Phaser.Geom.Circle(0, 0, 40), Phaser.Geom.Circle.Contains);
+                ffButton.isDown = false;
+                ffButton.on('pointerdown', () => { ffButton.isDown = true; });
+                ffButton.on('pointerup', () => { ffButton.isDown = false; });
+                ffButton.on('pointerout', () => { ffButton.isDown = false; });
+                console.log('[TrialManager] FastForward button initialized.');
+            }
+
             // キャラ画像取得 (Lazy load もあるが、ここで初期検索)
-            console.log('[TrialSegmentManager] Pre-caching characters...');
+            console.log('[TrialManager] Pre-caching characters...');
             this._findCharacterImages();
 
             const layoutData = this.scene.loadData || this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
-            console.log('[TrialSegmentManager] Layout Data:', layoutData ? 'Found' : 'Not Found');
+            console.log('[TrialManager] Layout Data:', layoutData ? 'Found' : 'Not Found');
 
             if (layoutData && layoutData.trial_data) {
-                console.log('[TrialSegmentManager] Trial Data found. Starting loop...');
+                console.log('[TrialManager] Trial Data found. Starting loop...');
                 this.segmentData = layoutData.trial_data;
+
+                // タイマーの初期化 (あれば)
+                const timerObj = this.scene.children.getByName('timer_container');
+                if (timerObj && timerObj.components && timerObj.components.TrialTimerComponent) {
+                    const timer = timerObj.components.TrialTimerComponent;
+                    if (this.segmentData.timeLimit) {
+                        timer.setTime(this.segmentData.timeLimit);
+                    }
+                    timer.start();
+                }
+
                 this.startDebateLoop();
             } else {
-                console.warn('[TrialSegmentManager] No trial_data found in layout JSON.');
+                console.warn('[TrialManager] No trial_data found in layout JSON.');
             }
         });
     }
@@ -137,7 +180,7 @@ export default class TrialSegmentManager {
             console.log('[TrialSegmentManager] Looping back to 0 immediately.');
             this.cleanupCurrentSegment(); // ★ 古い証言を破棄
             this.currentTestimonyIndex = 0;
-            // ★ 再帰呼び出しではなく、次フレーム以降に委ねる（安定性のため）
+            // ★ リセット直後は少し待ってから開始（安定性のため）
             this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
             return;
         }
@@ -150,9 +193,18 @@ export default class TrialSegmentManager {
 
         this.currentTestimonyIndex++;
 
-        this.spawnTimer = this.scene.time.delayedCall(this.segmentData.interval || 4000, () => {
-            this.spawnNextTestimony();
-        });
+        // 次の証言のトリガー判定
+        // interval が 0 または未指定の場合、証言が消えるのを待つ (順次表示モード)
+        const interval = this.segmentData.interval;
+        if (interval > 0) {
+            console.log(`[TrialSegmentManager] Next spawn in ${interval}ms`);
+            this.spawnTimer = this.scene.time.delayedCall(interval, () => {
+                this.spawnNextTestimony();
+            });
+        } else {
+            console.log('[TrialSegmentManager] Sequential mode. Waiting for TESTIMONY_FINISHED...');
+            this.waitingForNext = true;
+        }
     }
 
     // キャラ画像を一括検索する内部メソッド
@@ -525,10 +577,47 @@ export default class TrialSegmentManager {
         this.scene.events.emit('RESUME_TRIAL');
     }
 
+    async handleTimeout() {
+        if (!this.isFlowing) return;
+        this.isFlowing = false;
+        this.cleanupCurrentSegment();
+
+        const timeoutScenario = this.segmentData.timeoutScenario || "chapter1/timeout_bad_end.ks";
+        console.log(`[TrialManager] Playing timeout scenario: ${timeoutScenario}`);
+
+        try {
+            await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, timeoutScenario, true);
+            // シナリオ終了後、通常はゲームオーバーかリトライを選択させるが、
+            // ここでは簡易的に最初からやり直す
+            this.restartDebate();
+        } catch (e) {
+            console.error('[TrialManager] Timeout scenario error:', e);
+            this.restartDebate();
+        }
+    }
+
     update(time, delta) {
+        // --- 早送りロジック ---
+        // 1. Shiftキーが押されているか
+        // 2. 画面上の「早送りボタン」(名前: fast_forward_button) が押されているか
+        let isFF = this.fastForwardKey.isDown;
+
+        const ffButton = this.scene.children.getByName('fast_forward_button');
+        if (ffButton && ffButton.isDown) { // isDown は自前で管理する必要があるかもしれない
+            isFF = true;
+        }
+
+        // timeScaleの適用
+        const targetScale = isFF ? 3.0 : 1.0;
+        if (this.scene.time.timeScale !== targetScale) {
+            this.scene.time.timeScale = targetScale;
+            console.log(`[TrialManager] timeScale changed to: ${targetScale}`);
+        }
+
         // 画面外、または破棄済みオブジェクトのクリーンアップ
         this.activeTestimonies = this.activeTestimonies.filter(obj => {
             if (!obj || !obj.active) return false;
+            // scrollモードの画面外判定はFlowComponentが行うが、念のためのバックアップ
             if (obj.x < -1500) {
                 obj.destroy();
                 return false;
