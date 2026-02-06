@@ -74,6 +74,7 @@
       },
       {
         "id": "t2",
+        "style": "typewriter",
         "text": "誰とも会っていませんし、何も食べていません。",
         "highlights": [
           {
@@ -118,6 +119,7 @@
       },
       {
         "id": "t3",
+        "style": "typewriter",
         "text": "魔法少女が嘘をつくはずがないでしょう？",
         "highlights": []
       }
