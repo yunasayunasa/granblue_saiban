@@ -32,9 +32,15 @@ export default class TrialSegmentManager {
             this.scene.input.enabled = true; // ★ 強制的に復帰
             // 議論中かつポーズされていないなら、証言生成の連鎖が止まっている可能性があるため再開させる
             if (this.isFlowing && !this.scene.isPaused) {
+                // すでに待機中(waitingForNext)なら何もしない
+                if (this.waitingForNext) {
+                    console.log('[TrialManager] RESUME_TRIAL: Already waiting for next. Skipping manual spawn.');
+                    return;
+                }
+
                 // 二重起動を防ぐため、少し待ってから実行
-                this.scene.time.delayedCall(500, () => {
-                    if (this.isFlowing && !this.scene.isPaused && !this.isInteracting) {
+                this.scene.time.delayedCall(300, () => {
+                    if (this.isFlowing && !this.scene.isPaused && !this.isInteracting && !this.waitingForNext) {
                         this.spawnNextTestimony();
                     }
                 });
@@ -136,6 +142,12 @@ export default class TrialSegmentManager {
     spawnNextTestimony() {
         if (!this.isFlowing || this.scene.isPaused || this.isInteracting) {
             console.log('[TrialSegmentManager] Spawn skipped (paused or interacting)');
+            return;
+        }
+
+        // ★ 重要: すでに次の証言を待機中(イベント待ち)なら、手動での重複生成を阻止する
+        if (this.waitingForNext) {
+            console.warn('[TrialSegmentManager] Spawn blocked: Already waiting for TESTIMONY_FINISHED.');
             return;
         }
 

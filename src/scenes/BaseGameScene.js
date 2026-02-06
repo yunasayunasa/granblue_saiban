@@ -81,1376 +81,433 @@ export default class BaseGameScene extends Phaser.Scene {
      */
     // applySceneSettings() メソッド内
     applySceneSettings() {
-
-
-        const keyToLoad = this.layoutDataKey || this.scene.key;
-        const layoutData = this.cache.json.get(keyToLoad);
-
-        if (layoutData && layoutData.scene_settings) {
-            // console.log(`[BaseGameScene] Applying 'scene_settings' in the first update frame...`); // メッセージを戻す
-            const settings = layoutData.scene_settings;
-
-            if (settings.backgroundColor) {
-                this.cameras.main.setBackgroundColor(settings.backgroundColor);
+        const key = this.layoutDataKey || this.scene.key;
+        const data = this.cache.json.get(key);
+        if (data && data.scene_settings) {
+            const s = data.scene_settings;
+            if (s.backgroundColor) this.cameras.main.setBackgroundColor(s.backgroundColor);
+            if (this.matter && this.matter.world && s.gravity) {
+                this.matter.world.engine.gravity.x = s.gravity.enabled ? (s.gravity.x || 0) : 0;
+                this.matter.world.engine.gravity.y = s.gravity.enabled ? (s.gravity.y || 0) : 0;
+                this.matter.world.engine.gravity.scale = s.gravity.enabled ? (s.gravity.scale ?? 0.001) : 0;
             }
-
-            // 重力設定 (initSceneWithDataから呼ばれるならthis.matter.worldは存在するはず)
-            if (this.matter && this.matter.world && settings.gravity) {
-                if (settings.gravity.enabled !== undefined) {
-                    this.matter.world.engine.gravity.x = settings.gravity.enabled ? (settings.gravity.x || 0) : 0;
-                    this.matter.world.engine.gravity.y = settings.gravity.enabled ? (settings.gravity.y || 0) : 0;
-                    this.matter.world.engine.gravity.scale = settings.gravity.enabled ? (settings.gravity.scale !== undefined ? settings.gravity.scale : 0.001) : 0;
-                } else if (settings.gravity.y !== undefined) {
-                    // 下位互換性のため、yのみの指定も受け付ける
-                    this.matter.world.engine.gravity.y = settings.gravity.y;
-                }
-            }
-
-
-
         }
     }
-    /**
-     * JSONデータに基づいてシーンの初期化を開始する (データキー動-的選択版)
-     */
+
     initSceneWithData() {
-        // ★★★ SystemSceneのイベントバスを取得 ★★★
-        const systemEvents = this.scene.get('SystemScene').events;
-
-        // ★★★ "start_tutorial" イベントをリッスンする ★★★
-        systemEvents.off('start_tutorial', this.handleStartTutorial, this);
-        systemEvents.on('start_tutorial', this.handleStartTutorial, this);
-
-        // --- 1. 読み込むべきJSONのキーを決定する ---
-        const keyToLoad = this.layoutDataKey || this.scene.key;
-
-        // console.log(`[${this.scene.key}] Attempting to build layout from JSON key: '${keyToLoad}'`);
-
-        // --- 2. 決定したキーを使って、キャッシュからJSONデータを取得 ---
-        const layoutData = this.cache.json.get(keyToLoad);
-
-
-        // --- 3. JSONデータが存在するかチェック ---
-        if (layoutData) {
-
-            // ▼▼▼【ここに追加します！】▼▼▼
-            // --------------------------------------------------------------------
-            // --- 4. (重要) オブジェクトをビルドする"前"にアニメーションを生成 ---
-            this.createAnimationsFromLayout(layoutData);
-            // --------------------------------------------------------------------
-            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
-            // --- 5. JSONデータに基づいてオブジェクト群をビルド ---
-            this.loadData = layoutData; // ★ サブクラスで参照できるように保存
-            this.buildSceneFromLayout(layoutData);
-
+        const sys = this.scene.get('SystemScene').events;
+        sys.off('start_tutorial', this.handleStartTutorial, this);
+        sys.on('start_tutorial', this.handleStartTutorial, this);
+        const key = this.layoutDataKey || this.scene.key;
+        const data = this.cache.json.get(key);
+        if (data) {
+            this.createAnimationsFromLayout(data);
+            this.loadData = data;
+            this.buildSceneFromLayout(data);
         } else {
-            // JSONデータが見つからなかった場合の警告
-            console.warn(`[${this.scene.key}] No layout data found for JSON key: '${keyToLoad}'`);
-            // オブジェクトがなくてもシーンの準備完了を通知する必要がある
-            this.finalizeSetup();
-        }
-
-        // --- 物理エンジン更新前のイベントを捕捉する ---
-        // (この部分はinitSceneWithDataの最後にあるのが適切です)
-        this.matter.world.on('beforeupdate', (event) => {
-            const engine = this.matter.world.engine;
-            const gravity = engine.gravity;
-
-            for (const gameObject of this.children.list) {
-                if (gameObject.body && gameObject.getData('ignoreGravity') === true) {
-                    const bodyGravity = {
-                        x: gameObject.body.mass * gravity.x * gravity.scale,
-                        y: gameObject.body.mass * gravity.y * gravity.scale
-                    };
-                    const counterForce = {
-                        x: -bodyGravity.x,
-                        y: -bodyGravity.y
-                    };
-                    Phaser.Physics.Matter.Matter.Body.applyForce(
-                        gameObject.body,
-                        gameObject.body.position,
-                        counterForce
-                    );
-                }
-            }
-        });
-    }
-
-    // ▼▼▼【そして、このメソッドをクラス内のどこかに追加してください】▼▼▼
-    // in src/scenes/BaseGameScene.js
-
-    createAnimationsFromLayout(layoutData) {
-        if (!layoutData.animations || !Array.isArray(layoutData.animations)) {
-            return; // animations配列がなければ何もしない
-        }
-
-        layoutData.animations.forEach(animData => {
-            if (this.anims.exists(animData.key)) {
-                console.warn(`Animation with key '${animData.key}' already exists. Skipping creation.`);
-                return;
-            }
-
-            // アニメーションを生成
-            this.anims.create({
-                key: animData.key,
-                frames: this.anims.generateFrameNumbers(animData.texture, {
-                    start: animData.frames.start,
-                    end: animData.frames.end
-                }),
-                frameRate: animData.frameRate,
-                repeat: animData.repeat
-            });
-
-            // ▼▼▼【ここが修正箇所です】▼▼▼
-            // animData.key を直接使います
-            const createdAnim = this.anims.get(animData.key);
-            // console.log(`[BaseGameScene] VERIFY: Animation '${animData.key}' was just created. Is it accessible?`, createdAnim ? 'YES' : 'NO');
-            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-        });
-    }
-
-    // ... (deferAction や buildSceneFromLayout などの他のメソッドはそのまま) ...
-    // ★★★ 遅延実行キューにアクションを追加するための新しいメソッド ★★★
-    deferAction(action) {
-        this._deferredActions.push(action);
-    }
-    /**
-     * ★★★ 新規ヘルパーメソッド ★★★
-     * 'start_tutorial'イベントを受け取ったときの処理
-     * @param {string} tutorialFile - イベントで渡されたシナリオファイル名
-     */
-    handleStartTutorial(tutorialFile) {
-        if (!tutorialFile) return;
-
-        // console.log(`[${this.scene.key}] Caught 'start_tutorial' event for file: ${tutorialFile}`);
-
-        // SystemSceneにオーバーレイの起動を依頼する
-        this.scene.get('SystemScene').events.emit('request-overlay', {
-            from: this.scene.key,
-            scenario: tutorialFile,
-            block_input: false
-        });
-    }
-    /*
-    **タイルマップメソッド
-*/
-    // in BaseGameScene.js
-
-    /**
-     * ★★★ 新設 ★★★
-     * タイルマップの一部をクロップし、物理ボディを持つオブジェクトとしてシーンに配置する
-     * @param {string} tilemapKey - 元となるタイルマップのアセットキー
-     * @param {{x: number, y: number, width: number, height: number}} cropRect - クロップする矩形範囲
-     */
-    // in src/scenes/BaseGameScene.js
-
-    // ★★★ 既存の addCroppedTilemapChunk を、この内容で完全に置き換える ★★★
-    addCroppedTilemapChunk(tilemapKey, cropRect) {
-        if (cropRect.width <= 0 || cropRect.height <= 0) return null;
-
-        // --- 1. テクスチャをその場で生成するコアロジック ---
-        const rt = this.make.renderTexture({ width: cropRect.width, height: cropRect.height }, false);
-        // ★★★ setVisible(false) をやめ、画面外に配置して描画させる ★★★
-        const tempImage = this.add.image(-9999, -9999, tilemapKey).setOrigin(0, 0).setCrop(cropRect.x, cropRect.y, cropRect.width, cropRect.height);
-        rt.draw(tempImage, 0, 0);
-        tempImage.destroy();
-
-        const newTextureKey = `${tilemapKey}_chunk_${Date.now()}`;
-        rt.saveTexture(newTextureKey);
-        rt.destroy();
-
-        // --- 2. オブジェクトを生成し、永続化用のデータを設定 ---
-        const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
-        const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
-        const chunkImage = this.add.image(centerX, centerY, newTextureKey);
-        chunkImage.name = newTextureKey;
-        chunkImage.setData('cropSource', { key: tilemapKey, rect: cropRect });
-
-        // --- 3. 物理ボディと初期化 ---
-        const layout = {
-            name: chunkImage.name, type: 'Image',
-            x: Math.round(centerX), y: Math.round(centerY),
-            layer: this.editorUI?.activeLayerName || 'Gameplay',
-            physics: { isStatic: true, width: cropRect.width, height: cropRect.height }
-        };
-        this.applyProperties(chunkImage, layout);
-        this.initComponentsAndEvents(chunkImage);
-
-        return chunkImage;
-    }
-
-    // in src/scenes/BaseGameScene.js
-    // ★★★ 既存の createObjectFromLayout を、このシンプルな内容で「完全に」置き換える ★★★
-
-    createObjectFromLayout(layout) {
-        // このメソッドは、どのテクスチャを使うかの決定はせず、
-        // とにかくオブジェクトの「器」を作ることに専念する。
-
-        const textureKey = layout.texture || '__DEFAULT';
-
-        if (layout.type === 'Text') {
-            const style = layout.style || { fontSize: '32px', fill: '#fff' };
-            const textObject = new Phaser.GameObjects.Text(this, 0, 0, layout.text || '', style);
-            if (style.shadow && style.shadow.color) { textObject.setShadow(style.shadow.offsetX, style.shadow.offsetY, style.shadow.color, style.shadow.blur); }
-            return textObject;
-        }
-        if (layout.type === 'Sprite') {
-            return new Phaser.GameObjects.Sprite(this, 0, 0, textureKey);
-        }
-        // デフォルトはImage
-        return new Phaser.GameObjects.Image(this, 0, 0, textureKey);
-    }
-    /**
-     * ★★★ 修正版 ★★★
-     * エディタからの要求に応じて、新しいテキストオブジェクトを生成する。
-     * @param {string} newName - 新しいオブジェクトに付ける一意な名前
-     * @param {string} layerName - オブジェクトが所属するレイヤー名
-     * @returns {Phaser.GameObjects.Text} 生成されたテキストオブジェクト
-     */
-    addTextObjectFromEditor(newName, layerName) { // ← ★ 引数を追加
-        const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
-        const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
-
-        const layout = {
-            name: newName,
-            type: 'Text',
-            text: 'New Text',
-            x: Math.round(centerX),
-            y: Math.round(centerY),
-            style: {
-                fontSize: '32px',
-                fill: '#ffffff',
-            },
-            layer: layerName // ★ 受け取ったlayerNameをlayoutオブジェクトに設定
-        };
-
-        const newGameObject = this.createObjectFromLayout(layout);
-        this.applyProperties(newGameObject, layout);
-
-        return newGameObject;
-    }
-
-    /**
-     * レイアウトデータからシーンのオブジェクトを構築する。
-     * @param {object} layoutData - シーンのレイアウトを定義するJSONオブジェクト。
-     */
-
-    /**
-     * ★★★ 二段階初期化を実装した最終FIX版 ★★★
-     * レイアウトデータからシーンのオブジェクトを構築・初期化する。
-     */
-    /// in src/scenes/BaseGameScene.js
-
-    /**
-     * ★★★【最終確定版 Ver2.0】★★★
-     * レイアウトデータからシーンのオブジェクトを構築・初期化する。
-     */
-    buildSceneFromLayout(layoutData) {
-        if (!layoutData) {
+            console.warn(`[BaseGameScene] No layout data: ${key}`);
             this.finalizeSetup([]);
-            return;
         }
-
-        if (this.editorUI && layoutData.layers) {
-            this.editorUI.setLayers(layoutData.layers);
-        }
-
-        const allGameObjects = [];
-
-        if (layoutData.objects) {
-            for (const layout of layoutData.objects) {
-                const gameObject = this.createObjectFromLayout(layout);
-                if (gameObject) {
-                    // 【第一段階】構築
-                    this.applyProperties(gameObject, layout);
-                    // 【第二段階】初期化（start()の呼び出しまでを含む）
-                    this.initComponentsAndEvents(gameObject);
-
-                    allGameObjects.push(gameObject);
+        this.matter.world.on('beforeupdate', () => {
+            const g = this.matter.world.engine.gravity;
+            this.children.list.forEach(obj => {
+                if (obj.body && obj.getData('ignoreGravity')) {
+                    const f = { x: -(obj.body.mass * g.x * g.scale), y: -(obj.body.mass * g.y * g.scale) };
+                    Phaser.Physics.Matter.Matter.Body.applyForce(obj.body, obj.body.position, f);
                 }
-            }
-        }
-
-        // ▼▼▼【start()を呼び出すコードをここから削除】▼▼▼
-        // 責務がinitComponentsAndEventsに移動したため、このブロックは不要
-        /*
-        // console.log(`%c[BaseGameScene] Starting ${allComponentsToStart.length} components...`);
-        allComponentsToStart.forEach(component => { ... });
-        */
-
-        this.finalizeSetup(allGameObjects);
+            });
+        });
     }
 
-    /**
-     * レイアウト定義に基づいてゲームオブジェクトを生成する (テキストオブジェクト対応版)
-     * @param {object} layout - 単一オブジェクトのレイアウト定義。
-     * @returns {Phaser.GameObjects.GameObject} 生成されたゲームオブジェクト。
-     */
+    createAnimationsFromLayout(data) {
+        if (!data.animations || !Array.isArray(data.animations)) return;
+        data.animations.forEach(a => {
+            if (!this.anims.exists(a.key)) {
+                this.anims.create({
+                    key: a.key,
+                    frames: this.anims.generateFrameNumbers(a.texture, { start: a.frames.start, end: a.frames.end }),
+                    frameRate: a.frameRate,
+                    repeat: a.repeat
+                });
+            }
+        });
+    }
+
+    deferAction(action) { this._deferredActions.push(action); }
+
+    handleStartTutorial(id) {
+        if (id) this.scene.get('SystemScene').events.emit('request-overlay', { from: this.scene.key, scenario: id, block_input: false });
+    }
+
+    addCroppedTilemapChunk(key, rect) {
+        if (rect.width <= 0 || rect.height <= 0) return null;
+        const rt = this.make.renderTexture({ width: rect.width, height: rect.height }, false);
+        const img = this.add.image(-9000, -9000, key).setOrigin(0, 0).setCrop(rect.x, rect.y, rect.width, rect.height);
+        rt.draw(img, 0, 0); img.destroy();
+        const newKey = `${key}_chunk_${Date.now()}`; rt.saveTexture(newKey); rt.destroy();
+        const obj = this.add.image(this.cameras.main.midPoint.x, this.cameras.main.midPoint.y, newKey);
+        obj.name = newKey; obj.setData('cropSource', { key, rect });
+        const l = { name: obj.name, type: 'Image', x: Math.round(obj.x), y: Math.round(obj.y), layer: 'Gameplay', physics: { isStatic: true } };
+        this.applyProperties(obj, l); this.initComponentsAndEvents(obj);
+        return obj;
+    }
+
+    addTextObjectFromEditor(name, layer) {
+        const l = { name, type: 'Text', text: 'New Text', x: Math.round(this.cameras.main.midPoint.x), y: Math.round(this.cameras.main.midPoint.y), style: { fontSize: '32px', fill: '#fff' }, layer };
+        const obj = this.createObjectFromLayout(l); this.applyProperties(obj, l);
+        return obj;
+    }
+
+    buildSceneFromLayout(data) {
+        if (!data) { this.finalizeSetup([]); return; }
+        if (this.editorUI && data.layers) this.editorUI.setLayers(data.layers);
+        const objs = [];
+        if (data.objects) {
+            data.objects.forEach(l => {
+                const obj = this.createObjectFromLayout(l);
+                if (obj) { this.applyProperties(obj, l); this.initComponentsAndEvents(obj); objs.push(obj); }
+            });
+        }
+        this.finalizeSetup(objs);
+    }
+
     createObjectFromLayout(layout) {
-        // ★★★ ここからが永続化のための修正 ★★★
-
-        // 1. テクスチャキーを決定する
-        let textureKey = layout.texture || '__DEFAULT';
-
-        // 1a. もしBase64データ(textureData)があれば、それを使ってテクスチャを動的に復元
+        let key = layout.texture || '__DEFAULT';
         if (layout.textureData) {
-            // ユニークなキーを生成
-            const newTextureKey = `chunk_restored_${Date.now()}_${Math.random()}`;
-
-            // 既に同じBase64からテクスチャが生成されていないかチェック（超最適化）
-            const existingTexture = this.textures.get(newTextureKey);
-            if (!existingTexture) {
-                try {
-                    this.textures.addBase64(newTextureKey, layout.textureData);
-                    textureKey = newTextureKey;
-                    // console.log(`[Import] Restored texture from Base64 data with key '${newTextureKey}'.`);
-                } catch (e) {
-                    console.error(`[Import] Failed to restore texture from Base64 data.`, e);
-                    textureKey = '__DEFAULT';
-                }
-            } else {
-                textureKey = newTextureKey;
-            }
+            const restoredKey = `chunk_restored_${Date.now()}_${Math.random()}`;
+            try { this.textures.addBase64(restoredKey, layout.textureData); key = restoredKey; } catch (e) { console.error(`[BaseGameScene] Restore Fail`, e); }
         }
-
-        // --- ケース1: タイプが 'Text' の場合 ---
         if (layout.type === 'Text') {
-            const text = layout.text || '';
-
-            // ★★★ スタイルオブジェクトをそのまま渡せる ★★★
-            const style = layout.style || { fontSize: '32px', fill: '#fff' };
-
-            const textObject = new Phaser.GameObjects.Text(this, 0, 0, text, style);
-
-            // ★★★ 影のスタイルは、個別のメソッドで設定する必要がある ★★★
-            if (style.shadow && style.shadow.color) {
-                textObject.setShadow(
-                    style.shadow.offsetX,
-                    style.shadow.offsetY,
-                    style.shadow.color,
-                    style.shadow.blur || 0,
-                    style.shadow.stroke,
-                    style.shadow.fill
-                );
-            }
-            return textObject;
+            const s = layout.style || { fontSize: '32px', fill: '#fff' };
+            const obj = new Phaser.GameObjects.Text(this, 0, 0, layout.text || '', s);
+            if (s.shadow && s.shadow.color) obj.setShadow(s.shadow.offsetX, s.shadow.offsetY, s.shadow.color, s.shadow.blur || 0, s.shadow.stroke, s.shadow.fill);
+            return obj;
         }
-
-        // --- ケース2: タイプが 'Sprite' の場合 (変更なし) ---
-        if (layout.type === 'Sprite') {
-            const textureKey = layout.texture || '__DEFAULT';
-            return new Phaser.GameObjects.Sprite(this, 0, 0, textureKey);
-        }
-
-        // --- ケース3: タイプが 'container' または 'Container' の場合 ---
-        if (layout.type === 'container' || layout.type === 'Container') {
-            return new Phaser.GameObjects.Container(this, 0, 0);
-        }
-
-        // --- ケース4: デフォルト (Image) の場合 (変更なし) ---
-
-        return new Phaser.GameObjects.Image(this, 0, 0, textureKey);
-
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        if (layout.type === 'Sprite') return new Phaser.GameObjects.Sprite(this, 0, 0, key);
+        if (layout.type === 'Container' || layout.type === 'container') return new Phaser.GameObjects.Container(this, 0, 0);
+        if (layout.type === 'Graphics' || layout.type === 'graphics') return new Phaser.GameObjects.Graphics(this);
+        return new Phaser.GameObjects.Image(this, 0, 0, key);
     }
 
-    // in src/scenes/BaseGameScene.js
-
-    // in src/scenes/BaseGameScene.js
-
-    /// in src/scenes/BaseGameScene.js
-
-    /**
-     * ★★★【最終確定版 Ver2.0】★★★
-     * GameObjectのコンポーネントとイベントを（再）初期化する。
-     * このメソッド内でstart()の呼び出しまでを完結させる。
-     * @param {Phaser.GameObjects.GameObject} gameObject - 初期化する対象オブジェクト
-     */
     initComponentsAndEvents(gameObject) {
-        const componentsToStart = [];
-
-        // --- 1. 既存のコンポーネントインスタンスを破棄 ---
         if (gameObject.components) {
             for (const key in gameObject.components) {
                 const component = gameObject.components[key];
-                if (this.updatableComponents.has(component)) {
-                    this.updatableComponents.delete(component);
-                }
-                if (component && typeof component.destroy === 'function') {
-                    component.destroy();
-                }
+                if (this.updatableComponents.has(component)) this.updatableComponents.delete(component);
+                if (component && component.destroy) component.destroy();
             }
         }
         gameObject.components = {};
-
-        // --- 2. データからコンポーネント定義を読み込み、新しいインスタンスを追加 ---
         const componentsData = gameObject.getData('components');
+        const componentsToStart = [];
         if (componentsData) {
-            // ★★★ 【修正】配列形式とオブジェクト形式の両方（TrialScene.json 等）に対応 ★★★
-            const dataArray = Array.isArray(componentsData)
-                ? componentsData
-                : Object.entries(componentsData).map(([type, params]) => ({ type, params }));
-
-            for (const compData of dataArray) {
-                const componentInstance = this.addComponent(gameObject, compData.type, compData.params);
-
-                if (componentInstance) {
-                    if (typeof componentInstance.update === 'function') {
-                        this.updatableComponents.add(componentInstance);
-                    }
-                    if (typeof componentInstance.start === 'function') {
-                        componentsToStart.push(componentInstance);
-                    }
-                }
-            }
-        }
-
-        // --- 3. イベントリスナーを（再）設定する ---
-        const eventsData = gameObject.getData('events');
-        this.applyEventsAndEditorFunctions(gameObject, eventsData);
-
-        // --- 4. オブジェクトをエディタで編集可能にする ---
-        const editor = this.plugins.get('EditorPlugin');
-        if (editor && editor.isEnabled) {
-            editor.makeEditable(gameObject, this);
-        }
-
-        // ▼▼▼【ここが修正の核心！】▼▼▼
-        // --- 5. 収集したコンポーネントのstart()を、このメソッド内で呼び出す ---
-        if (componentsToStart.length > 0) {
-            // console.log(`%c[initComponentsAndEvents] Starting ${componentsToStart.length} components for '${gameObject.name}'...`, 'color: orange;');
-            componentsToStart.forEach(component => {
-                try {
-                    component.start();
-                } catch (e) {
-                    console.error(`Error during start() of component on object '${component.gameObject.name}':`, e);
+            const normalized = Array.isArray(componentsData) ? componentsData : Object.entries(componentsData).map(([type, params]) => ({ type, params }));
+            normalized.forEach(c => {
+                const instance = this.addComponent(gameObject, c.type, c.params);
+                if (instance) {
+                    if (typeof instance.update === 'function') this.updatableComponents.add(instance);
+                    componentsToStart.push(instance);
                 }
             });
         }
-
-
-        // ★★★ このメソッドは何も返さなくて良くなる ★★★
-        // return componentsToStart; // ← この行は不要
+        this.applyEventsAndEditorFunctions(gameObject, gameObject.getData('events'));
+        componentsToStart.forEach(comp => {
+            try { comp.start(); } catch (e) { console.error(`[BaseGameScene] Component start error:`, e); }
+        });
     }
-    /**
-     * ★★★【第一段階：構築】最終FIX版 ★★★
-     * GameObjectのインスタンスに対し、レイアウトデータに基づいて基本的なプロパティを設定する。
-     * このメソッドは、オブジェクトの「ガワ」と「データ」の構築に専念する。
-     * コンポーネントのインスタンス化やイベントリスナーの登録は「行わない」。
-     * @param {Phaser.GameObjects.GameObject} gameObject - プロパティを適用する対象オブジェクト
-     * @param {object} layout - 単一オブジェクトのレイアウト定義
-     * @returns {Phaser.GameObjects.GameObject} プロパティ適用後のオブジェクト
-     */
-    /// in src/scenes/BaseGameScene.js
 
-    applyProperties(gameObject, layout) {
-        const data = layout || {};
+    applyProperties(gameObject, data) {
         gameObject.name = data.name || 'untitled';
+        if (data.data) { for (const key in data.data) gameObject.setData(key, data.data[key]); }
+        ['components', 'events', 'group', 'layer'].forEach(k => { if (data[k]) gameObject.setData(k, data[k]); });
 
-        // --- 1. カスタムデータ保存 ---
-        if (data.data) for (const key in data.data) gameObject.setData(key, data.data[key]);
-        if (data.components) {
-            // ★★★ 【正規化】オブジェクト形式を配列形式に変換して保存 ★★★
-            const normalized = Array.isArray(data.components)
-                ? data.components
-                : Object.entries(data.components).map(([type, params]) => ({ type, params }));
-            gameObject.setData('components', normalized);
-        }
-        if (data.events) gameObject.setData('events', data.events);
-        if (data.layer) gameObject.setData('layer', data.layer);
-        if (data.group) gameObject.setData('group', data.group);
-        if (data.anim_prefix) gameObject.setData('anim_prefix', data.anim_prefix);
-        if (data.cropSource) gameObject.setData('cropSource', data.cropSource);
-        // Yソート対象かどうかも、まずデータとして保存
-        if (data.isYSortable) gameObject.setData('isYSortable', true);
+        if (data.texture && (gameObject instanceof Phaser.GameObjects.Sprite || gameObject instanceof Phaser.GameObjects.Image)) gameObject.setTexture(data.texture);
+        if (data.frame !== undefined && gameObject instanceof Phaser.GameObjects.Sprite) gameObject.setFrame(data.frame);
 
-        // --- 2. シーンに追加 ---
-        this.add.existing(gameObject);
-
-        // --- 3. テクスチャ設定 ---
-        let finalTextureKey = data.texture;
-        if (data.cropSource) {
-            try {
-                const { key, rect } = data.cropSource;
-                if (rect.width > 0 && rect.height > 0) {
-                    const rt = this.make.renderTexture({ width: rect.width, height: rect.height }, false);
-                    const tempImage = this.add.image(-9999, -9999, key).setOrigin(0, 0).setCrop(rect.x, rect.y, rect.width, rect.height);
-                    rt.draw(tempImage, 0, 0);
-                    tempImage.destroy();
-                    const newTextureKey = `${key}_chunk_restored_${Date.now()}`;
-                    rt.saveTexture(newTextureKey);
-                    rt.destroy();
-                    finalTextureKey = newTextureKey;
-                }
-            } catch (e) { console.error("Failed to recreate texture from cropSource:", e); finalTextureKey = '__DEFAULT'; }
-        }
-        if (finalTextureKey && gameObject.setTexture) {
-            gameObject.setTexture(finalTextureKey);
-        }
-
-        // --- 4. Transformプロパティ設定 ---
-        gameObject.setPosition(data.x || 0, data.y || 0);
-        gameObject.setAngle(data.angle || 0);
+        gameObject.setPosition(data.x ?? 0, data.y ?? 0);
+        gameObject.setAngle(data.angle ?? 0);
         gameObject.setAlpha(data.alpha ?? 1);
-        if (data.depth !== undefined) gameObject.setDepth(data.depth);
-        // ★ visible プロパティ対応
-        if (data.visible !== undefined) gameObject.setVisible(data.visible);
+        gameObject.setDepth(data.depth ?? 0);
+        gameObject.setVisible(data.visible ?? true);
 
-        // Yソート対象なら、原点を自動的に足元に設定
-        if (gameObject.getData('isYSortable') === true) {
-            gameObject.setOrigin(0.5, 1);
-            // Yソート対象リストに追加
-            if (!this.ySortableObjects.includes(gameObject)) {
-                this.ySortableObjects.push(gameObject);
-            }
-        }
-        // JSONにoriginの指定があれば、そちらを優先（上書き）
-        if (data.originX !== undefined || data.originY !== undefined) {
-            gameObject.setOrigin(data.originX ?? 0.5, data.originY ?? 0.5);
-        }
+        if (data.ySort) this.ySortableObjects.add(gameObject);
+        if (data.originX !== undefined || data.originY !== undefined) gameObject.setOrigin(data.originX ?? 0.5, data.originY ?? 0.5);
 
-        // --- 5. 物理ボディの生成と設定 ---
         if (data.physics) {
-            const phys = data.physics;
-
-            // 5a. 既存ボディがあれば削除
-            if (gameObject.body) this.matter.world.remove(gameObject.body);
-
-            // 5b. ボディを生成・アタッチ (スケールはまだ1.0)
-            this.matter.add.gameObject(gameObject, {
-                isStatic: phys.isStatic,
-                isSensor: phys.isSensor
-            });
-
-            if (gameObject.body) {
-                // 5c. ボディが作られた「後」で、スケールを適用
-                gameObject.setScale(data.scaleX ?? 1, data.scaleY ?? 1);
-
-                // 5d. 衝突フィルタを、JSONの定義から設定
-                if (phys.collisionFilter) {
-                    gameObject.setCollisionCategory(phys.collisionFilter.category);
-                    gameObject.setCollidesWith(phys.collisionFilter.mask);
-                    // 永続化のために、データもセットしておく
-                    gameObject.setData('collision_category', phys.collisionFilter.category);
-                    gameObject.setData('collision_mask', phys.collisionFilter.mask);
-                }
-
-                // 5e. その他の物理プロパティを適用
-                gameObject.setFriction(phys.friction ?? 0.1);
-                gameObject.setFrictionAir(phys.frictionAir ?? 0.01);
-                gameObject.setBounce(phys.restitution ?? 0);
-                if (phys.fixedRotation !== undefined) {
-                    gameObject.setFixedRotation(phys.fixedRotation);
-                    gameObject.setData('fixedRotation', phys.fixedRotation);
-                }
-                gameObject.setData('ignoreGravity', phys.ignoreGravity === true);
-                gameObject.setData('shape', phys.shape || 'rectangle');
-            }
+            this.matter.add.gameObject(gameObject, data.physics);
+            if (data.physics.isStatic) gameObject.setStatic(true);
+            if (data.physics.isSensor) gameObject.setSensor(true);
+            if (data.physics.friction !== undefined) gameObject.setFriction(data.physics.friction);
+            if (data.physics.restitution !== undefined) gameObject.setBounce(data.physics.restitution);
+            if (data.physics.fixedRotation !== undefined) gameObject.setFixedRotation(data.physics.fixedRotation);
+            if (data.physics.ignoreGravity !== undefined) gameObject.setData('ignoreGravity', data.physics.ignoreGravity);
+            if (data.physics.collisionFilter) gameObject.setCollisionCategory(data.physics.collisionFilter.category).setCollidesWith(data.physics.collisionFilter.mask);
         } else {
-            // 物理ボディがない場合は、ここでスケールを設定
             gameObject.setScale(data.scaleX ?? 1, data.scaleY ?? 1);
         }
 
-        return gameObject;
+        if (gameObject instanceof Phaser.GameObjects.Graphics && data.draw) this.applyGraphicsProperties(gameObject, data.draw);
+
+        if (gameObject instanceof Phaser.GameObjects.Container && data.list) {
+            data.list.forEach(childLayout => {
+                const child = this.createObjectFromLayout(childLayout);
+                if (child) {
+                    this.applyProperties(child, childLayout);
+                    gameObject.add(child);
+                    this.initComponentsAndEvents(child);
+                }
+            });
+        }
     }
 
-    /**
-     * オブジェクトにイベントリスナーとエディタ機能を設定する (構文修正・最終完成版)
-     * ★★★ 以下のメソッドで、既存のものを完全に置き換えてください ★★★
-     */
-    // in src/scenes/BaseGameScene.js
+    applyGraphicsProperties(graphics, draw) {
+        if (!draw) return;
+        graphics.clear();
+        if (draw.lineStyle) {
+            graphics.lineStyle(draw.lineStyle.width || 0, parseInt(draw.lineStyle.color, 16) || 0xffffff, draw.lineStyle.alpha ?? 1);
+        }
+        if (draw.fill) {
+            graphics.fillStyle(parseInt(draw.fill.color, 16) || 0xffffff, draw.fill.alpha ?? 1);
+        }
+        switch (draw.type) {
+            case 'roundedRect':
+                if (draw.fill) graphics.fillRoundedRect(draw.x, draw.y, draw.width, draw.height, draw.radius || 0);
+                if (draw.lineStyle) graphics.strokeRoundedRect(draw.x, draw.y, draw.width, draw.height, draw.radius || 0);
+                break;
+            case 'rect':
+                if (draw.fill) graphics.fillRect(draw.x, draw.y, draw.width, draw.height);
+                if (draw.lineStyle) graphics.strokeRect(draw.x, draw.y, draw.width, draw.height);
+                break;
+            case 'circle':
+                if (draw.fill) graphics.fillCircle(draw.x, draw.y, draw.radius);
+                if (draw.lineStyle) graphics.strokeCircle(draw.x, draw.y, draw.radius);
+                break;
+        }
+    }
 
-    /**
-     * ★★★ イベントリスナー登録を復活させた、真の最終完成版 ★★★
-     * オブジェクトにイベントリスナーとエディタ機能を設定する。
-     */
-    // in src/scenes/BaseGameScene.js
-
-    // in src/scenes/BaseGameScene.js
-
-    /**
-     * GameObjectにVSLイベントとエディタ機能を適用する (onClick, onReady対応の最終FIX版)
-     * @param {Phaser.GameObjects.GameObject} gameObject - 対象のゲームオブジェクト
-     * @param {Array<object>} eventsData - JSONから読み込んだイベント定義の配列
-     */
     applyEventsAndEditorFunctions(gameObject, eventsData) {
         const events = eventsData || [];
         gameObject.setData('events', events);
-
-        // --- 1. まず、過去に登録した可能性のあるリスナーをすべてクリアする ---
         gameObject.off('pointerdown');
         gameObject.off('onStateChange');
         gameObject.off('onDirectionChange');
-        // (将来的に追加するイベントがあれば、ここにもoffを追加する)
-
-        // --- 2. setInteractiveの事前適用 ---
-
 
         events.forEach(eventData => {
-
-            if (eventData.trigger === 'onClick') {
-                // ★ 1. オブジェクトをとにかくクリック可能にする
+            if (eventData.trigger === 'onClick' || eventData.trigger === 'onPointerDown') {
                 gameObject.setInteractive({ useHandCursor: true });
-                // --- 'onClick' トリガーの処理 ---
                 gameObject.on('pointerdown', () => {
-                    console.log(`%c[DEBUG] onClick fired for '${gameObject.name}' WITHOUT mode check!`, 'color: red; font-weight: bold;');
-
-                    if (this.actionInterpreter) {
-                        this.actionInterpreter.run(gameObject, eventData, null);
-                    } else {
-                        console.error('[DEBUG] ActionInterpreter not found!');
-                    }
+                    const ai = this.registry.get('actionInterpreter');
+                    if (ai) ai.run(gameObject, eventData, null);
                 });
-            }
-            // onClickイベントが一つでも定義されていれば、オブジェクトをクリック可能にする
-            // これは、エディタのモードに関わらず、常に行う必要がある。
-            /*const hasOnClick = events.some(e => e.trigger === 'onClick');
-            if (hasOnClick) {
-                gameObject.setInteractive({ useHandCursor: true });
-            }
-        
-            // --- 3. データに基づいて、新しいリスナーを設定していく ---
-            events.forEach(eventData => {
-                
-                // --- 'onClick' トリガーの処理 ---
-                if (eventData.trigger === 'onClick') {
-                    gameObject.on('pointerdown', () => {
-                        const editorPlugin = this.plugins.get('EditorPlugin');
-                        
-                        // エディタが存在しない(通常プレイ)か、またはエディタがプレイモードの場合に実行
-                        if (!editorPlugin || editorPlugin.isEnabled && editorPlugin.mode === 'play') { 
-                            if (this.actionInterpreter) {
-                                console.log(`[ApplyEvents] onClick fired for '${gameObject.name}'`);
-                                // ActionInterpreterに直接実行を依頼
-                                this.actionInterpreter.run(gameObject, eventData, null); // 衝突相手はいないのでnull
-                            }
-                        }
-                    });
-                }
-                  */
-            // --- 'onReady' トリガーの処理 ---
-            if (eventData.trigger === 'onReady') {
-                // onReadyは条件なしで、このメソッドが呼ばれた直後に一度だけ実行する
-                if (this.actionInterpreter) {
-                    console.log(`[ApplyEvents] onReady fired for '${gameObject.name}'`);
-                    // runを非同期で呼び出すが、完了は待たない (fire and forget)
-                    this.actionInterpreter.run(gameObject, eventData, null); // 衝突相手はいないのでnull
-                }
-            }
-
-            // --- 'onStateChange' トリガーの処理 ---
-            if (eventData.trigger === 'onStateChange') {
-                gameObject.on('onStateChange', (newState, oldState) => {
-                    this.evaluateConditionAndRun(gameObject, eventData, { state: newState, oldState: oldState });
-                });
-            }
-
-            // --- 'onDirectionChange' トリガーの処理 ---
-            if (eventData.trigger === 'onDirectionChange') {
-                gameObject.on('onDirectionChange', (newDirection) => {
-                    this.evaluateConditionAndRun(gameObject, eventData, { direction: newDirection });
+            } else if (eventData.trigger === 'onStateChange' || eventData.trigger === 'onDirectionChange') {
+                const signal = eventData.trigger === 'onStateChange' ? 'onStateChange' : 'onDirectionChange';
+                gameObject.on(signal, (val1, val2) => {
+                    const context = signal === 'onStateChange' ? { state: val1, oldState: val2 } : { direction: val1 };
+                    this.evaluateConditionAndRun(gameObject, eventData, context);
                 });
             }
         });
 
-        // --- 4. 最後に、エディタ用の追加処理を行う ---
         const editor = this.plugins.get('EditorPlugin');
-        if (editor && editor.isEnabled) {
-            // makeEditableは、ドラッグ機能や選択ハイライトなど、
-            // エディタ専用のインタラクションを追加する役割に専念する。
-            // (setInteractiveが重複して呼ばれてもPhaserは問題なく処理する)
-            editor.makeEditable(gameObject, this);
-        }
-    }
-    /**
-     * ★★★ リアルタイム編集対応・最終FIX版 ★★★
-     * ターゲットオブジェクトにコンポーネントを追加する。
-     * StateMachineComponentが追加された際には、
-     * 動作に必要なデフォルトデータを自動的に生成・設定し、初期化(init)まで行う。
-     * @param {Phaser.GameObjects.GameObject} target - コンポーネントを追加する対象オブジェクト
-     * @param {string} componentType - 追加するコンポーネントのクラス名 (例: 'StateMachineComponent')
-     * @param {object} [params={}] - コンポーネントのコンストラクタに渡すパラメータ
-     */
-    // in src/scenes/BaseGameScene.js
-
-    /**
-     * ★★★【start()ライフサイクル分離・最終確定版】★★★
-     * ターゲットオブジェクトにコンポーネントを追加し、インスタンスを返す。
-     * このメソッドは、コンポーネントのインスタンス化にのみ責任を持つ。
-     * start()やinit()の呼び出しは、上位のメソッド(initComponentsAndEvents)に委ねる。
-     */
-    addComponent(target, componentType, params = {}) {
-        if (target.components && target.components[componentType]) {
-            console.warn(`[BaseGameScene] Component '${componentType}' already exists on '${target.name}'.`);
-            return target.components[componentType]; // 既存のインスタンスを返す
-        }
-
-        const ComponentClass = ComponentRegistry[componentType];
-        if (!ComponentClass) {
-            console.warn(`[BaseGameScene] Unknown component: '${componentType}'`);
-            return null;
-        }
-
-        const componentInstance = new ComponentClass(this, target, params);
-
-        if (!target.components) target.components = {};
-        target.components[componentType] = componentInstance;
-
-
-
-        // ▼▼▼【start()やinit()の呼び出しを、ここから全て削除！】▼▼▼
-        // StateMachineComponentの特殊な初期化も、ここでは行わない。
-        // その責務はinitComponentsAndEventsに移譲する。
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
-        let componentsData = target.getData('components') || [];
-        // ★ ここでも念のため正規化（不正なデータがセットされた場合へのガード）
-        if (!Array.isArray(componentsData)) {
-            componentsData = Object.entries(componentsData).map(([type, params]) => ({ type, params }));
-        }
-
-        if (!componentsData.some(c => c.type === componentType)) {
-            componentsData.push({ type: componentType, params: params });
-            target.setData('components', componentsData);
-        }
-
-        const editor = this.plugins.get('EditorPlugin');
-        if (editor && editor.isEnabled && typeof editor.onComponentAdded === 'function') {
-            editor.onComponentAdded(target, componentType, params);
-        }
-
-        // ★★★ 生成したインスタンスを返す ★★★
-        return componentInstance;
-    }
-    update(time, delta) {
-        // --- 0. シーンの初期設定と「簡易光源」の遅延生成 ---
-
-
-        // --- 1. 遅延実行キューの処理 ---
-        if (this._deferredActions.length > 0) {
-            const actionsToRun = [...this._deferredActions];
-            this._deferredActions.length = 0;
-            actionsToRun.forEach(action => action());
-        }
-
-        // --- 2. コンポーネント更新ループ ---
-        if (this.updatableComponents) {
-            this.updatableComponents.forEach(component => {
-                // ★ 修正：component.update が存在する場合のみ実行する
-                if (component.gameObject.scene && component.gameObject.active && typeof component.update === 'function') {
-                    component.update(time, delta);
-                }
-            });
-        }
-        if (!this._debugOnce) {
-            // console.log("--- BASEGAME SCENE UPDATE CALLED ---");
-            // console.log("this.ySortEnabled:", this.ySortEnabled);
-            // console.log("this.ySortableObjects:", this.ySortableObjects);
-            this._debugOnce = true;
-        }
-
-        if (this.ySortEnabled) {
-            for (const obj of this.ySortableObjects) {
-                if (obj.active) {
-                    const sortY = obj.body ? Math.round(obj.body.position.y) : Math.round(obj.y);
-                    if (obj.depth !== sortY) {
-                        obj.setDepth(sortY);
-
-                        // プレイヤーの時だけログを出す
-                        if (obj.name === 'player') {
-                            // console.log(`[Y-Sort] player depth updated to: ${sortY}`);
-                        }
-                    }
-                }
-            }
-        }
-
+        if (editor && editor.isEnabled) editor.makeEditable(gameObject, this);
     }
 
-
-
-    /**
-     * ★★★ 新規ヘルパーメソッド ★★★
-     * 条件式を安全に評価し、条件が満たされればアクションを実行する
-     * @param {Phaser.GameObjects.GameObject} gameObject - アクションの起点
-     * @param {object} eventData - イベント定義
-     * @param {object} context - 条件式の中で利用可能にする変数 (例: { state: 'walk' })
-     */
     evaluateConditionAndRun(gameObject, eventData, context) {
-        let conditionMet = true; // デフォルトはtrue
-
+        let conditionMet = true;
         if (eventData.condition) {
-            // --- 1. コンテキストオブジェクトから、変数名と値のリストを作成 ---
-            const varNames = Object.keys(context); // 例: ['state', 'oldState']
-            const varValues = Object.values(context); // 例: ['walk', 'idle']
-
             try {
-                // --- 2. Functionコンストラクタに、変数名を引数として明示的に渡す ---
-                const func = new Function(...varNames, `'use strict'; return (${eventData.condition});`);
-
-                // --- 3. 作成した関数に、実際の値を渡して実行 ---
-                conditionMet = func(...varValues);
-
+                const func = new Function(...Object.keys(context), `'use strict'; return (${eventData.condition});`);
+                conditionMet = func(...Object.values(context));
             } catch (e) {
-                console.warn(`[Event System] Failed to evaluate condition: "${eventData.condition}"`, e);
+                console.warn(`[BaseGameScene] Condition error: "${eventData.condition}"`, e);
                 conditionMet = false;
             }
         }
-
         if (conditionMet) {
-            const actionInterpreter = this.registry.get('actionInterpreter');
-            if (actionInterpreter) {
-                actionInterpreter.run(gameObject, eventData, gameObject);
-            }
+            const ai = this.registry.get('actionInterpreter');
+            if (ai) ai.run(gameObject, eventData, gameObject);
+        }
+        return conditionMet;
+    }
+
+    handleOverlap(src, tar, phase) {
+        const ai = this.registry.get('actionInterpreter'), evs = src.getData('events');
+        if (!ai || !evs) return;
+        const key = `overlap_${tar.name || tar.id}`, was = src.getData(key);
+        if (phase === 'active' && !was) {
+            src.setData(key, true);
+            evs.forEach(e => { if (e.trigger === 'onOverlap_Start' && e.targetGroup === tar.getData('group')) ai.run(src, e, tar); });
+        } else if (phase === 'end' && was) {
+            src.setData(key, false);
+            evs.forEach(e => { if (e.trigger === 'onOverlap_End' && e.targetGroup === tar.getData('group')) ai.run(src, e, tar); });
         }
     }
-    // in src/scenes/BaseGameScene.js
+
+    handleCollision(src, tar, pair) {
+        const ai = this.registry.get('actionInterpreter'), evs = src.getData('events');
+        if (!ai || !evs) return;
+        evs.forEach(e => {
+            if (e.targetGroup !== tar.getData('group')) return;
+            if (e.trigger === 'onCollide_Start') ai.run(src, e, tar);
+            else if (e.trigger === 'onStomp' || e.trigger === 'onHit') {
+                let norm = pair.collision.normal; if (src.body === pair.bodyB) norm = { x: -norm.x, y: -norm.y };
+                const stomp = norm.y < -0.7;
+                if ((e.trigger === 'onStomp' && stomp) || (e.trigger === 'onHit' && !stomp)) ai.run(src, e, tar);
+            }
+        });
+    }
+
+    addComponent(target, type, params = {}) {
+        if (target.components && target.components[type]) return target.components[type];
+        const Class = ComponentRegistry[type];
+        if (!Class) return null;
+        const inst = new Class(this, target, params);
+        if (!target.components) target.components = {};
+        target.components[type] = inst;
+        let data = target.getData('components') || [];
+        if (!Array.isArray(data)) data = Object.entries(data).map(([t, p]) => ({ type: t, params: p }));
+        if (!data.some(c => c.type === type)) { data.push({ type, params }); target.setData('components', data); }
+        const ed = this.plugins.get('EditorPlugin');
+        if (ed && ed.isEnabled && ed.onComponentAdded) ed.onComponentAdded(target, type, params);
+        return inst;
+    }
+
+    update(time, delta) {
+        if (this._deferredActions.length > 0) {
+            const arr = [...this._deferredActions]; this._deferredActions.length = 0;
+            arr.forEach(a => a());
+        }
+        if (this.updatableComponents) {
+            this.updatableComponents.forEach(c => { if (c.gameObject.active && c.update) try { c.update(time, delta); } catch (e) { } });
+        }
+        if (this.ySortEnabled) {
+            this.children.list.filter(o => o.active && o.getData('layer') === 'Gameplay').forEach(obj => {
+                const sy = obj.body ? Math.round(obj.body.position.y) : Math.round(obj.y);
+                if (obj.depth !== sy) obj.setDepth(sy);
+            });
+        }
+        this.handleKeyPressEvents();
+    }
 
     finalizeSetup(allGameObjects) {
-        // console.log(`[BaseGameScene] Finalizing setup with ${allGameObjects.length} objects.`);
-
         for (const gameObject of allGameObjects) {
             const events = gameObject.getData('events');
             if (events) {
-                for (const eventData of events) {
+                events.forEach(eventData => {
                     if (eventData.trigger === 'onReady') {
                         const actionInterpreter = this.registry.get('actionInterpreter');
-                        if (actionInterpreter) {
-                            actionInterpreter.run(gameObject, eventData, gameObject);
-                        }
+                        if (actionInterpreter) actionInterpreter.run(gameObject, eventData, gameObject);
                     }
-                }
-            }
-        }
-
-        // --- 衝突イベント監視 ---
-        this.matter.world.on('collisionstart', (event) => {
-            for (const pair of event.pairs) {
-                // ▼▼▼【ここに不足していた変数宣言を追加】▼▼▼
-                const objA = pair.bodyA.gameObject;
-                const objB = pair.bodyB.gameObject;
-
-                if (objA && objB) {
-                    this.handleCollision(objA, objB, pair);
-                    this.handleCollision(objB, objA, pair);
-                }
-                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-            }
-        });
-
-        // --- オーバーラップイベント監視 (ここは変更なし) ---
-        this.matter.world.on('collisionactive', (event) => {
-            for (const pair of event.pairs) {
-                if (pair.bodyA.isSensor || pair.bodyB.isSensor) {
-                    const objA = pair.bodyA.gameObject;
-                    const objB = pair.bodyB.gameObject;
-                    if (objA && objB) {
-                        this.handleOverlap(objA, objB, 'active');
-                        this.handleOverlap(objB, objA, 'active');
-                    }
-                }
-            }
-        });
-
-        this.matter.world.on('collisionend', (event) => {
-            for (const pair of event.pairs) {
-                if (pair.bodyA.isSensor || pair.bodyB.isSensor) {
-                    const objA = pair.bodyA.gameObject;
-                    const objB = pair.bodyB.gameObject;
-                    if (objA && objB) {
-                        this.handleOverlap(objA, objB, 'end');
-                        this.handleOverlap(objB, objA, 'end');
-                    }
-                }
-            }
-        });
-
-        // console.log("[BaseGameScene] All collision and overlap listeners activated.");
-
-        if (this.onSetupComplete) { this.onSetupComplete(); }
-        this.events.emit('scene-ready');
-    }
-
-    /**
-     * ★★★ 新規メソッド ★★★
-     * オーバーラップ（センサー接触）を処理する
-     * @param {Phaser.GameObjects.GameObject} sourceObject - イベントの起点
-     * @param {Phaser.GameObjects.GameObject} targetObject - 接触相手
-     * @param {string} phase - 'active' (重なり中) or 'end' (重なり終了)
-     */
-    handleOverlap(sourceObject, targetObject, phase) {
-        const actionInterpreter = this.registry.get('actionInterpreter');
-        if (!actionInterpreter || !sourceObject.getData) return;
-
-        const events = sourceObject.getData('events');
-        if (!events) return;
-
-
-        // "重なり始め" をエミュレートするためのフラグ管理
-        const overlapKey = `overlap_${targetObject.name || targetObject.id}`;
-        const wasOverlapping = sourceObject.getData(overlapKey);
-
-        if (phase === 'active' && !wasOverlapping) {
-            // --- Overlap Start ---
-            sourceObject.setData(overlapKey, true); // 今、重なったことを記録
-            for (const eventData of events) {
-                if (eventData.trigger === 'onOverlap_Start' && eventData.targetGroup === targetObject.getData('group')) {
-                    actionInterpreter.run(sourceObject, eventData, targetObject);
-                }
-            }
-        } else if (phase === 'end' && wasOverlapping) {
-            // --- Overlap End ---
-            sourceObject.setData(overlapKey, false); // 重なりが解消したことを記録
-            for (const eventData of events) {
-                if (eventData.trigger === 'onOverlap_End' && eventData.targetGroup === targetObject.getData('group')) {
-                    actionInterpreter.run(sourceObject, eventData, targetObject);
-                }
-            }
-        }
-    }
-
-
-    /**
-   * 衝突を処理するコアロジック (全ての衝突トリガーに対応した最終確定版)
-   * @param {Phaser.GameObjects.GameObject} sourceObject - イベントの起点となるオブジェクト
-   * @param {Phaser.GameObjects.GameObject} targetObject - 衝突相手のオブジェクト
-   * @param {object} pair - Matter.jsが提供する衝突の詳細情報
-   */
-
-    handleCollision(sourceObject, targetObject, pair) {
-        const actionInterpreter = this.registry.get('actionInterpreter');
-        if (!actionInterpreter || !sourceObject.getData) return;
-
-        const events = sourceObject.getData('events');
-        if (!events) return;
-
-        for (const eventData of events) {
-            // グループが一致しないイベントは、即座にスキップ
-            if (eventData.targetGroup !== targetObject.getData('group')) {
-                continue;
-            }
-
-            // ▼▼▼【ここが全てのトリガーを正しく捌く、新しいロジックです】▼▼▼
-
-            const trigger = eventData.trigger;
-
-            // --- ケース1: トリガーが 'onCollide_Start' の場合 ---
-            // 方向を問わないので、グループが一致すれば即座にアクションを実行
-            if (trigger === 'onCollide_Start') {
-                // console.log(`%c[Collision] COLLIDE Event: '${sourceObject.name}' collided with '${targetObject.name}'`, 'color: yellow');
-                actionInterpreter.run(sourceObject, eventData, targetObject);
-                // 一致するイベントが見つかったので、このイベント定義に対する処理は終了
-                continue;
-            }
-
-            // --- ケース2: トリガーが 'onStomp' または 'onHit' の場合 ---
-            // 衝突方向の判定が必要
-            if (trigger === 'onStomp' || trigger === 'onHit') {
-
-                // 衝突の法線ベクトルを取得し、sourceObject視点に正規化
-                let collisionNormal = pair.collision.normal;
-                if (sourceObject.body === pair.bodyB) {
-                    collisionNormal = { x: -collisionNormal.x, y: -collisionNormal.y };
-                }
-
-                const isStomp = collisionNormal.y < -0.7; // ほぼ真上からの衝突
-                const isHit = !isStomp; // それ以外は全て 'Hit' とする
-
-                if (trigger === 'onStomp' && isStomp) {
-                    // console.log(`%c[Collision] STOMP Event: '${sourceObject.name}' stomped on '${targetObject.name}'`, 'color: lightgreen');
-                    actionInterpreter.run(sourceObject, eventData, targetObject);
-                }
-                else if (trigger === 'onHit' && isHit) {
-                    // console.log(`%c[Collision] HIT Event: '${sourceObject.name}' was hit by '${targetObject.name}'`, 'color: orange');
-                    actionInterpreter.run(sourceObject, eventData, targetObject);
-                }
-            }
-
-            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-        }
-    }
-
-    /**
-     * エディタからイベント定義が変更された際に呼び出される。
-     * @param {Phaser.GameObjects.GameObject} targetObject - 対象オブジェクト。
-     */
-    onEditorEventChanged(targetObject) {
-        // console.log(`[${this.scene.key}] Rebuilding events for '${targetObject.name}'.`);
-        // イベントリスナーのみを再適用する
-        this.applyEventsAndEditorFunctions(targetObject, targetObject.getData('events'));
-    }
-
-    /**
-    * ★★★ 新規メソッド ★★★
-    * エディタからオブジェクトを追加するための、中核となるロジック。
-    * 継承先のシーンから呼び出されることを想定。
-    * @param {object} createLayout - createObjectFromLayoutに渡すための情報（例: { texture, type }）
-    * @param {string} newName - 新しいオブジェクトの名前
-    * @param {string} layerName - 所属するレイヤー名
-    * @returns {Phaser.GameObjects.GameObject}
-    */
-    // in src/scenes/BaseGameScene.js
-
-    /**
-     * ★★★ 二段階初期化を呼び出す最終FIX版 ★★★
-     * エディタからオブジェクトを追加するための中核ロジック。
-     */
-    _addObjectFromEditorCore(createLayout, newName, layerName) {
-        const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
-        const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
-
-        // --- 1. まず、生成するオブジェクトの完全なレイアウトデータを作成 ---
-        const newObjectLayout = {
-            ...createLayout, // { texture, type } などの情報
-            name: newName,
-            x: Math.round(centerX),
-            y: Math.round(centerY),
-            layer: layerName
-        };
-
-        // --- 2. GameObjectのインスタンスを生成 ---
-        const newGameObject = this.createObjectFromLayout(newObjectLayout);
-
-        if (newGameObject) {
-            // ▼▼▼【ここが修正の核心です】▼▼▼
-            // 3. 【第一段階】構築フェーズを実行
-            this.applyProperties(newGameObject, newObjectLayout);
-
-            // 4. 【第二段階】初期化フェーズを実行
-            this.initComponentsAndEvents(newGameObject);
-            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-        }
-
-        return newGameObject;
-    }
-
-    /**
-     * addObjectFromEditor のデフォルト実装。
-     * 継承先でオーバーライドされなかった場合に、警告を出すためのもの。
-     */
-    addObjectFromEditor(assetKey, newName, layerName) {
-        console.warn(`[BaseGameScene] addObjectFromEditor is not implemented in '${this.scene.key}'. Using default image implementation.`);
-        // 最低限のフォールバックとして、Imageオブジェクトを追加する
-        return this._addObjectFromEditorCore({ texture: assetKey, type: 'Image' }, newName, layerName);
-    }
-
-
-    handleKeyPressEvents() {
-        const actionInterpreter = this.registry.get('actionInterpreter');
-        if (!actionInterpreter || !sourceObject.getData) return;
-
-        const events = sourceObject.getData('events');
-        if (!events) return;
-        for (const [key, events] of this.keyPressEvents.entries()) {
-            const keyObject = this.input.keyboard.addKey(key);
-            if (Phaser.Input.Keyboard.JustDown(keyObject)) {
-                events.forEach(event => {
-                    if (actionInterpreter) this.actionInterpreter.run(sourceObject, eventData, targetObject);
                 });
             }
         }
+        this.matter.world.on('collisionstart', (event) => {
+            event.pairs.forEach(pair => {
+                if (pair.bodyA.gameObject && pair.bodyB.gameObject) {
+                    this.handleCollision(pair.bodyA.gameObject, pair.bodyB.gameObject, pair);
+                    this.handleCollision(pair.bodyB.gameObject, pair.bodyA.gameObject, pair);
+                }
+            });
+        });
+        this.matter.world.on('collisionactive', (event) => {
+            event.pairs.forEach(pair => {
+                if ((pair.bodyA.isSensor || pair.bodyB.isSensor) && pair.bodyA.gameObject && pair.bodyB.gameObject) {
+                    this.handleOverlap(pair.bodyA.gameObject, pair.bodyB.gameObject, 'active');
+                    this.handleOverlap(pair.bodyB.gameObject, pair.bodyA.gameObject, 'active');
+                }
+            });
+        });
+        this.matter.world.on('collisionend', (event) => {
+            event.pairs.forEach(pair => {
+                if ((pair.bodyA.isSensor || pair.bodyB.isSensor) && pair.bodyA.gameObject && pair.bodyB.gameObject) {
+                    this.handleOverlap(pair.bodyA.gameObject, pair.bodyB.gameObject, 'end');
+                    this.handleOverlap(pair.bodyB.gameObject, pair.bodyA.gameObject, 'end');
+                }
+            });
+        });
+        if (this.onSetupComplete) this.onSetupComplete();
+        this.events.emit('scene-ready');
     }
 
+    onEditorEventChanged(targetObject) {
+        this.applyEventsAndEditorFunctions(targetObject, targetObject.getData('events'));
+    }
 
-    // in BaseGameScene.js
-    // in BaseGameScene.js
+    _addObjectFromEditorCore(createLayout, newName, layerName) {
+        const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
+        const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
+        const newLayout = { ...createLayout, name: newName, x: Math.round(centerX), y: Math.round(centerY), layer: layerName };
+        const obj = this.createObjectFromLayout(newLayout);
+        if (obj) {
+            this.applyProperties(obj, newLayout);
+            this.initComponentsAndEvents(obj);
+        }
+        return obj;
+    }
 
-    /**
-        * ★★★ 修正版 (makeEditable呼び出しを追加) ★★★
-        * エディタからの要求に応じて、プレハブをシーンにインスタンス化する。
-        */
+    addObjectFromEditor(assetKey, newName, layerName) {
+        return this._addObjectFromEditorCore({ texture: assetKey, type: 'Image' }, newName, layerName);
+    }
+
+    handleKeyPressEvents() {
+        const interpreter = this.registry.get('actionInterpreter');
+        if (!interpreter) return;
+        for (const [key, events] of this.keyPressEvents.entries()) {
+            const keyObj = this.input.keyboard.addKey(key);
+            if (Phaser.Input.Keyboard.JustDown(keyObj)) {
+                events.forEach(e => interpreter.run(this, e, this));
+            }
+        }
+    }
+
     addPrefabFromEditor(prefabKey, newName, layerName) {
         const prefabData = this.cache.json.get(prefabKey);
         if (!prefabData) return null;
-
-        const spawnPos = {
-            x: this.cameras.main.scrollX + this.cameras.main.width / 2,
-            y: this.cameras.main.scrollY + this.cameras.main.height / 2
-        };
-
-        // ★★★ 1. EditorPluginを最初に取得しておく ★★★
-        const editorPlugin = this.plugins.get('EditorPlugin');
-
+        const spawnPos = { x: this.cameras.main.scrollX + this.cameras.main.width / 2, y: this.cameras.main.scrollY + this.cameras.main.height / 2 };
         if (prefabData.type === 'GroupPrefab') {
-            const newGroupId = `group_${newName}_${Phaser.Math.RND.uuid().substr(0, 4)}`;
-            const createdObjects = [];
-
-            prefabData.objects.forEach(childLayout => {
-                const newLayout = { ...childLayout };
-                newLayout.x = spawnPos.x + (childLayout.x || 0);
-                newLayout.y = spawnPos.y + (childLayout.y || 0);
-                newLayout.group = newGroupId;
-                newLayout.layer = layerName;
-
-                const newGameObject = this.createObjectFromLayout(newLayout);
-                if (newGameObject) {
-                    this.applyProperties(newGameObject, newLayout);
-
-                    // ★★★ 2. 生成したオブジェクトをエディタに登録する ★★★
-                    if (editorPlugin && editorPlugin.isEnabled) {
-                        editorPlugin.makeEditable(newGameObject, this);
-                    }
-
-                    createdObjects.push(newGameObject);
+            const gid = `group_${newName}_${Phaser.Math.RND.uuid().substr(0, 4)}`;
+            const created = prefabData.objects.map(c => {
+                const l = { ...c, x: spawnPos.x + (c.x || 0), y: spawnPos.y + (c.y || 0), group: gid, layer: layerName };
+                const obj = this.createObjectFromLayout(l);
+                if (obj) {
+                    this.applyProperties(obj, l);
+                    this.initComponentsAndEvents(obj);
                 }
+                return obj;
             });
-            return createdObjects;
-
-        } else { // 単一プレハブの場合
-            const newObjectLayout = { ...prefabData };
-            newObjectLayout.name = newName;
-            newObjectLayout.x = spawnPos.x;
-            newObjectLayout.y = spawnPos.y;
-            newObjectLayout.layer = layerName;
-
-            const newGameObject = this.createObjectFromLayout(newObjectLayout);
-            if (newGameObject) { // ★ オブジェクトが生成できたか確認
-                this.applyProperties(newGameObject, newObjectLayout);
-
-                // ★★★ 2. 生成したオブジェクトをエディタに登録する ★★★
-                if (editorPlugin && editorPlugin.isEnabled) {
-                    editorPlugin.makeEditable(newGameObject, this);
-                }
+            return created;
+        } else {
+            const l = { ...prefabData, name: newName, x: spawnPos.x, y: spawnPos.y, layer: layerName };
+            const obj = this.createObjectFromLayout(l);
+            if (obj) {
+                this.applyProperties(obj, l);
+                this.initComponentsAndEvents(obj);
             }
-            return newGameObject;
-        }
-    }
-    // in BaseGameScene.js
-
-    fillObjectRange(sourceObject, endPoint) {
-        if (!sourceObject || !sourceObject.scene) return;
-
-        // --- 1. グリッドとループ範囲の計算 (変更なし) ---
-        const gridWidth = sourceObject.displayWidth;
-        const gridHeight = sourceObject.displayHeight;
-        const startGridX = Math.round(sourceObject.x / gridWidth);
-        const startGridY = Math.round(sourceObject.y / gridHeight);
-        const endGridX = Math.round(endPoint.x / gridWidth);
-        const endGridY = Math.round(endPoint.y / gridHeight);
-        const fromX = Math.min(startGridX, endGridX);
-        const toX = Math.max(startGridX, endGridX);
-        const fromY = Math.min(startGridY, endGridY);
-        const toY = Math.max(startGridY, endGridY);
-
-        // --- 2. 複製元レイアウトの作成 (変更なし) ---
-        const sourceLayout = this.extractLayoutFromObject(sourceObject);
-
-        // --- 3. グループIDの生成 (変更なし) ---
-        const groupId = `fill_group_${Phaser.Math.RND.uuid()}`;
-
-        // --- 4. 矩形範囲をループして、オブジェクトを配置 ---
-        for (let gx = fromX; gx <= toX; gx++) {
-            for (let gy = fromY; gy <= toY; gy++) {
-                const newLayout = { ...sourceLayout };
-                newLayout.x = gx * gridWidth + (sourceLayout.originX === 0 ? 0 : gridWidth / 2); // 原点を考慮
-                newLayout.y = gy * gridHeight + (sourceLayout.originY === 0 ? 0 : gridHeight / 2);
-                newLayout.name = `${sourceLayout.name}_${gx}_${gy}`;
-                newLayout.group = groupId;
-
-                const newGameObject = this.createObjectFromLayout(newLayout);
-                if (newGameObject) {
-                    // ★ 第一段階：プロパティ適用
-                    this.applyProperties(newGameObject, newLayout);
-                    // ★★★ 第二段階：コンポーネントとイベントの初期化（これが抜けていた！） ★★★
-                    this.initComponentsAndEvents(newGameObject);
-                }
-            }
-        }
-
-        // --- 5. ブラシを破棄し、選択を解除 ---
-        sourceObject.destroy();
-        const editor = this.plugins.get('EditorPlugin');
-        if (editor) {
-            this.time.delayedCall(10, () => {
-                editor.deselectAll();
-            });
+            return obj;
         }
     }
 
-    /**
-     * ★★★ 新規ヘルパーメソッド ★★★
-     * 指定されたグループIDに所属する、全てのGameObjectの配列を返す
-     * @param {string} groupId - 検索するグループID
-     * @returns {Array<Phaser.GameObjects.GameObject>}
-     */
-    getObjectsByGroup(groupId) {
-        if (!groupId) return [];
-        // シーンの表示リスト(this.children.list)から、
-        // getData('group')がgroupIdと一致するオブジェクトを全て絞り込んで返す
-        return this.children.list.filter(obj => obj.getData('group') === groupId);
-    }
-
-    // in BaseGameScene.js
-
-    /**
-     * ★★★ 完全版 ★★★
-     * 既存のGameObjectから、複製や保存に使えるプレーンなレイアウトオブジェクトを抽出する。
-     * @param {Phaser.GameObjects.GameObject} gameObject - 抽出元のオブジェクト
-     * @returns {object} 抽出されたレイアウト情報
-     */
     extractLayoutFromObject(gameObject) {
-        if (!gameObject || !gameObject.scene) {
-            return {}; // 安全のため空オブジェクトを返す
-        }
-
+        if (!gameObject || !gameObject.scene) return {};
         const layout = {
-            name: gameObject.name,
-            type: gameObject.constructor.name, // 'Image', 'Sprite', 'Text', 'Container' などを自動で取得
-
-            // --- Transform ---
-            x: Math.round(gameObject.x),
-            y: Math.round(gameObject.y),
-            scaleX: parseFloat(gameObject.scaleX.toFixed(3)),
-            scaleY: parseFloat(gameObject.scaleY.toFixed(3)),
-            angle: Math.round(gameObject.angle),
-            alpha: parseFloat(gameObject.alpha.toFixed(3)),
-            depth: gameObject.depth,
-
-            // ★ スケールを考慮した表示サイズも保存
-            displayWidth: gameObject.displayWidth,
-            displayHeight: gameObject.displayHeight,
-
-            // --- Data ---
-            group: gameObject.getData('group'),
-            layer: gameObject.getData('layer'),
-            components: gameObject.getData('components'),
-            events: gameObject.getData('events'),
+            name: gameObject.name, type: gameObject.constructor.name,
+            x: Math.round(gameObject.x), y: Math.round(gameObject.y),
+            scaleX: gameObject.scaleX, scaleY: gameObject.scaleY,
+            angle: gameObject.angle, alpha: gameObject.alpha, depth: gameObject.depth,
+            group: gameObject.getData('group'), layer: gameObject.getData('layer'),
+            components: gameObject.getData('components'), events: gameObject.getData('events'),
         };
-
-        // --- タイプに応じた固有のプロパティを追加 ---
         if (gameObject instanceof Phaser.GameObjects.Text) {
-            layout.text = gameObject.text;
-            layout.style = gameObject.style.toJSON();
-        }
-        else if (gameObject instanceof Phaser.GameObjects.Sprite) {
-            // Sprite と Image の両方が texture を持つ
+            layout.text = gameObject.text; layout.style = gameObject.style.toJSON();
+        } else if (gameObject.texture) {
             layout.texture = gameObject.texture.key;
-            // Sprite は frame も持つ
-            layout.frame = gameObject.frame.name;
+            if (gameObject.frame) layout.frame = gameObject.frame.name;
         }
-        else if (gameObject instanceof Phaser.GameObjects.Image) {
-            layout.texture = gameObject.texture.key;
-        }
-
-        // --- 物理ボディ情報もコピー ---
         if (gameObject.body) {
-            const body = gameObject.body;
-            layout.physics = {
-                isStatic: body.isStatic,
-                isSensor: body.isSensor,
-                fixedRotation: body.fixedRotation, // ★ 回転固定の状態を保存
-                shape: gameObject.getData('shape') || 'rectangle',
-                ignoreGravity: gameObject.getData('ignoreGravity') === true,
-                friction: body.friction,
-                restitution: body.restitution,
-                collisionFilter: {
-                    category: body.collisionFilter.category,
-                    mask: body.collisionFilter.mask
-                }
-            };
+            layout.physics = { isStatic: gameObject.body.isStatic, isSensor: gameObject.body.isSensor, friction: gameObject.body.friction, restitution: gameObject.body.restitution };
         }
-
         return layout;
     }
 
-    /**
-   * ★★★ 最終確定版：シーンの状態スナップショットを作成する ★★★
-   * 全てのオブジェクトのTransform情報と、シリアライズ可能な全コンポーネントの状態を保存する。
-   * @returns {object} シーンの永続化可能な状態
-   */
-    createSceneSnapshot() {
-        const snapshot = {
-            sceneKey: this.scene.key,
-            objects: []
-        };
-
-        for (const gameObject of this.children.list) {
-            // 保存すべきではない一時的なオブジェクトは除外
-            if (!gameObject.active || !gameObject.name || gameObject.name.startsWith('__')) {
-                continue;
-            }
-
-            const objectState = {
-                name: gameObject.name,
-                x: Math.round(gameObject.x),
-                y: Math.round(gameObject.y),
-                scaleX: gameObject.scaleX,
-                scaleY: gameObject.scaleY,
-                angle: gameObject.angle,
-                alpha: gameObject.alpha,
-                components: {} // コンポーネントデータを保存する器
-            };
-
-            // ▼▼▼【ここがシリアライズ処理の核心】▼▼▼
-            if (gameObject.components) {
-                for (const compName in gameObject.components) {
-                    const component = gameObject.components[compName];
-                    // serializeメソッドを持つコンポーネントだけを対象にする
-                    if (component && typeof component.serialize === 'function') {
-                        objectState.components[compName] = component.serialize();
-                    }
-                }
-            }
-            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
-            snapshot.objects.push(objectState);
-        }
-
-        return snapshot;
-    }
-    shutdown() {
-        super.shutdown();
-    }
-
-    /**
-     * カメラをフェードさせます。JSONイベントノードから呼び出されます。
-     * @param {object} params - { type: 'in'|'out', time: ms, color: '0xRRGGBB' }
-     */
-    cameraFade(params) {
-        const time = parseInt(params.time, 10) || 1000;
-        const type = params.type || 'out';
-        const colorStr = params.color || '0x000000';
-
-        // 16進数文字列を数値に変換
-        const red = parseInt(colorStr.substring(2, 4), 16);
-        const green = parseInt(colorStr.substring(4, 6), 16);
-        const blue = parseInt(colorStr.substring(6, 8), 16);
-
-        const camera = this.cameras.main;
-
-        if (type === 'in') {
-            camera.fadeIn(time, red, green, blue);
-        } else {
-            camera.fadeOut(time, red, green, blue);
-        }
-    }
-
-    /**
-     * ゲームフローイベントを発火させます。JSONイベントノードから呼び出されます。
-     * @param {object} params - { event: string, data: string(JSON) }
-     */
-    fireGameFlowEvent(params) {
-        const eventName = params.event;
-        let eventData = {};
-        if (params.data) {
-            try {
-                const jsonString = params.data.replace(/'/g, '"');
-                eventData = JSON.parse(jsonString);
-            } catch (e) {
-                console.error(`[BaseGameScene] Invalid data format for game flow event: ${params.data}`, e);
-            }
-        }
-
-        // EngineAPI 経由での発火を試みる
-        const systemScene = this.scene.get('SystemScene');
-        if (systemScene && systemScene.gameFlowManager) {
-            systemScene.gameFlowManager.handleEvent(eventName, eventData);
-        } else {
-            const engineAPI = this.registry.get('engineAPI');
-            if (engineAPI) {
-                engineAPI.fireGameFlowEvent(eventName, eventData);
-            }
-        }
-    }
+    shutdown() { super.shutdown(); }
 }

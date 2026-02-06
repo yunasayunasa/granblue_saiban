@@ -38,7 +38,7 @@
     {
       "name": "timer_container",
       "type": "Container",
-      "x": 1780,
+      "x": 1100,
       "y": 80,
       "depth": 2000,
       "components": [
@@ -89,7 +89,7 @@
     {
       "name": "fast_forward_button",
       "type": "Container",
-      "x": 1780,
+      "x": 1100,
       "y": 180,
       "depth": 2000,
       "list": [
