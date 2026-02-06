@@ -8,15 +8,6 @@
   },
   "objects": [
     {
-      "name": "trial_manager",
-      "type": "container",
-      "x": 0,
-      "y": 0,
-      "components": {
-        "TrialSegmentManager": {}
-      }
-    },
-    {
       "name": "interaction_menu",
       "type": "container",
       "x": 640,
@@ -59,6 +50,15 @@
       "y": 400,
       "texture": "yuna_angry",
       "visible": false
+    },
+    {
+      "name": "trial_manager",
+      "type": "container",
+      "x": 0,
+      "y": 0,
+      "components": {
+        "TrialSegmentManager": {}
+      }
     }
   ],
   "trial_data": {

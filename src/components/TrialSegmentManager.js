@@ -47,35 +47,37 @@ export default class TrialSegmentManager {
     start() {
         console.log('[TrialSegmentManager] start() called.');
 
-        // ★ 修正: インスタンス化の順序に依存しないよう、GameObject名から検索して取得する
-        const menuObj = this.scene.children.getByName('interaction_menu');
-        if (menuObj && menuObj.components && menuObj.components.InteractionMenuComponent) {
-            this.interactionMenu = menuObj.components.InteractionMenuComponent;
-            this.interactionMenu.onSelection = (choice) => this.handleChoice(choice);
-            console.log('[TrialSegmentManager] InteractionMenuComponent found via GameObject.');
-        } else {
-            console.warn('[TrialSegmentManager] InteractionMenuComponent NOT found.');
-        }
+        // ★ 修正: 確実に全オブジェクトが生成されるのを待つため、微小な遅延を入れる
+        this.scene.time.delayedCall(10, () => {
+            const menuObj = this.scene.children.getByName('interaction_menu');
+            if (menuObj && menuObj.components && menuObj.components.InteractionMenuComponent) {
+                this.interactionMenu = menuObj.components.InteractionMenuComponent;
+                this.interactionMenu.onSelection = (choice) => this.handleChoice(choice);
+                console.log('[TrialSegmentManager] InteractionMenuComponent found via GameObject.');
+            } else {
+                console.warn('[TrialSegmentManager] InteractionMenuComponent NOT found.');
+            }
 
-        const indicatorObj = this.scene.children.getByName('progress_indicator');
-        if (indicatorObj && indicatorObj.components && indicatorObj.components.ProgressIndicatorComponent) {
-            this.progressIndicator = indicatorObj.components.ProgressIndicatorComponent;
-        }
+            const indicatorObj = this.scene.children.getByName('progress_indicator');
+            if (indicatorObj && indicatorObj.components && indicatorObj.components.ProgressIndicatorComponent) {
+                this.progressIndicator = indicatorObj.components.ProgressIndicatorComponent;
+            }
 
-        // キャラ画像取得 (ここではログのみ、実際の取得は遅延させる)
-        console.log('[TrialSegmentManager] Pre-caching characters...');
-        this._findCharacterImages();
+            // キャラ画像取得 (Lazy load もあるが、ここで初期検索)
+            console.log('[TrialSegmentManager] Pre-caching characters...');
+            this._findCharacterImages();
 
-        const layoutData = this.scene.loadData || this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
-        console.log('[TrialSegmentManager] Layout Data:', layoutData ? 'Found' : 'Not Found');
+            const layoutData = this.scene.loadData || this.scene.cache.json.get(this.scene.layoutDataKey || this.scene.scene.key);
+            console.log('[TrialSegmentManager] Layout Data:', layoutData ? 'Found' : 'Not Found');
 
-        if (layoutData && layoutData.trial_data) {
-            console.log('[TrialSegmentManager] Trial Data found. Starting loop...');
-            this.segmentData = layoutData.trial_data;
-            this.startDebateLoop();
-        } else {
-            console.warn('[TrialSegmentManager] No trial_data found in layout JSON.');
-        }
+            if (layoutData && layoutData.trial_data) {
+                console.log('[TrialSegmentManager] Trial Data found. Starting loop...');
+                this.segmentData = layoutData.trial_data;
+                this.startDebateLoop();
+            } else {
+                console.warn('[TrialSegmentManager] No trial_data found in layout JSON.');
+            }
+        });
     }
 
     startDebateLoop() {
@@ -223,8 +225,11 @@ export default class TrialSegmentManager {
 
         // コンテナのクリック範囲を設定（テキストのサイズに合わせる）
         container.setSize(textObj.width, textObj.height);
-        // ★ Phaser 3.60のContainerでは、ヒットエリアを明示的に指定するのが安全
-        container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains);
+
+        // ★ 指マーク（Hand Cursor）を有効化し、ヒットエリアを正確に設定
+        container.setInteractive({ useHandCursor: true });
+        container.input.hitArea = new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height);
+        container.input.hitAreaCallback = Phaser.Geom.Rectangle.Contains;
 
         // ★ IDを保存 (後で検索できるように)
         if (data.id) {
@@ -267,15 +272,21 @@ export default class TrialSegmentManager {
             // 次のフレームで更新されるのを待つが、ここでは簡易的に再セット
             textObj.updateText();
             container.setSize(textObj.width, textObj.height);
-            // サイズが変わったのでヒットエリアも再設定
-            container.input.hitArea.setTo(0, 0, textObj.width, textObj.height);
-            container.setInteractive({ useHandCursor: true });
 
-            // 重要：インタラクション設定
+            // 重要：ハイライトがある場合のみ指マークとクリックイベントを設定
+            container.setInteractive({ useHandCursor: true });
+            container.input.hitArea = new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height);
+            container.input.hitAreaCallback = Phaser.Geom.Rectangle.Contains;
+
             container.on('pointerdown', () => {
                 console.log('[TrialManager] Testimony clicked:', modifiedText);
                 this.onHighlightClicked(data.highlights[0]);
             });
+        } else {
+            // ハイライトがない場合は指マークを出さない（通常のヒットエリアのみ）
+            container.setInteractive({ useHandCursor: false });
+            container.input.hitArea = new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height);
+            container.input.hitAreaCallback = Phaser.Geom.Rectangle.Contains;
         }
 
         this.activeTestimonies.push(container);
@@ -407,9 +418,12 @@ export default class TrialSegmentManager {
                 textObj.updateText();
                 activeObj.setSize(textObj.width, textObj.height);
 
-                // イベント再設定: 一度オフにしてから再開
+                // イベント再設定
                 activeObj.off('pointerdown');
                 activeObj.setInteractive({ useHandCursor: true });
+                if (activeObj.input && activeObj.input.hitArea) {
+                    activeObj.input.hitArea.setTo(0, 0, textObj.width, textObj.height);
+                }
 
                 if (newHighlights && newHighlights.length > 0) {
                     activeObj.on('pointerdown', () => {
