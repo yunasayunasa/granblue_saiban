@@ -108,6 +108,8 @@ export default class EvidenceSelectOverlay extends Phaser.GameObjects.Container 
                 this.setVisible(false);
                 // コールバック解除
                 this.onPresent = null;
+                // ★ イベント発火
+                this.emit('CLOSE_OVERLAY');
             }
         });
     }

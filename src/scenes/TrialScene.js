@@ -39,6 +39,65 @@ export default class TrialScene extends BaseGameScene {
         this.evidenceManager.addEvidence('gum');
 
         this.initSceneWithData();
+
+        // ★ 証拠品確認ボタンの追加 (左上, タイマーと同じ高さ y=80 付近)
+        this.createEvidenceButton();
+    }
+
+    createEvidenceButton() {
+        const x = 150;
+        const y = 80;
+        
+        const container = this.add.container(x, y).setDepth(2000).setScrollFactor(0);
+        
+        // 背景 (角丸四角)
+        const bg = this.add.graphics();
+        bg.fillStyle(0x000000, 0.6);
+        bg.lineStyle(2, 0xffffff, 0.8);
+        bg.fillRoundedRect(-80, -35, 160, 70, 15);
+        bg.strokeRoundedRect(-80, -35, 160, 70, 15);
+        container.add(bg);
+
+        // テキスト
+        const text = this.add.text(0, 0, '証拠品', {
+            fontSize: '28px',
+            color: '#ffffff',
+            fontFamily: 'sans-serif',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        container.add(text);
+
+        // インタラクション
+        container.setSize(160, 70);
+        container.setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                // 議論中(isFlowing)でも見れるようにするが、ポーズはしておいたほうが無難
+                if (this.evidenceSelectOverlay) {
+                    if (this.evidenceSelectOverlay.visible) {
+                         this.evidenceSelectOverlay.hide();
+                         this.setPause(false);
+                    } else {
+                         this.setPause(true);
+                         this.evidenceSelectOverlay.show('view', () => {
+                             // viewモードなのでコールバックは基本使わないが、閉じた時の処理用
+                         });
+                         // Overlay側で閉じるボタンが押されたらここに戻る仕組みが必要だが、
+                         // 現状のOverlayはhide()するだけ。
+                         // Overlayのhideでポーズ解除が必要。
+                         // 簡易的に、Overlayのhideをフックするか、OverlayにonCloseを持たせる。
+                         // EvidenceSelectOverlayを少し修正して、onCloseコールバックを受け取れるようにするのが良いが、
+                         // ここでは一旦、OverlayのcloseBtnクリック時にシーンのresumeを呼ぶように改造するか、
+                         // またはEvidenceSelectOverlayからイベントを発火させる。
+                    }
+                }
+            });
+        
+        // Overlayが閉じられたときにポーズ解除するイベントをリッスン
+        if (this.evidenceSelectOverlay) {
+            this.evidenceSelectOverlay.on('CLOSE_OVERLAY', () => {
+                this.setPause(false);
+            });
+        }
     }
 
     /**
