@@ -129,6 +129,24 @@
       ]
     }
   ],
+  "_COMMENT_TEMPLATE_GUIDE": {
+    "description": "シナリオライター向け設定ガイド",
+    "rules": {
+      "UPDATE_TESTIMONY": "「疑問」などで証言を書き換える場合。action='update_testimony'を指定。pre_update_scenarioで短い会話を再生後、自動的に議論の最初(restart)に戻ります。",
+      "EVIDENCE_REQUIRED": "証拠品提示が必要な場合。evidence_required='ID'を指定。これがある場合、選択肢を選んだ後に証拠品選択画面が開きます。",
+      "CORRECT_FLOW": "正解の場合。correct=true。success_scenario再生後、next_trial_dataがあれば次のパートへ進みます。",
+      "FAILURE_FLOW": "不正解(証拠品なし)の場合。correct=false。failure_scenario再生後、自動的に議論の最初(restart)に戻ります。",
+      "WRONG_EVIDENCE": "証拠品提示で間違ったものを選んだ場合。failure_scenario_evidenceがあればそれを再生し、その後『再度証拠品選択画面』が開きます(Retry)。"
+    },
+    "example_structure": {
+      "text": "疑問：本当に何も？",
+      "action": "update_testimony",
+      "pre_update_scenario": "短い会話.ks",
+      "target": "書き換える証言ID",
+      "new_text": "新しい証言テキスト",
+      "new_highlights": []
+    }
+  },
   "trial_data": {
     "timeLimit": 300,
     "timeoutScenario": "chapter1/trial_test_failure.ks",

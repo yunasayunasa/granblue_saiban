@@ -416,7 +416,7 @@ export default class TrialSegmentManager {
     }
 
     async handleChoice(choice) {
-        console.log('[TrialManager] Choice selected:', choice.text);
+        console.log('[TrialManager] Choice selected:', choice.text, choice);
 
         // 0. 「戻る」ボタン: 何もせず議論再開
         if (choice.isBack) {
@@ -424,59 +424,128 @@ export default class TrialSegmentManager {
             return;
         }
 
-        // 0.5. 中間シナリオ (pre_update_scenario) がある場合
-        if (choice.pre_update_scenario) {
-            console.log(`[TrialManager] Playing interim scenario: ${choice.pre_update_scenario}`);
-            this.isPlayingInterim = true;
-            try {
-                await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, choice.pre_update_scenario, true);
-            } catch (e) {
-                console.warn('[TrialManager] Interim scenario failed:', e);
-            }
-            this.isPlayingInterim = false;
-            // 続きの処理へ
-        }
-
-        // 1. テキスト更新アクション (ゆさぶる等)
+        // --- 疑問 / ゆさぶる (update_testimony) の処理 ---
         if (choice.action === 'update_testimony') {
+            // 1. 中間シナリオがあれば再生
+            if (choice.pre_update_scenario) {
+                console.log(`[TrialManager] Playing interim scenario: ${choice.pre_update_scenario}`);
+                this.isPlayingInterim = true;
+                try {
+                    await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, choice.pre_update_scenario, true);
+                } catch (e) {
+                    console.warn('[TrialManager] Interim scenario failed:', e);
+                }
+                this.isPlayingInterim = false;
+            }
+
+            // 2. データ更新 (メモリ内のデータを書き換える)
             await this.updateTestimony(choice.target, choice.new_text, choice.new_highlights);
+
+            // 3. ユーザー要望: "疑問...はすべてショートテキストのあと議論冒頭に戻る"
+            // データ更新後、議論を最初からやり直すことで、プレイヤーは新しい証言を確認しにいく
+            this.restartDebate();
             return;
         }
 
-        // 1.5 証拠品提示が必要な場合 (evidence_required が choice に設定されている場合)
-        // または、choice自体が「証拠品を提示する」というアクションの場合
+        // --- 証拠品提示が必要な場合 (evidence_required) ---
+        // 正解選択肢でかつ証拠品が必要な場合
         if (choice.evidence_required) {
             console.log('[TrialManager] Evidence required:', choice.evidence_required);
-            // 証拠品選択オーバーレイを表示
-            const overlay = this.scene.evidenceSelectOverlay;
-            if (overlay) {
-                overlay.show('present', (selectedEvidenceId) => {
-                    this._onEvidencePresented(selectedEvidenceId, choice);
-                });
-            } else {
-                console.warn('[TrialManager] EvidenceSelectOverlay not found.');
-                this._resumeFromMenu(); // 諦めて戻る
-            }
-            return; // ここで一旦処理を止めて、コールバック待ち
+            this._showEvidenceOverlay(choice);
+            return; 
         }
 
-        // 2. シナリオ再生の準備 (通常フロー)
-        await this._processScenarioResult(choice.correct, choice.success_scenario, choice.failure_scenario, choice.next_trial_data);
+        // --- その他 (単なるハズレ選択肢など) ---
+        // ユーザー要望: "ハズレ選択肢はすべてショートテキストのあと議論冒頭に戻る"
+        
+        const isCorrect = choice.correct;
+        const scenarioFile = isCorrect ? choice.success_scenario : choice.failure_scenario;
+
+        // シナリオ再生
+        if (scenarioFile) {
+            try {
+                await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, scenarioFile, true);
+            } catch (e) { console.warn('Scenario failed:', e); }
+        }
+
+        if (isCorrect) {
+            // 正解 (証拠品なしで正解になるケースは稀だが、あれば次へ)
+            if (choice.next_trial_data) {
+                this.loadNextTrialData(choice.next_trial_data);
+            } else {
+                // 次のデータがない場合はとりあえず進めるか終了
+                console.log('No next data. Finishing trial segment?');
+                this._resumeFromMenu(); 
+            }
+        } else {
+            // 不正解 -> 冒頭に戻る
+            this.restartDebate();
+        }
+    }
+
+    _showEvidenceOverlay(choice) {
+        const overlay = this.scene.evidenceSelectOverlay;
+        if (overlay) {
+            // ポーズ状態にする
+            // this.scene.setPause(true); // EvidenceSelectOverlay側で制御されている場合もあるが念のため
+            // -> EvidenceSelectOverlay.show は内部で特にPauseしないようなので、呼ぶ側でするか、
+            //    あるいは handleChoice 時点ですでに InteractionMenu で Pause されているはず。
+            
+            overlay.show('present', (selectedEvidenceId) => {
+                this._onEvidencePresented(selectedEvidenceId, choice);
+            });
+        } else {
+            console.warn('[TrialManager] EvidenceSelectOverlay not found.');
+            this.restartDebate();
+        }
     }
 
     // 証拠品が提示されたときのコールバック
     async _onEvidencePresented(evidenceId, choice) {
         console.log(`[TrialManager] Evidence presented: ${evidenceId}, Required: ${choice.evidence_required}`);
         
+        // オーバーレイは閉じる動作を内部で行うが、非同期完了を待つ必要があるかも
+        // ここでは即座に判定
+        
         if (evidenceId === choice.evidence_required) {
-            // 正解！ -> 論破演出へ
+            // --- 正解 ---
+            // 論破演出
             await this._playBreakEffect();
-            await this._processScenarioResult(true, choice.success_scenario, null, choice.next_trial_data);
+            
+            // 成功シナリオ
+            if (choice.success_scenario) {
+                await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, choice.success_scenario, true);
+            }
+
+            // 次のフェーズへ
+            if (choice.next_trial_data) {
+                this.loadNextTrialData(choice.next_trial_data);
+            } else {
+                // 完全クリア？
+                console.log('Trial segment complete!'); 
+                this.scene.events.emit('TRIAL_COMPLETE'); 
+            }
         } else {
-            // 不正解 -> 失敗シナリオへ（あれば）
-            // 証拠品間違い専用のシナリオがあればそれがベストだが、今回は共通失敗あるいは汎用失敗へ
-            // choice.failure_scenario_evidence_mismatch などがあれば優先する
-            await this._processScenarioResult(false, null, choice.failure_scenario, null);
+            // --- 不正解 (間違った証拠品) ---
+            // ユーザー要望: "仮に間違った証拠品ならショートテキストのあと再提示"
+            
+            // 失敗シナリオ (証拠品ミス用があればそれを、なければ通常の失敗シナリオ)
+            const failScenario = choice.failure_scenario_evidence || choice.failure_scenario;
+            if (failScenario) {
+                await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, failScenario, true);
+            } else {
+                // シナリオがない場合は簡易メッセージ
+                if (this.progressIndicator) {
+                   this.progressIndicator.show("証拠品が違うようだ…", 1500);
+                   await new Promise(r => setTimeout(r, 1500));
+                }
+            }
+
+            // 再提示 (もう一度オーバーレイを開く)
+            // 少しウェイトを入れてから開く
+            this.scene.time.delayedCall(500, () => {
+                this._showEvidenceOverlay(choice);
+            });
         }
     }
 
@@ -484,47 +553,6 @@ export default class TrialSegmentManager {
         return new Promise(resolve => {
             this.cutInEffect.play(resolve);
         });
-    }
-
-    async _processScenarioResult(isCorrect, successScenario, failureScenario, nextTrialData) {
-        let scenarioFile = isCorrect ? successScenario : failureScenario;
-        let isSuccess = isCorrect;
-
-        // 3. シナリオがあればオーバーレイで実行
-        if (scenarioFile) {
-            try {
-                console.log(`[TrialManager] Playing scenario: ${scenarioFile}`);
-                await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, scenarioFile, true);
-
-                if (!this.isFlowing && this.currentTestimonyIndex === 0) {
-                    console.log('[TrialManager] Scene was reset during scenario.');
-                    return;
-                }
-            } catch (e) {
-                console.warn('[TrialManager] Scenario execution failed or skipped:', e);
-            }
-        } else if (isSuccess) {
-             // シナリオなし正解
-             if (this.progressIndicator) {
-                await new Promise(resolve => {
-                    this.progressIndicator.show("論破！！", 3000); // ここもカットイン出したければ出せる
-                    this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', resolve);
-                });
-            }
-        }
-
-        // 4. シナリオ終了後の処理
-        if (isSuccess) {
-            if (nextTrialData) {
-                this.loadNextTrialData(nextTrialData);
-            } else {
-                this._resumeFromMenu();
-            }
-        } else {
-            // 失敗時は元の議論に戻る
-            if (!this.isFlowing && this.currentTestimonyIndex === 0) return;
-            this._resumeFromMenu();
-        }
     }
 
     _resumeFromMenu() {
@@ -594,11 +622,9 @@ export default class TrialSegmentManager {
             await new Promise(resolve => {
                 this.scene.events.once('PROGRESS_INDICATOR_COMPLETE', resolve);
             });
-            this.isInteracting = false;
-            this.scene.events.emit('RESUME_TRIAL');
+            // ここでのresumeは行わない (handleChoice側でrestartDebateする)
         } else {
-            this.isInteracting = false;
-            this.scene.events.emit('RESUME_TRIAL');
+            // resumeなし
         }
     }
 
