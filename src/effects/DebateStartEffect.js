@@ -51,56 +51,49 @@ export default class DebateStartEffect extends Phaser.GameObjects.Container {
         this.text.alpha = 0;
         this.subText.alpha = 0;
         this.subText.scale = 2;
+        this.alpha = 1; // フェードアウトからの復帰用
 
-        const timeline = this.scene.tweens.createTimeline();
-
-        // 1. 帯が開く
-        timeline.add({
+        // 1. 帯が開く (0ms)
+        this.scene.tweens.add({
             targets: this.bgImage,
-            scaleY: 1, // 元のサイズ(setDisplaySizeで指定したもの)に対する比率なら1でいいが、setDisplaySize使ってるので調整必要かも
-            // setDisplaySize使ってる場合、scaleが変わるとサイズも変わる。直感的には scaleY: 0 -> 1 でOK
+            scaleY: 1,
             duration: 300,
             ease: 'Back.out'
         });
 
-        // 2. テキストイン
-        timeline.add({
+        // 2. テキストイン (200ms)
+        this.scene.tweens.add({
             targets: this.text,
             alpha: 1,
-            x: width/2, // 横からスライドさせてもいい
+            x: width/2,
             duration: 300,
-            offset: 200
+            delay: 200
         });
 
-        // 3. STARTスタンプ
-        timeline.add({
+        // 3. STARTスタンプ (400ms)
+        this.scene.tweens.add({
             targets: this.subText,
             alpha: 1,
             scale: 1,
             duration: 400,
             ease: 'Bounce.out',
-            offset: 400
+            delay: 400
         });
 
-        // 4. 待機
-        timeline.add({
-            targets: this, // ダミー
-            duration: 1000,
-            offset: 800
-        });
-
-        // 5. フェードアウト
-        timeline.add({
+        // 4. フェードアウト (1800ms - 待ち時間含む)
+        // 元のタイムラインでは offset:800 で 1000ms 待機 -> 1300?? 
+        // 意図としては、全部出切ってから少し待って消える。
+        // スタンプ完了が 400+400=800ms。そこから1秒待つなら1800msあたりでフェードアウト開始。
+        this.scene.tweens.add({
             targets: this,
             alpha: 0,
             duration: 300,
+            delay: 1800,
             onComplete: () => {
                 this.setVisible(false);
-                this.alpha = 1; // 次回用に戻す
+                this.alpha = 1; 
                 if (onComplete) onComplete();
             }
         });
-
-        timeline.play();
     }
 }

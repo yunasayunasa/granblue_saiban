@@ -50,51 +50,49 @@ export default class CutInEffect extends Phaser.GameObjects.Container {
     play(onComplete) {
         this.setVisible(true);
         this.bg.alpha = 0;
+        this.alpha = 1; // フェードアウトからの復帰用
         
         // 位置リセット
         const width = this.scene.scale.width;
         this.targetObj.x = width + 500;
         this.targetObj.alpha = 1;
+        this.targetObj.scaleX = 1.5; // 初期スケール
+        this.targetObj.scaleY = 1.5;
 
-        const timeline = this.scene.tweens.createTimeline();
-
-        // 1. 暗転 & スライドイン (高速)
-        timeline.add({
+        // 1. 暗転 & スライドイン (0ms)
+        this.scene.tweens.add({
             targets: this.bg,
             alpha: 0.7,
-            duration: 200,
-            offset: 0
+            duration: 200
         });
-        timeline.add({
+        
+        this.scene.tweens.add({
             targets: this.targetObj,
             x: width / 2,
             ease: 'Power2',
-            duration: 300,
-            offset: 0
+            duration: 300
         });
 
-        // 2. 停止 (決めポーズ)
-        timeline.add({
+        // 2. 停止 (決めポーズ) & ズーム (300ms)
+        this.scene.tweens.add({
             targets: this.targetObj,
             scaleX: 1.6, // 少しズーム
             scaleY: 1.6,
             duration: 1000,
-            offset: 300
+            delay: 300
         });
 
-        // 3. フェードアウト
-        timeline.add({
+        // 3. フェードアウト (1300ms)
+        this.scene.tweens.add({
             targets: [this.targetObj, this.bg],
             alpha: 0,
             x: -500, // 左へ抜ける
             duration: 400,
-            offset: 1300,
+            delay: 1300,
             onComplete: () => {
                 this.setVisible(false);
                 if (onComplete) onComplete();
             }
         });
-
-        timeline.play();
     }
 }
