@@ -66,6 +66,7 @@ export default class InteractionMenuComponent {
 
         btn.setInteractive({ useHandCursor: true });
         btn.on('pointerdown', () => {
+            console.log('[InteractionMenu] Selected:', choice);
             this.hide();
             if (this.onSelection) {
                 this.onSelection(choice);

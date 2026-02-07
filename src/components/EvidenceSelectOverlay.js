@@ -2,6 +2,7 @@
  * 証拠品選択オーバーレイ (UI)
  * - 下部にリスト
  * - 左に拡大画像
+ * 
  * - 右に説明
  */
 export default class EvidenceSelectOverlay extends Phaser.GameObjects.Container {
@@ -72,9 +73,15 @@ export default class EvidenceSelectOverlay extends Phaser.GameObjects.Container 
     }
 
     show(mode = 'view', onPresentCallback = null) {
+        console.log(`[EvidenceSelectOverlay] show called. Mode: ${mode}`);
         this.setVisible(true);
         this.isModePresent = (mode === 'present');
         this.onPresent = onPresentCallback;
+
+        // ★ 一時停止 (シーン全体をポーズ)
+        if (this.scene.setPause) {
+            this.scene.setPause(true);
+        }
 
         // ボタン表示切り替え
         this.presentBtn.setVisible(this.isModePresent);

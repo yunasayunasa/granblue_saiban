@@ -412,7 +412,8 @@ export default class TrialSegmentManager {
     }
 
     async handleChoice(choice) {
-        console.log('[TrialManager] Choice selected:', choice.text, choice);
+        console.log('[TrialManager] handleChoice called with:', JSON.stringify(choice));
+        console.log('[TrialManager] action:', choice.action, 'pre_update:', choice.pre_update_scenario, 'evidence_req:', choice.evidence_required);
 
         // 0. 「戻る」ボタン: 何もせず議論再開
         if (choice.isBack) {
