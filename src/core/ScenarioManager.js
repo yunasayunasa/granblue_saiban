@@ -132,24 +132,16 @@ export default class ScenarioManager {
             const handler = this.tagHandlers.get(tagName);
 
             if (handler) {
-                // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-                // ★★★ これが全てを解決する、唯一の修正です ★★★
-                // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-
-                // 全てのパラメータの「値」に対して、変数展開を試みる
+                // ... (params processing) ...
                 for (const key in params) {
                     if (typeof params[key] === 'string') {
-                        // [eval]タグのexp属性の場合は、中身を展開しないようにするなどの配慮は不要。
-                        // embedVariablesが`&`記号を探すので、"f.hoge=0"のような文字列は変更されない。
                         params[key] = this.embedVariables(params[key]);
                     }
                 }
-
-                // 修正されたparamsでハンドラを実行
                 await handler(this, params);
-
             } else {
-                console.warn(`未定義のタグです: [${tagName}]`);
+                console.error(`[ScenarioManager] Undefined Tag Error: [${tagName}] at Line ${this.currentLine}: "${line}"`);
+                console.error('Available tags:', Array.from(this.tagHandlers.keys()));
             }
         }
         else if (trimedLine.length > 0) {

@@ -185,25 +185,21 @@ export default class TrialSegmentManager {
 
                 EngineAPI.runScenarioAsOverlay(this.scene.scene.key, this.segmentData.loop_scenario, true)
                     .then(() => {
-                        console.log('Loop scenario finished. Restarting loop.');
-                        this.cleanupCurrentSegment(); // ★ 古い証言を破棄
+                        console.log('[TrialSegmentManager] Loop scenario Promise resolved. Restarting loop.');
+                        this.cleanupCurrentSegment(); 
                         this.isFlowing = true;
                         this.currentTestimonyIndex = 0;
-                        this.scene.isPaused = false; // ★ ポーズ状態をリセット
-                        // this.scene.events.emit('RESUME_TRIAL'); // ★ 削除: ここでEmitするとリスナーが反応してspawnNextTestimonyを呼んでしまい、演出と被る
+                        this.scene.isPaused = false; 
                         
-                        // ループ時は「LOOP」などの演出を入れる手もあるが、今回はSTARTと同じものを使うか、テキストを変える
                         this.debateStartEffect.play('LOOP', () => {
                              this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
                         });
                     })
                     .catch(err => {
-                        console.error('[TrialSegmentManager] Loop scenario error:', err);
-                        this.cleanupCurrentSegment(); // エラー時も古い証言を破棄
-                        // エラー時も再ループを試みる
+                        console.error('[TrialSegmentManager] Loop scenario FAILED/TIEMOUT:', err);
+                        this.cleanupCurrentSegment();
                         this.isFlowing = true;
                         this.currentTestimonyIndex = 0;
-                        // this.scene.events.emit('RESUME_TRIAL'); // ★ 削除
                         this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
                     });
                 return;

@@ -116,11 +116,10 @@ fireGameFlowEvent(eventName, data = {}) { // ★ data引数を追加
         
         // Promiseを返すことで、呼び出し元(GameFlowManager)が await できるようにする
         return new Promise(resolve => {
+            console.log(`[EngineAPI] runScenarioAsOverlay START: ${scenarioFile}`);
             // 1. "オーバーレイが閉じた" という公式イベントを一度だけリッスンする
             this.systemScene.events.once('overlay-closed', (data) => {
-// // console.log(`[EngineAPI] 'overlay-closed' event received. Resolving the promise for runScenarioAsOverlay.`);
-                
-                // 3. イベントを受け取ったら、Promiseを解決して待機を終了させる
+                console.log(`[EngineAPI] 'overlay-closed' received for ${scenarioFile}. Resolving...`); 
                 resolve();
             });
 

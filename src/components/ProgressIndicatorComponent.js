@@ -13,6 +13,7 @@ export default class ProgressIndicatorComponent {
     }
 
     show(message = "議論進行…", duration = 2000) {
+        console.log('[ProgressIndicator] show called. gameObject type:', this.gameObject.type, this.gameObject);
         let textObj = null;
         if (this.gameObject.setText) {
             textObj = this.gameObject;
