@@ -212,7 +212,9 @@ export default class BaseGameScene extends Phaser.Scene {
         }
         this.applyEventsAndEditorFunctions(gameObject, gameObject.getData('events'));
         componentsToStart.forEach(comp => {
-            try { comp.start(); } catch (e) { console.error(`[BaseGameScene] Component start error:`, e); }
+            if (typeof comp.start === 'function') {
+                try { comp.start(); } catch (e) { console.error(`[BaseGameScene] Component start error:`, e); }
+            }
         });
     }
 

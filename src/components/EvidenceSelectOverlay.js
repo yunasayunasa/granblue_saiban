@@ -37,7 +37,10 @@ export default class EvidenceSelectOverlay extends Phaser.GameObjects.Container 
         this.add(closeBtn);
 
         // 3. 左側: 拡大画像エリア
-        this.largeImage = this.scene.add.image(300, 300, null).setMaxSize(400, 400); // プレースホルダー
+        // Texture key cannot be null. Use empty string or a valid placeholder.
+        this.largeImage = this.scene.add.image(300, 300, ''); 
+        // this.largeImage.setMaxSize(400, 400); // setMaxSize might fail if texture is invalid/empty frame, so do it later or check safely
+        this.largeImage.setVisible(false); // Initially hidden
         this.add(this.largeImage);
         
         // 4. 右側: 説明エリア
