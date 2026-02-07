@@ -149,6 +149,7 @@
             "choices": [
               {
                 "text": "反論：飴を舐めていた",
+                "evidence_required": "candy_wrapper",
                 "correct": true,
                 "success_scenario": "chapter1/trial_test_success.ks"
               },
@@ -160,6 +161,7 @@
               {
                 "text": "疑問：本当に何も？",
                 "action": "update_testimony",
+                "pre_update_scenario": "chapter1/trial_interim_doubt.ks",
                 "target": "t2",
                 "new_text": "誰とも会っていませんし、ガムしか噛んでいません。",
                 "new_highlights": [
@@ -168,6 +170,7 @@
                     "choices": [
                       {
                         "text": "反論：ガムも食べ物だ",
+                        "evidence_required": "gum",
                         "correct": true,
                         "success_scenario": "chapter1/trial_test_success.ks"
                       },
@@ -186,7 +189,6 @@
       },
       {
         "id": "t3",
-        "_comment_style": "証言の表示スタイル。'scroll'（右から左へ）または 'typewriter'（中央固定タイプ）。省略時はscroll。",
         "style": "typewriter",
         "text": "魔法少女が嘘をつくはずがないでしょう？",
         "highlights": []

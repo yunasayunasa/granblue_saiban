@@ -121,6 +121,7 @@ this.registry.set('physics_define', this.cache.json.get('physics_define'));
     onLoadComplete(assetDefine) {
         // console.log("PreloadScene: 全アセットロード完了。");
         
+        // console.log("[PreloadScene] Load queue built."); // This line was moved to a more appropriate place if it refers to queue building.
         this.createGlobalAssetList();
         const charaDefs = this.createCharaDefs(assetDefine);
 

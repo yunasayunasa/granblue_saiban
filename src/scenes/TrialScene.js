@@ -1,4 +1,6 @@
 import BaseGameScene from './BaseGameScene.js';
+import EvidenceManager from '../components/EvidenceManager.js';
+import EvidenceSelectOverlay from '../components/EvidenceSelectOverlay.js';
 
 /**
  * 裁判パート用のシーン。
@@ -23,6 +25,19 @@ export default class TrialScene extends BaseGameScene {
 
     create() {
         super.create();
+        
+        // 証拠品マネージャーの初期化
+        this.evidenceManager = new EvidenceManager(this);
+        this.evidenceManager.init();
+        
+        // 証拠品選択オーバーレイの作成
+        this.evidenceSelectOverlay = new EvidenceSelectOverlay(this, this.evidenceManager);
+        this.evidenceSelectOverlay.setVisible(false);
+
+        // テスト用: 初期所持品の追加 (デバッグ)
+        this.evidenceManager.addEvidence('candy_wrapper');
+        this.evidenceManager.addEvidence('gum');
+
         this.initSceneWithData();
     }
 

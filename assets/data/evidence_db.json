@@ -1,0 +1,25 @@
+{
+  "evidence_list": [
+    {
+      "id": "candy_wrapper",
+      "name": "アメの包み紙",
+      "description": "現場に落ちていたアメの包み紙。イチゴ味のようだ。",
+      "icon": "item/potion.png",
+      "image": "item/potion.png"
+    },
+    {
+      "id": "gum",
+      "name": "ガム",
+      "description": "噛み終わったガム。ティッシュに包まれている。",
+      "icon": "item/shield.png",
+      "image": "item/shield.png"
+    },
+    {
+      "id": "broken_sword",
+      "name": "折れた剣",
+      "description": "魔法少女の武器。何らかの強い力でへし折られている。",
+      "icon": "item/sword.png",
+      "image": "item/sword.png"
+    }
+  ]
+}
