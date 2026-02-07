@@ -1,5 +1,5 @@
 
-[cm][showwindow]
+[cm]
 「本当に何も食べていないんですか？」[p]
 [chara_show name="yuna" face="default"]
 「……ええ。何も。」[p]

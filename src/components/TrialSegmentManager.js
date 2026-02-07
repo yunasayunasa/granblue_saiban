@@ -464,8 +464,18 @@ export default class TrialSegmentManager {
         // シナリオ再生
         if (scenarioFile) {
             try {
-                await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, scenarioFile, true);
-            } catch (e) { console.warn('Scenario failed:', e); }
+                // シナリオ実行とタイムアウトの競合
+                await Promise.race([
+                    EngineAPI.runScenarioAsOverlay(this.scene.scene.key, scenarioFile, true),
+                    new Promise((_, reject) => this.scene.time.delayedCall(10000, () => reject(new Error('Scenario execution timed out'))))
+                ]);
+            } catch (e) {
+                console.warn('[TrialManager] Scenario execution failed or timed out:', e);
+                // フリーズ防止のため、強制的にオーバーレイを閉じるリクエストを送る
+                EngineAPI.requestCloseOverlay('NovelOverlayScene');
+                // 少し待ってから次へ進む
+                await new Promise(r => this.scene.time.delayedCall(500, r));
+            }
         }
 
         if (isCorrect) {

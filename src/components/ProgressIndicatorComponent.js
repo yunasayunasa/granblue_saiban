@@ -18,7 +18,13 @@ export default class ProgressIndicatorComponent {
             textObj = this.gameObject;
         } else if (this.gameObject.list) {
             // Container の場合は子要素から Text を探す
-            textObj = this.gameObject.list.find(child => child.setText || child.type === 'Text');
+            textObj = this.gameObject.list.find(child => child.setText || child.type === 'Text' || child.type === 'BitmapText');
+        }
+        
+        // ★ 追加: テキストが見つからない場合のフォールバック (GameObject自体が実はTextっぽい何かだった場合)
+        if (!textObj && this.gameObject.text !== undefined) {
+             // setTextメソッドがないがtextプロパティがある場合(稀だが)
+             textObj = this.gameObject;
         }
 
         if (textObj) {
