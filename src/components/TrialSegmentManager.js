@@ -190,7 +190,7 @@ export default class TrialSegmentManager {
                         this.isFlowing = true;
                         this.currentTestimonyIndex = 0;
                         this.scene.isPaused = false; // ★ ポーズ状態をリセット
-                        this.scene.events.emit('RESUME_TRIAL'); // ポーズ解除などのため念のため
+                        // this.scene.events.emit('RESUME_TRIAL'); // ★ 削除: ここでEmitするとリスナーが反応してspawnNextTestimonyを呼んでしまい、演出と被る
                         
                         // ループ時は「LOOP」などの演出を入れる手もあるが、今回はSTARTと同じものを使うか、テキストを変える
                         this.debateStartEffect.play('LOOP', () => {
@@ -203,6 +203,7 @@ export default class TrialSegmentManager {
                         // エラー時も再ループを試みる
                         this.isFlowing = true;
                         this.currentTestimonyIndex = 0;
+                        // this.scene.events.emit('RESUME_TRIAL'); // ★ 削除
                         this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
                     });
                 return;
@@ -657,7 +658,7 @@ export default class TrialSegmentManager {
         this.currentTestimonyIndex = 0;
         this.startDebateLoop();
         this.isInteracting = false;
-        this.scene.events.emit('RESUME_TRIAL');
+        // this.scene.events.emit('RESUME_TRIAL'); // ★ 削除: startDebateLoop内で演出再生 -> onCompleteでspawn呼ばれるので不要
     }
 
     async handleTimeout() {

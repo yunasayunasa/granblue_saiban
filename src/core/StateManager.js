@@ -40,6 +40,16 @@ export default class StateManager extends Phaser.Events.EventEmitter {
             this.emit('f-variable-changed', key, value, oldValue);
         }
     }
+
+    /**
+     * f変数を取得する
+     * @param {string} key - f変数のキー
+     * @returns {*} 値
+     */
+    getF(key) {
+        return this.f[key];
+    }
+
     // --- sf (システム変数) の管理 ---
 
     /**
