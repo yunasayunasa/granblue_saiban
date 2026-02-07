@@ -140,6 +140,7 @@ export default class TrialSegmentManager {
     }
 
     startDebateLoop() {
+        console.log('[TrialSegmentManager] startDebateLoop. DUMP segmentData:', JSON.stringify(this.segmentData));
         this.isFlowing = true;
         this.currentTestimonyIndex = 0;
         // this.spawnNextTestimony(); // 開始演出後に呼び出すのでコメントアウト

@@ -18,7 +18,7 @@
     },
     {
       "name": "progress_indicator",
-      "type": "text",
+      "type": "Text",
       "x": 640,
       "y": 200,
       "text": "議論進行…",
@@ -170,13 +170,14 @@
       {
         "id": "t2",
         "style": "typewriter",
-        "text": "誰とも会っていませんし、何も食べていません。",
+        "text": "誰とも会っていませんし、何も【食べて】いません。",
         "highlights": [
           {
             "text": "食べて",
             "choices": [
               {
                 "text": "反論：飴を舐めていた",
+                "evidence_required": "candy_wrapper",
                 "correct": true,
                 "success_scenario": "chapter1/trial_test_success.ks"
               },
@@ -188,6 +189,7 @@
               {
                 "text": "疑問：本当に何も？",
                 "action": "update_testimony",
+                "pre_update_scenario": "chapter1/trial_interim_doubt.ks",
                 "target": "t2",
                 "new_text": "誰とも会っていませんし、ガムしか噛んでいません。",
                 "new_highlights": [
@@ -219,5 +221,11 @@
         "highlights": []
       }
     ]
+  },
+  "_COMMENT_TEMPLATE_GUIDE": {
+    "description": "シナリオライター向け設定ガイド",
+    "rules": {
+      "UPDATE_TESTIMONY": "「疑問」などで証言を書き換える場合。action='update_testimony'を指定。pre_update_scenarioで短い会話を再生後"
+    }
   }
 }
