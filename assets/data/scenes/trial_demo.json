@@ -27,7 +27,7 @@
     },
     {
       "name": "progress_indicator",
-      "type": "text",
+      "type": "Text",
       "x": 640,
       "y": 200,
       "text": "議論進行…",

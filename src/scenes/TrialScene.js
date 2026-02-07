@@ -2,6 +2,7 @@ import BaseGameScene from './BaseGameScene.js';
 import EvidenceManager from '../components/EvidenceManager.js';
 import EvidenceSelectOverlay from '../components/EvidenceSelectOverlay.js';
 
+
 /**
  * 裁判パート用のシーン。
  * BaseGameSceneを継承し、証言のフロー制御、ポーズ機能、タイマー管理を追加する。
@@ -132,6 +133,9 @@ export default class TrialScene extends BaseGameScene {
     startDebate() {
         // 二重開始防止
         if (this.timerEvent) this.timerEvent.destroy();
+
+        // ★ 修正: 開始時に必ずポーズ解除
+        this.setPause(false);
 
         // タイマーの開始
         this.timerEvent = this.time.addEvent({
