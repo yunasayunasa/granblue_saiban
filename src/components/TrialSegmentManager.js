@@ -309,14 +309,7 @@ export default class TrialSegmentManager {
         // rotation = angle * (Math.PI / 180)
 
         const targetRotation = targetAngle * (Math.PI / 180);
-
-        this.scene.tweens.add({
-            targets: cam,
-            rotation: targetRotation,
-            duration: 500,
-            ease: 'Cubic.easeOut'
-        });
-
+        cam.setRotation(targetRotation);
     }
 
     createTestimonyObject(data) {
@@ -427,6 +420,12 @@ export default class TrialSegmentManager {
         }
 
         const container = this.scene.add.container(x, y).setDepth(1000); // ★ 高いDepthを設定
+
+        // ★ デュアルカメラ対応: UIカメラからは除外する
+        if (this.scene.uiCamera) {
+            this.scene.uiCamera.ignore(container);
+        }
+
         const textObj = this.scene.add.text(0, 0, data.text.replace(/\|/g, '\n'), {
             fontSize: '32px',
             color: '#ffffff',

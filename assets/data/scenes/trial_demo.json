@@ -23,7 +23,8 @@
       "y": 360,
       "components": {
         "InteractionMenuComponent": {}
-      }
+      },
+      "layer": "UI"
     },
     {
       "name": "progress_indicator",
@@ -33,13 +34,15 @@
       "text": "議論進行…",
       "components": {
         "ProgressIndicatorComponent": {}
-      }
+      },
+      "layer": "UI"
     },
     {
       "name": "timer_container",
       "type": "Container",
       "x": 1100,
       "y": 80,
+      "layer": "UI",
       "depth": 2000,
       "components": [
         {
@@ -91,6 +94,7 @@
       "type": "Container",
       "x": 1100,
       "y": 180,
+      "layer": "UI",
       "depth": 2000,
       "list": [
         {

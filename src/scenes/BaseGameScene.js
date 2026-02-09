@@ -92,6 +92,14 @@ export default class BaseGameScene extends Phaser.Scene {
                 this.matter.world.engine.gravity.scale = s.gravity.enabled ? (s.gravity.scale ?? 0.001) : 0;
             }
         }
+
+        // ★ デュアルカメラシステムの設定
+        // メインカメラは既存。UIカメラを追加。
+        if (!this.uiCamera) {
+            this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height).setName('UICamera');
+            this.uiCamera.setScroll(0, 0);
+            this.uiCamera.setTransparent(true);
+        }
     }
 
     initSceneWithData() {
@@ -260,6 +268,15 @@ export default class BaseGameScene extends Phaser.Scene {
         } else if (!gameObject.parentContainer) {
             // 親コンテナ（Container内の子要素）でなければ、シーンに直接追加
             this.add.existing(gameObject);
+
+            // ★ 動的なカメラ振り分け
+            if (this.uiCamera) {
+                if (data.layer === 'UI') {
+                    this.cameras.main.ignore(gameObject);
+                } else {
+                    this.uiCamera.ignore(gameObject);
+                }
+            }
         }
 
         if (gameObject instanceof Phaser.GameObjects.Graphics && data.draw) this.applyGraphicsProperties(gameObject, data.draw);
@@ -415,6 +432,25 @@ export default class BaseGameScene extends Phaser.Scene {
     }
 
     finalizeSetup(allGameObjects) {
+        // ★ デュアルカメラの振り分け設定
+        if (this.uiCamera) {
+            // UIカメラはデフォルトですべてを無視し、UIレイヤーのみを表示する
+            // メインカメラはUIレイヤーのみを無視する
+
+            this.cameras.main.ignore(Object.values(this.layer).filter(l => l.name === 'UI'));
+
+            // UIカメラの設定: UI以外のレイヤーをすべて無視
+            const nonUiLayers = Object.values(this.layer).filter(l => l.name !== 'UI');
+            this.uiCamera.ignore(nonUiLayers);
+
+            // レイヤーに属していないオブジェクトもUIカメラからは無視する
+            this.children.list.forEach(child => {
+                if (!child.getData('layer') && child !== this.uiCamera && !Object.values(this.layer).includes(child)) {
+                    this.uiCamera.ignore(child);
+                }
+            });
+        }
+
         for (const gameObject of allGameObjects) {
             const events = gameObject.getData('events');
             if (events) {
