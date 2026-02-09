@@ -98,9 +98,13 @@ export default class BaseGameScene extends Phaser.Scene {
 
         // ★ デュアルカメラシステムの設定
         if (!this.uiCamera) {
+            // UIカメラを追加 (画面全体)
             this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height).setName('UICamera');
             this.uiCamera.setScroll(0, 0);
-            // UIカメラはクリアせず、メインカメラの描画結果の上に重ねる
+
+            // 重要: メインカメラの結果の上に透明度を保持したまま重ねる
+            // 背景色を透明に設定し、クリアを有効にする (または clearBeforeRender=false にして背景色設定なしにする)
+            // ここでは clearBeforeRender=false が最も安全
             this.uiCamera.clearBeforeRender = false;
         }
     }
@@ -245,7 +249,9 @@ export default class BaseGameScene extends Phaser.Scene {
         if (!this.uiCamera) return;
 
         // 親を辿って UI レイヤーに属しているかチェック
-        let isUI = (layerName === 'UI');
+        // または gameObject 自体が 'UI' という名前かチェック
+        let isUI = (layerName === 'UI' || gameObject.name === 'UI');
+
         if (!isUI) {
             let p = gameObject.parentContainer;
             while (p) {
@@ -258,10 +264,25 @@ export default class BaseGameScene extends Phaser.Scene {
         }
 
         if (isUI) {
+            // UI要素ならメインカメラ（回転する方）からは隠す
             this.cameras.main.ignore(gameObject);
         } else {
+            // それ以外（背景、キャラ等）はUIカメラ（水平な方）からは隠す
             this.uiCamera.ignore(gameObject);
         }
+    }
+
+    findGameObjectByName(name, root = null) {
+        // ルートが指定されていない場合は、シーンの表示リストから探す
+        const list = root ? (root.list || []) : this.children.list;
+        for (const child of list) {
+            if (child.name === name) return child;
+            if (child instanceof Phaser.GameObjects.Container) {
+                const found = this.findGameObjectByName(name, child);
+                if (found) return found;
+            }
+        }
+        return null;
     }
 
     applyProperties(gameObject, data) {
@@ -303,7 +324,8 @@ export default class BaseGameScene extends Phaser.Scene {
             this.add.existing(gameObject);
         }
 
-        // 動的なカメラ振り分け
+        // ★ 動的なカメラ振り分け
+        // 親子関係が確定した後に登録することで、親のレイヤー情報を正確にキャッチする
         this.registerToCamera(gameObject, data.layer);
 
         if (gameObject instanceof Phaser.GameObjects.Graphics && data.draw) this.applyGraphicsProperties(gameObject, data.draw);
@@ -312,13 +334,10 @@ export default class BaseGameScene extends Phaser.Scene {
             data.list.forEach(childLayout => {
                 const child = this.createObjectFromLayout(childLayout);
                 if (child) {
+                    // 子要素を親コンテナに追加した「後」に applyProperties が再帰的に呼ばれるようにする
+                    // (現状は applyProperties 内で add(child) しているが、タイミングを整理)
+                    gameObject.add(child);
                     this.applyProperties(child, childLayout);
-                    // Container.add(child) はすでに行われる（applyProperties内で再帰的に呼ばれるため不要だが、
-                    // 明示的にここで呼ぶか、applyProperties側のロジックに任せるか。
-                    // 現状の applyProperties の data.layer がない場合は add.existing されるので注意。
-                    // Containerの子要素の場合は parentContainer がセットされるはずだが、
-                    // new 直後はセットされていないため、第二引数等で制御する必要がある。
-                    if (!child.parentContainer) gameObject.add(child);
                     this.initComponentsAndEvents(child);
                 }
             });
@@ -459,24 +478,18 @@ export default class BaseGameScene extends Phaser.Scene {
     }
 
     finalizeSetup(allGameObjects) {
-        // ★ デュアルカメラの振り分け設定
+        // ★ デュアルカメラの振り分けを最終確定
         if (this.uiCamera) {
-            // UIレイヤーのコンテナを取得
-            const uiLayer = this.layer['UI'];
-            if (uiLayer) {
-                this.cameras.main.ignore(uiLayer);
-            }
-
-            // UI以外の全レイヤー
-            const otherLayers = Object.values(this.layer).filter(l => l.name !== 'UI');
-            this.uiCamera.ignore(otherLayers);
-
-            // レイヤー外のトップレベルオブジェクトもUIカメラからは無視する
+            // シーン内の全オブジェクトを走査して振り分けを徹底
             this.children.list.forEach(child => {
+                // registerToCamera を呼び出して、現在の親子関係に基づいて ignore を設定
                 const layer = child.getData('layer');
-                if (layer !== 'UI' && !Object.values(this.layer).includes(child)) {
-                    this.uiCamera.ignore(child);
-                }
+                this.registerToCamera(child, layer);
+            });
+
+            // レイヤーコンテナ自体も確実に振り分け
+            Object.entries(this.layer).forEach(([name, container]) => {
+                this.registerToCamera(container, name);
             });
         }
 

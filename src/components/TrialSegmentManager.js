@@ -238,14 +238,22 @@ export default class TrialSegmentManager {
 
     // キャラ画像を一括検索する内部メソッド
     _findCharacterImages() {
-        if (!this.charaImages.left) this.charaImages.left = this.scene.children.getByName('character_left');
-        if (!this.charaImages.center) this.charaImages.center = this.scene.children.getByName('character_center');
-        if (!this.charaImages.right) this.charaImages.right = this.scene.children.getByName('character_right');
+        const charNames = {
+            left: 'character_left',
+            center: 'character_center',
+            right: 'character_right'
+        };
 
-        console.log('[TrialSegmentManager] Character status check:',
-            'L:', !!this.charaImages.left,
-            'C:', !!this.charaImages.center,
-            'R:', !!this.charaImages.right);
+        for (const [key, name] of Object.entries(charNames)) {
+            if (this.scene.findGameObjectByName) {
+                this.charaImages[key] = this.scene.findGameObjectByName(name);
+            } else {
+                this.charaImages[key] = this.scene.children.getByName(name);
+            }
+        }
+
+        console.log('[TrialSegmentManager] Found characters:',
+            Object.entries(this.charaImages).map(([k, v]) => `${k}: ${v ? v.name : 'null'}`).join(', '));
     }
 
     // キャラ表示切り替えメソッド
@@ -277,7 +285,7 @@ export default class TrialSegmentManager {
 
         if (target) {
             target.setVisible(true);
-            console.log('[TrialSegmentManager] Showing character for index', index, 'at position:', pos, '(Data pos:', posStr, ')');
+            console.log(`[TrialSegmentManager] Showing character target: ${target.name} at position: ${pos}`);
 
             // ★ カメラ回転演出
             this._rotateCameraForPosition(pos);
@@ -310,6 +318,7 @@ export default class TrialSegmentManager {
 
         const targetRotation = targetAngle * (Math.PI / 180);
         cam.setRotation(targetRotation);
+        console.log(`[TrialSegmentManager] MainCamera rotation set to: ${targetRotation} (rad) / ${targetAngle} (deg)`);
     }
 
     createTestimonyObject(data) {
