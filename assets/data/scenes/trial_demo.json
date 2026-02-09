@@ -8,6 +8,14 @@
   },
   "objects": [
     {
+      "name": "background_underlay",
+      "type": "image",
+      "x": 640,
+      "y": 360,
+      "texture": "bg_school",
+      "layer": "Background"
+    },
+    {
       "name": "trial_manager",
       "type": "container",
       "x": 0,
@@ -15,6 +23,33 @@
       "components": {
         "TrialSegmentManager": {}
       }
+    },
+    {
+      "name": "character_left",
+      "type": "image",
+      "x": 300,
+      "y": 450,
+      "texture": "yuna_angry",
+      "visible": false,
+      "layer": "Gameplay"
+    },
+    {
+      "name": "character_center",
+      "type": "image",
+      "x": 640,
+      "y": 450,
+      "texture": "yuna_angry",
+      "visible": false,
+      "layer": "Gameplay"
+    },
+    {
+      "name": "character_right",
+      "type": "image",
+      "x": 980,
+      "y": 450,
+      "texture": "yuna_angry",
+      "visible": false,
+      "layer": "Gameplay"
     },
     {
       "name": "interaction_menu",
