@@ -136,7 +136,8 @@
       "EVIDENCE_REQUIRED": "証拠品提示が必要な場合。evidence_required='ID'を指定。これがある場合、選択肢を選んだ後に証拠品選択画面が開きます。",
       "CORRECT_FLOW": "正解の場合。correct=true。success_scenario再生後、next_trial_dataがあれば次のパートへ進みます。",
       "FAILURE_FLOW": "不正解(証拠品なし)の場合。correct=false。failure_scenario再生後、自動的に議論の最初(restart)に戻ります。",
-      "WRONG_EVIDENCE": "証拠品提示で間違ったものを選んだ場合。failure_scenario_evidenceがあればそれを再生し、その後『再度証拠品選択画面』が開きます(Retry)。"
+      "WRONG_EVIDENCE": "証拠品提示で間違ったものを選んだ場合。failure_scenario_evidenceがあればそれを再生し、その後『再度証拠品選択画面』が開きます(Retry)。",
+      "TAGS": "テキスト内で使える演出タグ: {se:音SE名} (再生), {cam:shake} (振動), {chara:感情} (表情変更)。例: 『絶対に{se:bang}{cam:shake}違う！』"
     },
     "example_structure": {
       "text": "疑問：本当に何も？",
@@ -155,12 +156,14 @@
     "testimonies": [
       {
         "id": "t1",
-        "text": "私は昨日の夜、ずっと部屋にいました。",
+        "position": "left",
+        "text": "私は昨日の夜、{se:popopo}ずっと部屋にいました。",
         "highlights": []
       },
       {
         "id": "t2",
-        "text": "誰とも会っていませんし、何も食べていません。",
+        "position": "right",
+        "text": "誰とも会っていませんし、{cam:shake}何も食べていません。",
         "highlights": [
           {
             "text": "食べて",
@@ -207,8 +210,9 @@
       },
       {
         "id": "t3",
+        "position": "center",
         "style": "typewriter",
-        "text": "魔法少女が嘘をつくはずがないでしょう？",
+        "text": "魔法少女が|嘘をつくはずがないでしょう？",
         "highlights": []
       }
     ]

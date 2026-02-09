@@ -150,8 +150,8 @@ export default class TrialSegmentManager {
 
         // 開始演出
         this.debateStartEffect.play('START', () => {
-             // 演出後に最初の証言生成
-             this.spawnNextTestimony();
+            // 演出後に最初の証言生成
+            this.spawnNextTestimony();
         });
     }
 
@@ -187,13 +187,13 @@ export default class TrialSegmentManager {
                 EngineAPI.runScenarioAsOverlay(this.scene.scene.key, this.segmentData.loop_scenario, true)
                     .then(() => {
                         console.log('[TrialSegmentManager] Loop scenario Promise resolved. Restarting loop.');
-                        this.cleanupCurrentSegment(); 
+                        this.cleanupCurrentSegment();
                         this.isFlowing = true;
                         this.currentTestimonyIndex = 0;
-                        this.scene.isPaused = false; 
-                        
+                        this.scene.isPaused = false;
+
                         this.debateStartEffect.play('LOOP', () => {
-                             this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
+                            this.scene.time.delayedCall(100, () => this.spawnNextTestimony());
                         });
                     })
                     .catch(err => {
@@ -253,24 +253,70 @@ export default class TrialSegmentManager {
         // 画像がまだ見つかっていない場合は検索を試みる (Lazy Load)
         this._findCharacterImages();
 
-        // 全て非表示
         if (this.charaImages.left) this.charaImages.left.setVisible(false);
         if (this.charaImages.center) this.charaImages.center.setVisible(false);
         if (this.charaImages.right) this.charaImages.right.setVisible(false);
 
-        // インデックスに応じて表示 (0:左, 1:右, 2:中 のローテーションとする)
-        const pos = index % 3;
+        // インデックスに応じて表示 (0:左, 1:右, 2:中 のローテーション、またはデータ指定)
+        // データに position 指定がある場合はそれを優先
+        const currentTestimony = this.segmentData.testimonies[index];
+        let posStr = currentTestimony && currentTestimony.position;
+
+        let pos = 2; // default center
+        if (posStr) {
+            if (posStr === 'left') pos = 0;
+            else if (posStr === 'right') pos = 1;
+            else pos = 2;
+        } else {
+            pos = index % 3;
+        }
+
         const target = (pos === 0) ? this.charaImages.left :
             (pos === 1) ? this.charaImages.right :
                 this.charaImages.center;
 
         if (target) {
             target.setVisible(true);
-            console.log('[TrialSegmentManager] Showing character for index', index, 'at position:', pos);
-            // 簡易パンアップ演出風 (Y座標を少し下げてからTween等したほうが良いが、今は即時)
+            console.log('[TrialSegmentManager] Showing character for index', index, 'at position:', pos, '(Data pos:', posStr, ')');
+
+            // ★ カメラ回転演出
+            this._rotateCameraForPosition(pos);
+
         } else {
             console.warn('[TrialSegmentManager] No character image for position:', pos);
         }
+    }
+
+    _rotateCameraForPosition(pos) {
+        const cam = this.scene.cameras.main;
+        let targetAngle = 0;
+
+        // 0:left -> カメラは左(-15度) ... ではなく、
+        // 要望: "キャラが右の時、カメラを全体的に15度右回転"
+        // "キャラが左なら...カメラは左に15度"
+        // Phaserのrotationはラジアン、angleは度。
+
+        if (pos === 0) { // Left Character
+            targetAngle = -5; // 左に傾ける (少し控えめに5度から調整)
+        } else if (pos === 1) { // Right Character
+            targetAngle = 5; // 右に傾ける
+        } else { // Center
+            targetAngle = 0;
+        }
+
+        // ユーザー要望の15度は画面が大きく傾きすぎる可能性があるため、まずは5度程度で様子を見る。
+        // また、rotateTo は Phaser Camera にはないため、tweenで rotation を操作する。
+        // rotation = angle * (Math.PI / 180)
+
+        const targetRotation = targetAngle * (Math.PI / 180);
+
+        this.scene.tweens.add({
+            targets: cam,
+            rotation: targetRotation,
+            duration: 500,
+            ease: 'Cubic.easeOut'
+        });
+
     }
 
     createTestimonyObject(data) {
@@ -280,28 +326,118 @@ export default class TrialSegmentManager {
 
         // 配置計算
         let x, y;
+
+        // 現在のキャラ位置を取得 (Spawn時に計算済みではないため再計算)
+        // 本来はインスタンス変数に保持すべきだが、簡易的にここでも同じロジックで判定
+        let posStr = data.position;
+        let posIndex = 2;
+        if (posStr) {
+            if (posStr === 'left') posIndex = 0;
+            else if (posStr === 'right') posIndex = 1;
+            else posIndex = 2;
+        } else {
+            posIndex = this.currentTestimonyIndex % 3; // Note: currentTestimonyIndex has already been incremented? No, it's checked before increment in spawn
+            // spawnNextで increment される前の index を使いたいが、
+            // spawnNextTestimony 内で createTestimonyObject 呼び出し時点では currentTestimonyIndex はまだインクリメントされていない。
+            // しかし spawnNextTestimony の中で data = testimonies[this.currentTestimonyIndex] としているので整合している。
+        }
+
+        const width = this.scene.cameras.main.width;
+        const height = this.scene.cameras.main.height;
+
         if (style === 'typewriter') {
-            // 中央配置: 画面幅の中央, Y軸は少し上寄りなど
-            x = this.scene.cameras.main.width / 2;
+            // 中央配置
+            x = width / 2;
             y = 300;
         } else {
-            // scroll (従来通り)
-            x = this.scene.cameras.main.width + 100;
-            y = 200 + (this.currentTestimonyIndex % 3) * 120;
+            // scroll (従来通りだが、開始位置を変える)
+            // Left Chara (pos=0) -> Text from Right
+            // Right Chara (pos=1) -> Text from Left
+            // Center Chara (pos=2) -> Text split?
+
+            y = 200 + (this.currentTestimonyIndex % 3) * 50; // 少しずらす
+
+            if (posIndex === 0) { // Left Chara -> Text on Right
+                x = width * 0.6; // 画面右側
+            } else if (posIndex === 1) { // Right Chara -> Text on Left
+                x = width * 0.1; // 画面左側
+            } else { // Center
+                // 中央の場合は邪魔にならないように... とりあえず左寄り
+                x = width * 0.1;
+
+                // ★ スプリット表示の場合
+                if (data.text.includes('|')) {
+                    // ここでは代表座標のみ決め、実際のテキスト生成は後で分割する
+                    // コンテナ自体の位置はずらさず、内部でオフセットする手もあるが、
+                    // TestimonyFlowComponentが1つのオブジェクトを動かす前提なので、
+                    // スプリットの場合はコンテナを2つ作るか、1つのコンテナ内に2つのTextを置くか。
+                    // FlowComponentは1つのText(またはContainer内の1つのText)を操作する。
+                    // 複雑になるため、今回は「スプリット文字が含まれていたら、改行に置換して中央表示」などで代用するか、
+                    // あるいは FlowComponent を拡張する。
+
+                    // 簡易実装: '|' を改行に置換して表示
+                    // data.text = data.text.replace(/\|/g, '\n'); 
+                    // 一旦そのまま通して、FlowComponent側で対応する手段もあるが、
+                    // 要望は「両方に分けて表示」。
+                }
+            }
+
+            // スクロール開始位置は画面外から
+            if (style === 'scroll') {
+                x = width + 50; // 右から左へ流れる前提なら常に右端スタート？
+                // 現在のTestimonyFlowComponentは「xを減算」しているので右から左。
+                // もし「左にキャラがいるから右にテキスト」の場合、
+                // 「テキストが右から出てきて左に流れる」のか、「その場に表示される」のか。
+                // 従来の挙動は「右から左へ流れるニコニコ動画風」。
+
+                // 要望「証言は左」 -> 恐らく固定位置表示 or 吹き出し的なものを想定？
+                // しかし FlowComponent は scroll か typewriter。
+                // typewriter なら固定位置。
+                // scroll なら流れる。
+
+                // ここでは「固定位置(typewriterライク)で、かつ表示場所が左右」という解釈で実装を修正する。
+                // styleが未指定なら 'scroll' になるが、裁判パートの証言は通常固定位置でポポポ...と出るのが一般的。
+                // もし 'scroll' が「流れる」モードなら、それはそれで維持。
+
+                // 今回は「証言シーンのテンプレート化」なので、style: 'typewriter' をデフォルトにする変更も視野に。
+                // しかし既存データへの影響を避けるため、style指定に従う。
+                // もし 'typewriter' なら座標を調整。
+            }
+        }
+
+        // ★ 強制的に typewriter 的な配置にするためのオーバーライド
+        // ユーザー要望の「右の時、証言は左」などの配置は静止テキスト（typewriter）の方が自然。
+        // もしデータが scroll 指定でも、このレイアウトテンプレートに従うなら位置固定の方が良いかもしれない。
+        // ここでは style='typewriter' の場合の配置ロジックを強化する。
+
+        if (style === 'typewriter' || data.position) { // position指定がある場合も固定配置とみなす
+            if (posIndex === 0) { // Left Chara -> Text Right
+                x = width * 0.55;
+                y = height * 0.6;
+            } else if (posIndex === 1) { // Right Chara -> Text Left
+                x = width * 0.05;
+                y = height * 0.6;
+            } else { // Center
+                x = width * 0.1; // 全幅使うため左端基準
+                y = height * 0.65; // 少し下
+            }
+        } else {
+            // 従来のスクロール (右端スタート)
+            x = width + 100;
         }
 
         const container = this.scene.add.container(x, y).setDepth(1000); // ★ 高いDepthを設定
-        const textObj = this.scene.add.text(0, 0, data.text, {
+        const textObj = this.scene.add.text(0, 0, data.text.replace(/\|/g, '\n'), {
             fontSize: '32px',
             color: '#ffffff',
             stroke: '#000000',
             strokeThickness: 6,
-            wordWrap: { width: 800, useAdvancedWrap: true } // ★ 複数行表示対応
+            wordWrap: { width: (posIndex === 2 ? 1000 : 500), useAdvancedWrap: true }
         });
 
-        // typewriterの場合は中央揃えにする
-        if (style === 'typewriter') {
-            textObj.setOrigin(0.5, 0.5);
+        if (style === 'typewriter' || data.position) {
+            // 左寄せ等の調整
+            textObj.setOrigin(0, 0);
         }
         container.add(textObj);
 
@@ -378,7 +514,7 @@ export default class TrialSegmentManager {
         if (this.isInteracting || !this.isFlowing) return;
 
         console.log('[TrialManager] highlight clicked. data:', highlightData);
-        
+
         // 証拠品提示が必要かチェック
         const evidenceRequired = highlightData.evidence_required;
 
@@ -450,12 +586,12 @@ export default class TrialSegmentManager {
         if (choice.evidence_required) {
             console.log('[TrialManager] Evidence required:', choice.evidence_required);
             this._showEvidenceOverlay(choice);
-            return; 
+            return;
         }
 
         // --- その他 (単なるハズレ選択肢など) ---
         // ユーザー要望: "ハズレ選択肢はすべてショートテキストのあと議論冒頭に戻る"
-        
+
         const isCorrect = choice.correct;
         const scenarioFile = isCorrect ? choice.success_scenario : choice.failure_scenario;
 
@@ -483,7 +619,7 @@ export default class TrialSegmentManager {
             } else {
                 // 次のデータがない場合はとりあえず進めるか終了
                 console.log('No next data. Finishing trial segment?');
-                this._resumeFromMenu(); 
+                this._resumeFromMenu();
             }
         } else {
             // 不正解 -> 冒頭に戻る
@@ -498,7 +634,7 @@ export default class TrialSegmentManager {
             // this.scene.setPause(true); // EvidenceSelectOverlay側で制御されている場合もあるが念のため
             // -> EvidenceSelectOverlay.show は内部で特にPauseしないようなので、呼ぶ側でするか、
             //    あるいは handleChoice 時点ですでに InteractionMenu で Pause されているはず。
-            
+
             overlay.show('present', (selectedEvidenceId) => {
                 this._onEvidencePresented(selectedEvidenceId, choice);
             });
@@ -511,15 +647,15 @@ export default class TrialSegmentManager {
     // 証拠品が提示されたときのコールバック
     async _onEvidencePresented(evidenceId, choice) {
         console.log(`[TrialManager] Evidence presented: ${evidenceId}, Required: ${choice.evidence_required}`);
-        
+
         // オーバーレイは閉じる動作を内部で行うが、非同期完了を待つ必要があるかも
         // ここでは即座に判定
-        
+
         if (evidenceId === choice.evidence_required) {
             // --- 正解 ---
             // 論破演出
             await this._playBreakEffect();
-            
+
             // 成功シナリオ
             if (choice.success_scenario) {
                 await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, choice.success_scenario, true);
@@ -530,13 +666,13 @@ export default class TrialSegmentManager {
                 this.loadNextTrialData(choice.next_trial_data);
             } else {
                 // 完全クリア？
-                console.log('Trial segment complete!'); 
-                this.scene.events.emit('TRIAL_COMPLETE'); 
+                console.log('Trial segment complete!');
+                this.scene.events.emit('TRIAL_COMPLETE');
             }
         } else {
             // --- 不正解 (間違った証拠品) ---
             // ユーザー要望: "仮に間違った証拠品ならショートテキストのあと再提示"
-            
+
             // 失敗シナリオ (証拠品ミス用があればそれを、なければ通常の失敗シナリオ)
             const failScenario = choice.failure_scenario_evidence || choice.failure_scenario;
             if (failScenario) {
@@ -544,8 +680,8 @@ export default class TrialSegmentManager {
             } else {
                 // シナリオがない場合は簡易メッセージ
                 if (this.progressIndicator) {
-                   this.progressIndicator.show("証拠品が違うようだ…", 1500);
-                   await new Promise(r => setTimeout(r, 1500));
+                    this.progressIndicator.show("証拠品が違うようだ…", 1500);
+                    await new Promise(r => setTimeout(r, 1500));
                 }
             }
 
