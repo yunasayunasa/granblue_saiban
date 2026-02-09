@@ -100,8 +100,8 @@ export default class BaseGameScene extends Phaser.Scene {
         if (!this.uiCamera) {
             this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height).setName('UICamera');
             this.uiCamera.setScroll(0, 0);
-            // UIカメラは背景をクリアせず、完全に透明にする
-            this.uiCamera.setBackgroundColor(0x000000, 0);
+            // UIカメラはクリアせず、メインカメラの描画結果の上に重ねる
+            this.uiCamera.clearBeforeRender = false;
         }
     }
 
@@ -244,7 +244,20 @@ export default class BaseGameScene extends Phaser.Scene {
     registerToCamera(gameObject, layerName) {
         if (!this.uiCamera) return;
 
-        if (layerName === 'UI') {
+        // 親を辿って UI レイヤーに属しているかチェック
+        let isUI = (layerName === 'UI');
+        if (!isUI) {
+            let p = gameObject.parentContainer;
+            while (p) {
+                if (p.name === 'UI' || p.getData('layer') === 'UI') {
+                    isUI = true;
+                    break;
+                }
+                p = p.parentContainer;
+            }
+        }
+
+        if (isUI) {
             this.cameras.main.ignore(gameObject);
         } else {
             this.uiCamera.ignore(gameObject);
@@ -448,18 +461,20 @@ export default class BaseGameScene extends Phaser.Scene {
     finalizeSetup(allGameObjects) {
         // ★ デュアルカメラの振り分け設定
         if (this.uiCamera) {
-            // UIカメラはデフォルトですべてを無視し、UIレイヤーのみを表示する
-            // メインカメラはUIレイヤーのみを無視する
+            // UIレイヤーのコンテナを取得
+            const uiLayer = this.layer['UI'];
+            if (uiLayer) {
+                this.cameras.main.ignore(uiLayer);
+            }
 
-            this.cameras.main.ignore(Object.values(this.layer).filter(l => l.name === 'UI'));
+            // UI以外の全レイヤー
+            const otherLayers = Object.values(this.layer).filter(l => l.name !== 'UI');
+            this.uiCamera.ignore(otherLayers);
 
-            // UIカメラの設定: UI以外のレイヤーをすべて無視
-            const nonUiLayers = Object.values(this.layer).filter(l => l.name !== 'UI');
-            this.uiCamera.ignore(nonUiLayers);
-
-            // レイヤーに属していないオブジェクトもUIカメラからは無視する
+            // レイヤー外のトップレベルオブジェクトもUIカメラからは無視する
             this.children.list.forEach(child => {
-                if (!child.getData('layer') && child !== this.uiCamera && !Object.values(this.layer).includes(child)) {
+                const layer = child.getData('layer');
+                if (layer !== 'UI' && !Object.values(this.layer).includes(child)) {
                     this.uiCamera.ignore(child);
                 }
             });

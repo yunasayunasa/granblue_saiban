@@ -1,5 +1,6 @@
 import NovelOverlayScene from '../scenes/NovelOverlayScene.js';
 
+
 export default class OverlayManager {
     /** @type {import('../scenes/SystemScene.js').default} */
     systemScene;
