@@ -98,7 +98,6 @@ export default class BaseGameScene extends Phaser.Scene {
         if (!this.uiCamera) {
             this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height).setName('UICamera');
             this.uiCamera.setScroll(0, 0);
-            this.uiCamera.setTransparent(true);
         }
     }
 
