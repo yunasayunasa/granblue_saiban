@@ -1,6 +1,6 @@
 {
   "scene_settings": {
-    "backgroundColor": "#ff0033",
+    "backgroundColor": "#000033",
     "gravity": {
       "enabled": false
     },
@@ -8,48 +8,12 @@
   },
   "objects": [
     {
-      "name": "interaction_menu",
-      "type": "container",
+      "name": "background_underlay",
+      "type": "image",
       "x": 640,
       "y": 360,
-      "components": {
-        "InteractionMenuComponent": {}
-      }
-    },
-    {
-      "name": "progress_indicator",
-      "type": "Text",
-      "x": 640,
-      "y": 200,
-      "text": "議論進行…",
-      "components": {
-        "ProgressIndicatorComponent": {}
-      }
-    },
-    {
-      "name": "character_left",
-      "type": "image",
-      "x": 200,
-      "y": 400,
-      "texture": "yuna_angry",
-      "_comment": "仮のキャラ画像。textureキーは適宜変更してください",
-      "visible": false
-    },
-    {
-      "name": "character_center",
-      "type": "image",
-      "x": 640,
-      "y": 400,
-      "texture": "yuna_angry",
-      "visible": false
-    },
-    {
-      "name": "character_right",
-      "type": "image",
-      "x": 1080,
-      "y": 400,
-      "texture": "yuna_angry",
-      "visible": false
+      "texture": "bg_school",
+      "layer": "Background"
     },
     {
       "name": "trial_manager",
@@ -61,10 +25,59 @@
       }
     },
     {
+      "name": "character_left",
+      "type": "image",
+      "x": 300,
+      "y": 450,
+      "texture": "yuna_angry",
+      "visible": false,
+      "layer": "Gameplay"
+    },
+    {
+      "name": "character_center",
+      "type": "image",
+      "x": 640,
+      "y": 450,
+      "texture": "yuna_angry",
+      "visible": false,
+      "layer": "Gameplay"
+    },
+    {
+      "name": "character_right",
+      "type": "image",
+      "x": 980,
+      "y": 450,
+      "texture": "yuna_angry",
+      "visible": false,
+      "layer": "Gameplay"
+    },
+    {
+      "name": "interaction_menu",
+      "type": "container",
+      "x": 640,
+      "y": 360,
+      "components": {
+        "InteractionMenuComponent": {}
+      },
+      "layer": "UI"
+    },
+    {
+      "name": "progress_indicator",
+      "type": "Text",
+      "x": 640,
+      "y": 200,
+      "text": "議論進行…",
+      "components": {
+        "ProgressIndicatorComponent": {}
+      },
+      "layer": "UI"
+    },
+    {
       "name": "timer_container",
       "type": "Container",
       "x": 1100,
       "y": 80,
+      "layer": "UI",
       "depth": 2000,
       "components": [
         {
@@ -116,6 +129,7 @@
       "type": "Container",
       "x": 1100,
       "y": 180,
+      "layer": "UI",
       "depth": 2000,
       "list": [
         {

@@ -85,7 +85,10 @@ export default class BaseGameScene extends Phaser.Scene {
         const data = this.cache.json.get(key);
         if (data && data.scene_settings) {
             const s = data.scene_settings;
-            if (s.backgroundColor) this.cameras.main.setBackgroundColor(s.backgroundColor);
+            if (s.backgroundColor) {
+                // メインカメラの背景色を設定（PhaserはCSSカラー文字列を受け入れ可能）
+                this.cameras.main.setBackgroundColor(s.backgroundColor);
+            }
             if (this.matter && this.matter.world && s.gravity) {
                 this.matter.world.engine.gravity.x = s.gravity.enabled ? (s.gravity.x || 0) : 0;
                 this.matter.world.engine.gravity.y = s.gravity.enabled ? (s.gravity.y || 0) : 0;
@@ -94,10 +97,11 @@ export default class BaseGameScene extends Phaser.Scene {
         }
 
         // ★ デュアルカメラシステムの設定
-        // メインカメラは既存。UIカメラを追加。
         if (!this.uiCamera) {
             this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height).setName('UICamera');
             this.uiCamera.setScroll(0, 0);
+            // UIカメラは背景をクリアせず、完全に透明にする
+            this.uiCamera.setBackgroundColor(0x000000, 0);
         }
     }
 
@@ -225,6 +229,28 @@ export default class BaseGameScene extends Phaser.Scene {
         });
     }
 
+    getLayer(name) {
+        if (!this.layer[name]) {
+            this.layer[name] = this.add.container(0, 0).setName(name);
+            const depths = { 'Background': 0, 'Gameplay': 10, 'UI': 100, 'Overlay': 1000 };
+            if (depths[name] !== undefined) this.layer[name].setDepth(depths[name]);
+
+            // レイヤーコンテナ自体のカメラ振り分け
+            this.registerToCamera(this.layer[name], name);
+        }
+        return this.layer[name];
+    }
+
+    registerToCamera(gameObject, layerName) {
+        if (!this.uiCamera) return;
+
+        if (layerName === 'UI') {
+            this.cameras.main.ignore(gameObject);
+        } else {
+            this.uiCamera.ignore(gameObject);
+        }
+    }
+
     applyProperties(gameObject, data) {
         gameObject.name = data.name || 'untitled';
         if (data.data) { for (const key in data.data) gameObject.setData(key, data.data[key]); }
@@ -257,26 +283,15 @@ export default class BaseGameScene extends Phaser.Scene {
 
         // ★ レイヤーまたは表示リストへの追加ロジックを復元
         if (data.layer) {
-            if (!this.layer[data.layer]) {
-                this.layer[data.layer] = this.add.container(0, 0).setName(data.layer);
-                // ★ レイヤーごとのデフォルト深度を設定
-                const depths = { 'Background': 0, 'Gameplay': 10, 'UI': 100, 'Overlay': 1000 };
-                if (depths[data.layer] !== undefined) this.layer[data.layer].setDepth(depths[data.layer]);
-            }
-            this.layer[data.layer].add(gameObject);
+            const layerObj = this.getLayer(data.layer);
+            layerObj.add(gameObject);
         } else if (!gameObject.parentContainer) {
             // 親コンテナ（Container内の子要素）でなければ、シーンに直接追加
             this.add.existing(gameObject);
-
-            // ★ 動的なカメラ振り分け
-            if (this.uiCamera) {
-                if (data.layer === 'UI') {
-                    this.cameras.main.ignore(gameObject);
-                } else {
-                    this.uiCamera.ignore(gameObject);
-                }
-            }
         }
+
+        // 動的なカメラ振り分け
+        this.registerToCamera(gameObject, data.layer);
 
         if (gameObject instanceof Phaser.GameObjects.Graphics && data.draw) this.applyGraphicsProperties(gameObject, data.draw);
 

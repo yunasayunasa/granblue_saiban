@@ -421,9 +421,9 @@ export default class TrialSegmentManager {
 
         const container = this.scene.add.container(x, y).setDepth(1000); // ★ 高いDepthを設定
 
-        // ★ デュアルカメラ対応: UIカメラからは除外する
-        if (this.scene.uiCamera) {
-            this.scene.uiCamera.ignore(container);
+        // ★ デュアルカメラ対応: UIカメラからは除外する（MainCamera側で回転させる）
+        if (this.scene.registerToCamera) {
+            this.scene.registerToCamera(container, 'Gameplay');
         }
 
         const textObj = this.scene.add.text(0, 0, data.text.replace(/\|/g, '\n'), {

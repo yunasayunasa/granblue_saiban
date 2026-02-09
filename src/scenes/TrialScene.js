@@ -26,14 +26,19 @@ export default class TrialScene extends BaseGameScene {
 
     create() {
         super.create();
-        
+
         // 証拠品マネージャーの初期化
         this.evidenceManager = new EvidenceManager(this);
         this.evidenceManager.init();
-        
+
         // 証拠品選択オーバーレイの作成
         this.evidenceSelectOverlay = new EvidenceSelectOverlay(this, this.evidenceManager);
         this.evidenceSelectOverlay.setVisible(false);
+
+        // ★ UIレイヤーに追加してカメラ振り分け
+        const uiLayer = this.getLayer('UI');
+        uiLayer.add(this.evidenceSelectOverlay);
+        this.registerToCamera(this.evidenceSelectOverlay, 'UI');
 
         // テスト用: 初期所持品の追加 (デバッグ)
         this.evidenceManager.addEvidence('candy_wrapper');
@@ -48,9 +53,14 @@ export default class TrialScene extends BaseGameScene {
     createEvidenceButton() {
         const x = 150;
         const y = 80;
-        
+
         const container = this.add.container(x, y).setDepth(2000).setScrollFactor(0);
-        
+
+        // ★ UIレイヤーに追加してカメラ振り分け
+        const uiLayer = this.getLayer('UI');
+        uiLayer.add(container);
+        this.registerToCamera(container, 'UI');
+
         // 背景 (角丸四角)
         const bg = this.add.graphics();
         bg.fillStyle(0x000000, 0.6);
@@ -75,24 +85,24 @@ export default class TrialScene extends BaseGameScene {
                 // 議論中(isFlowing)でも見れるようにするが、ポーズはしておいたほうが無難
                 if (this.evidenceSelectOverlay) {
                     if (this.evidenceSelectOverlay.visible) {
-                         this.evidenceSelectOverlay.hide();
-                         this.setPause(false);
+                        this.evidenceSelectOverlay.hide();
+                        this.setPause(false);
                     } else {
-                         this.setPause(true);
-                         this.evidenceSelectOverlay.show('view', () => {
-                             // viewモードなのでコールバックは基本使わないが、閉じた時の処理用
-                         });
-                         // Overlay側で閉じるボタンが押されたらここに戻る仕組みが必要だが、
-                         // 現状のOverlayはhide()するだけ。
-                         // Overlayのhideでポーズ解除が必要。
-                         // 簡易的に、Overlayのhideをフックするか、OverlayにonCloseを持たせる。
-                         // EvidenceSelectOverlayを少し修正して、onCloseコールバックを受け取れるようにするのが良いが、
-                         // ここでは一旦、OverlayのcloseBtnクリック時にシーンのresumeを呼ぶように改造するか、
-                         // またはEvidenceSelectOverlayからイベントを発火させる。
+                        this.setPause(true);
+                        this.evidenceSelectOverlay.show('view', () => {
+                            // viewモードなのでコールバックは基本使わないが、閉じた時の処理用
+                        });
+                        // Overlay側で閉じるボタンが押されたらここに戻る仕組みが必要だが、
+                        // 現状のOverlayはhide()するだけ。
+                        // Overlayのhideでポーズ解除が必要。
+                        // 簡易的に、Overlayのhideをフックするか、OverlayにonCloseを持たせる。
+                        // EvidenceSelectOverlayを少し修正して、onCloseコールバックを受け取れるようにするのが良いが、
+                        // ここでは一旦、OverlayのcloseBtnクリック時にシーンのresumeを呼ぶように改造するか、
+                        // またはEvidenceSelectOverlayからイベントを発火させる。
                     }
                 }
             });
-        
+
         // Overlayが閉じられたときにポーズ解除するイベントをリッスン
         if (this.evidenceSelectOverlay) {
             this.evidenceSelectOverlay.on('CLOSE_OVERLAY', () => {
