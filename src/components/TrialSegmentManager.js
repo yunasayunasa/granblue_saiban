@@ -488,42 +488,65 @@ export default class TrialSegmentManager {
             flowComponent.start();
         }
 
-        // ハイライト設定
+        // ハイライト設定と当たり判定の構築
         if (data.highlights && data.highlights.length > 0) {
-            // ★ 修正: 色変え(setTint)は全体が変わってしまい分かりにくいため廃止。
-            // 代わりに、テキスト自体を加工して【】で囲むことで強調箇所を示す。
+            // テキストの加工（強調表示）
             let modifiedText = data.text;
             data.highlights.forEach(h => {
-                // 単純置換
                 modifiedText = modifiedText.replace(h.text, `【${h.text}】`);
             });
 
-            // コンポーネントのテキストを更新（タイピング開始前なので間に合う）
-            // container内のTextオブジェクトも更新しておく必要がある
             textObj.setText(modifiedText);
-
-            // FlowComponent側にも新しいテキストを伝える
-            if (flowComponent) {
-                flowComponent.fullText = modifiedText;
-            }
-
-            // コンテナもサイズ再計算（文字数が増えたため）
+            if (flowComponent) flowComponent.fullText = modifiedText;
             textObj.updateText();
+
+            // コンテナサイズを更新
             container.setSize(textObj.width, textObj.height);
 
-            // 重要：ハイライトがある場合のみ指マークとクリックイベントを設定
-            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains);
-            container.input.useHandCursor = true;
+            // ★ ハイライトごとの個別判定範囲を生成
+            // 本来は正確な座標計算が必要だが、ここでは簡易的に
+            // 「ハイライトの数だけ、テキストの下に並べる or 特定のオフセットで配置」
+            // ユーザー要望の「可視化」として、黄色いボックスを作成
 
-            container.on('pointerdown', () => {
-                console.log(`[TrialManager] Testimony highlight clicked! ID: ${data.id}, isInteracting: ${this.isInteracting}`);
-                this.onHighlightClicked(data.highlights[0]);
+            data.highlights.forEach((h, index) => {
+                // ハイライト箇所を特定してボックスを置く
+                // ※ 正確な文字座標取得は困難なため、ここでは「全幅をハイライト数で割る」か、
+                // あるいは「全体をクリック範囲としつつ、可視化ボックスを中央に置く」などの暫定対応を行う。
+                // ユーザーが「個別判定」を求めているため、重ならないように配置を試みる。
+
+                const padding = 10;
+                const boxW = textObj.width / data.highlights.length;
+                const boxH = textObj.height + padding * 2;
+                const boxX = (index * boxW);
+                const boxY = -padding;
+
+                const hitBox = this.scene.add.graphics();
+                hitBox.fillStyle(0xffff00, 0.3); // 半透明黄色
+                hitBox.lineStyle(2, 0xffff00, 0.8);
+                hitBox.fillRect(0, 0, boxW, boxH);
+                hitBox.strokeRect(0, 0, boxW, boxH);
+
+                const hitZone = this.scene.add.container(boxX, boxY);
+                hitZone.add(hitBox);
+                hitZone.setSize(boxW, boxH);
+                hitZone.setInteractive({ useHandCursor: true })
+                    .on('pointerdown', (pointer, localX, localY, event) => {
+                        event.stopPropagation(); // 重なり防止
+                        console.log(`[TrialManager] Highlight Area ${index} clicked!`, h.text);
+                        this.onHighlightClicked(h);
+                    });
+
+                container.add(hitZone);
             });
+
+            // コンテナ自体のインタラクティブ設定（フォールバック用、または全体を吸い取らないように低優先に）
+            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains);
+            container.input.enabled = false; // 個別Zoneに任せる
         } else {
-            // ハイライトがない場合もクリック領域自体は設定（ただし指マークはなし）
+            // ハイライトがない場合
             textObj.updateText();
             container.setSize(textObj.width, textObj.height);
-            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains);
+            // 何もしない（クリック不可）
         }
 
         this.activeTestimonies.push(container);
