@@ -75,7 +75,7 @@
     {
       "name": "timer_container",
       "type": "Container",
-      "x": 1100,
+      "x": 1230,
       "y": 80,
       "layer": "UI",
       "depth": 2000,
@@ -90,34 +90,21 @@
       "list": [
         {
           "name": "timer_bg",
-          "type": "Graphics",
-          "draw": {
-            "type": "roundedRect",
-            "x": -150,
-            "y": -35,
-            "width": 300,
-            "height": 70,
-            "radius": 15,
-            "fill": {
-              "color": "0x000000",
-              "alpha": 0.6
-            },
-            "lineStyle": {
-              "width": 3,
-              "color": "0xffffff",
-              "alpha": 0.8
-            }
-          }
+          "type": "Image",
+          "x": -150,
+          "y": 0,
+          "texture": "timer_back",
+          "origin": 0.5
         },
         {
           "name": "timer_text",
           "type": "Text",
-          "x": 0,
+          "x": -150,
           "y": 2,
           "origin": 0.5,
           "text": "LIMIT 05:00",
           "style": {
-            "fontSize": "36px",
+            "fontSize": "30px",
             "color": "#ffffff",
             "fontFamily": "serif"
           }
@@ -127,34 +114,23 @@
     {
       "name": "fast_forward_button",
       "type": "Container",
-      "x": 1100,
+      "x": 1230,
       "y": 180,
       "layer": "UI",
       "depth": 2000,
       "list": [
         {
           "name": "ff_bg",
-          "type": "Graphics",
-          "draw": {
-            "type": "circle",
-            "x": 0,
-            "y": 0,
-            "radius": 40,
-            "fill": {
-              "color": "0xffffff",
-              "alpha": 0.2
-            },
-            "lineStyle": {
-              "width": 2,
-              "color": "0xffffff",
-              "alpha": 0.5
-            }
-          }
+          "type": "Image",
+          "x": -40,
+          "y": 0,
+          "texture": "speedbutton",
+          "origin": 0.5
         },
         {
           "name": "ff_text",
           "type": "Text",
-          "x": 0,
+          "x": -40,
           "y": -2,
           "origin": 0.5,
           "text": ">>",

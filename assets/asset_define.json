@@ -24,7 +24,9 @@
     "chest": "assets/images/chest.png",
     "hasira_bottom": "assets/images/hasira_bottom.png",
     "hasira_center": "assets/images/hasira_center.png",
-    "taimatsu_on": "assets/images/taimatsu_on.png"
+    "taimatsu_on": "assets/images/taimatsu_on.png",
+    "timer_back": "assets/images/timer_back.png",
+    "speedbutton": "assets/images/speedbutton.png"
   },
   "spritesheets": {
     "walk": {
