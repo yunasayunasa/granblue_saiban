@@ -10,7 +10,7 @@ export default class EvidenceSelectOverlay extends Phaser.GameObjects.Container 
         super(scene, 0, 0);
         this.scene = scene;
         this.evidenceManager = evidenceManager;
-        
+
         // 画面サイズショートカット
         this.width = scene.scale.width;
         this.height = scene.scale.height;
@@ -27,23 +27,23 @@ export default class EvidenceSelectOverlay extends Phaser.GameObjects.Container 
 
     _createUI() {
         // 1. 背景 (半透明の黒)
-        this.bg = this.scene.add.rectangle(this.width/2, this.height/2, this.width, this.height, 0x000000, 0.85);
+        this.bg = this.scene.add.rectangle(this.width / 2, this.height / 2, this.width, this.height, 0x000000, 0.85);
         this.bg.setInteractive(); // 下の要素をクリックさせない
         this.add(this.bg);
 
         // 2. ブロッカー (閉じる用) - 右上の×ボタンなど
-        const closeBtn = this.scene.add.text(this.width - 50, 50, '×', { fontSize: '48px', color: '#ffffff' })
+        this.closeBtn = this.scene.add.text(this.width - 50, 50, '×', { fontSize: '48px', color: '#ffffff' })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.hide());
-        this.add(closeBtn);
+        this.add(this.closeBtn);
 
         // 3. 左側: 拡大画像エリア
         // Texture key cannot be null. Use empty string or a valid placeholder.
-        this.largeImage = this.scene.add.image(300, 300, ''); 
+        this.largeImage = this.scene.add.image(300, 300, '');
         // this.largeImage.setMaxSize(400, 400); // setMaxSize might fail if texture is invalid/empty frame, so do it later or check safely
         this.largeImage.setVisible(false); // Initially hidden
         this.add(this.largeImage);
-        
+
         // 4. 右側: 説明エリア
         this.descContainer = this.scene.add.container(600, 100);
         this.titleText = this.scene.add.text(0, 0, '', { fontSize: '40px', color: '#ffcc00', fontStyle: 'bold' });
@@ -55,17 +55,17 @@ export default class EvidenceSelectOverlay extends Phaser.GameObjects.Container 
         this.presentBtn = this.scene.add.text(300, 550, 'つきつける', {
             fontSize: '32px', padding: { x: 20, y: 10 }, color: '#ffffff', backgroundColor: '#aa0000'
         })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .setVisible(false)
-        .on('pointerdown', () => this._onPresentBtnClicked());
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .setVisible(false)
+            .on('pointerdown', () => this._onPresentBtnClicked());
         this.add(this.presentBtn);
 
         // 6. 下部: リストエリア (スクロールコンテナは複雑なので、一旦簡易的なページングか、コンテナ並べで実装)
         // 今回は物理的に並べる（数が少ない前提）
         this.listContainer = this.scene.add.container(0, this.height - 150);
         // 背景帯
-        const listBg = this.scene.add.rectangle(this.width/2, 75, this.width, 150, 0x222222);
+        const listBg = this.scene.add.rectangle(this.width / 2, 75, this.width, 150, 0x222222);
         this.listContainer.add(listBg);
         this.add(this.listContainer);
 
@@ -85,6 +85,7 @@ export default class EvidenceSelectOverlay extends Phaser.GameObjects.Container 
 
         // ボタン表示切り替え
         this.presentBtn.setVisible(this.isModePresent);
+        this.closeBtn.setVisible(!this.isModePresent); // ★ 提示モードなら ×ボタンを隠す
 
         // リスト更新
         this._refreshList();
@@ -136,10 +137,10 @@ export default class EvidenceSelectOverlay extends Phaser.GameObjects.Container 
             const y = 75; // listContainer内のY
 
             const iconContainer = this.scene.add.container(x, y);
-            
+
             // アイコン枠
             const frame = this.scene.add.rectangle(0, 0, 100, 100, 0x444444).setStrokeStyle(2, 0xffffff);
-            
+
             // アイコン画像 (アセットがロードされている前提、なければ文字)
             let icon;
             if (this.scene.textures.exists(item.icon)) {

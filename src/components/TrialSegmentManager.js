@@ -15,6 +15,7 @@ export default class TrialSegmentManager {
         this.activeTestimonies = [];
         this.isInteracting = false;
         this.isFlowing = false;
+        this.waitingForNext = false;
 
         this.interactionMenu = null;
         this.progressIndicator = null;
@@ -76,6 +77,12 @@ export default class TrialSegmentManager {
         // エフェクトインスタンス
         this.cutInEffect = new CutInEffect(this.scene);
         this.debateStartEffect = new DebateStartEffect(this.scene);
+
+        // ★ デュアルカメラ対応: 演出は常に水平に表示するためUIカメラに登録
+        if (this.scene.registerToCamera) {
+            this.scene.registerToCamera(this.cutInEffect, 'UI');
+            this.scene.registerToCamera(this.debateStartEffect, 'UI');
+        }
 
         // 中間シナリオ再生中フラグ
         this.isPlayingInterim = false;
@@ -618,6 +625,9 @@ export default class TrialSegmentManager {
         }
 
         if (isCorrect) {
+            // ★ 進行時はカメラをリセット
+            this._rotateCameraForPosition(-1); // -1 or null to reset
+
             // 正解 (証拠品なしで正解になるケースは稀だが、あれば次へ)
             if (choice.next_trial_data) {
                 this.loadNextTrialData(choice.next_trial_data);
@@ -658,6 +668,9 @@ export default class TrialSegmentManager {
 
         if (evidenceId === choice.evidence_required) {
             // --- 正解 ---
+            // ★ 進行時はカメラをリセット（論破演出の前に戻しておく）
+            this._rotateCameraForPosition(-1);
+
             // 論破演出
             await this._playBreakEffect();
 
@@ -824,6 +837,9 @@ export default class TrialSegmentManager {
         this.activeTestimonies = [];
         this.isInteracting = false; // ★ インタラクション状態もリセット
         this.waitingForNext = false; // ★ 次周回への誤爆防止
+
+        // ★ カメラリセットを徹底
+        this._rotateCameraForPosition(-1);
     }
 
     // ★ 冒頭からやり直す（リセット）
