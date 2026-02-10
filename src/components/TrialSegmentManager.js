@@ -117,9 +117,14 @@ export default class TrialSegmentManager {
             // 早送りボタンの初期化
             const ffButton = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('fast_forward_button') : this.scene.children.getByName('fast_forward_button');
             if (ffButton) {
+                // 画像(ff_bg)が0,0に配置されているため、Circleも0,0でOK
                 ffButton.setInteractive(new Phaser.Geom.Circle(0, 0, 40), Phaser.Geom.Circle.Contains);
+                ffButton.input.useHandCursor = true;
                 ffButton.isDown = false;
-                ffButton.on('pointerdown', () => { ffButton.isDown = true; });
+                ffButton.on('pointerdown', () => {
+                    ffButton.isDown = true;
+                    console.log('[TrialManager] FastForward active');
+                });
                 ffButton.on('pointerup', () => { ffButton.isDown = false; });
                 ffButton.on('pointerout', () => { ffButton.isDown = false; });
                 console.log('[TrialManager] FastForward button initialized.');
