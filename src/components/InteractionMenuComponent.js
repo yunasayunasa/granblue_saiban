@@ -57,15 +57,55 @@ export default class InteractionMenuComponent {
     }
 
     createChoiceButton(choice, index) {
-        const y = index * 60;
-        const btn = this.scene.add.text(0, y, choice.text, {
-            fontSize: '24px',
-            backgroundColor: '#000000',
-            padding: { x: 10, y: 5 }
+        const spacing = 120; // 選択肢同士の間隔を広げる
+        const y = index * spacing;
+
+        const container = this.scene.add.container(0, y);
+
+        // --- 1. 土台 (楕円) ---
+        const bgW = 900; // 横に長く
+        const bgH = 100; // 縦も少し厚めに
+        const bg = this.scene.add.graphics();
+
+        const drawBg = (color, alpha) => {
+            bg.clear();
+            bg.fillStyle(color, alpha);
+            // 楕円を描画 (Phaser 3 では fillEllipse)
+            bg.fillEllipse(0, 0, bgW, bgH);
+            // 枠線
+            bg.lineStyle(3, 0xffffff, 0.4);
+            bg.strokeEllipse(0, 0, bgW, bgH);
+        };
+
+        drawBg(0x000000, 0.7); // 初期状態: 半透明黒
+        container.add(bg);
+
+        // --- 2. テキスト (巨大/明朝体) ---
+        const btnText = this.scene.add.text(0, 0, choice.text, {
+            fontSize: '64px',
+            color: '#ffffff',
+            fontFamily: '"Times New Roman", "MS PMincho", serif',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        container.add(btnText);
+
+        // --- 3. インタラクション ---
+        // ヒットエリアを楕円に合わせる
+        container.setSize(bgW, bgH);
+        container.setInteractive(new Phaser.Geom.Ellipse(0, 0, bgW, bgH), Phaser.Geom.Ellipse.Contains);
+        container.input.useHandCursor = true;
+
+        container.on('pointerover', () => {
+            drawBg(0x000033, 0.9); // ホバー時: 少し青っぽく、濃く
+            btnText.setScale(1.05); // 少し大きく
         });
 
-        btn.setInteractive({ useHandCursor: true });
-        btn.on('pointerdown', () => {
+        container.on('pointerout', () => {
+            drawBg(0x000000, 0.7);
+            btnText.setScale(1.0);
+        });
+
+        container.on('pointerdown', () => {
             console.log('[InteractionMenu] Selected:', choice);
             this.hide();
             if (this.onSelection) {
@@ -73,7 +113,7 @@ export default class InteractionMenuComponent {
             }
         });
 
-        this.gameObject.add(btn);
+        this.gameObject.add(container);
     }
 
     hide() {
