@@ -509,29 +509,25 @@ export default class TrialSegmentManager {
             // ユーザー要望の「可視化」として、黄色いボックスを作成
 
             data.highlights.forEach((h, index) => {
-                // ハイライト箇所を特定してボックスを置く
-                // ※ 正確な文字座標取得は困難なため、ここでは「全幅をハイライト数で割る」か、
-                // あるいは「全体をクリック範囲としつつ、可視化ボックスを中央に置く」などの暫定対応を行う。
-                // ユーザーが「個別判定」を求めているため、重ならないように配置を試みる。
-
                 const padding = 10;
                 const boxW = textObj.width / data.highlights.length;
                 const boxH = textObj.height + padding * 2;
                 const boxX = (index * boxW);
                 const boxY = -padding;
 
+                // 可視化ボックス
                 const hitBox = this.scene.add.graphics();
                 hitBox.fillStyle(0xffff00, 0.3); // 半透明黄色
                 hitBox.lineStyle(2, 0xffff00, 0.8);
-                hitBox.fillRect(0, 0, boxW, boxH);
-                hitBox.strokeRect(0, 0, boxW, boxH);
+                hitBox.fillRect(boxX, boxY, boxW, boxH);
+                hitBox.strokeRect(boxX, boxY, boxW, boxH);
+                container.add(hitBox);
 
-                const hitZone = this.scene.add.container(boxX, boxY);
-                hitZone.add(hitBox);
-                hitZone.setSize(boxW, boxH);
+                // ★ 判定ゾーン: 中央座標指定
+                const hitZone = this.scene.add.zone(boxX + boxW / 2, boxY + boxH / 2, boxW, boxH);
                 hitZone.setInteractive({ useHandCursor: true })
                     .on('pointerdown', (pointer, localX, localY, event) => {
-                        event.stopPropagation(); // 重なり防止
+                        if (event) event.stopPropagation(); // 貫通・重なり防止
                         console.log(`[TrialManager] Highlight Area ${index} clicked!`, h.text);
                         this.onHighlightClicked(h);
                     });
