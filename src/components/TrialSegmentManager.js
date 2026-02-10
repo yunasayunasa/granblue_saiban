@@ -78,7 +78,14 @@ export default class TrialSegmentManager {
         this.cutInEffect = new CutInEffect(this.scene);
         this.debateStartEffect = new DebateStartEffect(this.scene);
 
-        // ★ デュアルカメラ対応: 演出は常に水平に表示するためUIカメラに登録
+        // ★ デュアルカメラ対応: 演出は常に水平に表示するためUIレイヤーに登録しUIカメラで描画
+        const uiLayer = this.scene.getLayer ? this.scene.getLayer('UI') : null;
+        if (uiLayer) {
+            uiLayer.add([this.cutInEffect, this.debateStartEffect]);
+            this.cutInEffect.setData('layer', 'UI');
+            this.debateStartEffect.setData('layer', 'UI');
+        }
+
         if (this.scene.registerToCamera) {
             this.scene.registerToCamera(this.cutInEffect, 'UI');
             this.scene.registerToCamera(this.debateStartEffect, 'UI');

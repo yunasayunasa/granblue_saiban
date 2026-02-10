@@ -4,15 +4,15 @@
       "id": "candy_wrapper",
       "name": "アメの包み紙",
       "description": "現場に落ちていたアメの包み紙。イチゴ味のようだ。",
-      "icon": "item/potion.png",
-      "image": "item/potion.png"
+      "icon": "taru",
+      "image": "taru"
     },
     {
       "id": "gum",
       "name": "ガム",
       "description": "噛み終わったガム。ティッシュに包まれている。",
-      "icon": "item/shield.png",
-      "image": "item/shield.png"
+      "icon": "chest",
+      "image": "chest"
     },
     {
       "id": "broken_sword",
