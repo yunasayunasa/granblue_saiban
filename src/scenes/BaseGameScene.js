@@ -58,16 +58,6 @@ export default class BaseGameScene extends Phaser.Scene {
             // console.log("[BaseGameScene] Y-Sort is enabled for this scene.");
         }
         this.applySceneSettings();
-
-        // ★ 入力デバッグ用グローバルリスナー
-        this.input.on('pointerdown', (pointer, currentlyOver) => {
-            console.log(`[BaseInputDebug] PointerDown at (${pointer.worldX}, ${pointer.worldY}) in camera: ${pointer.camera.name}`);
-            if (currentlyOver && currentlyOver.length > 0) {
-                console.log(`[BaseInputDebug] Over ${currentlyOver.length} objects:`, currentlyOver.map(o => o.name || o.type));
-            } else {
-                console.log(`[BaseInputDebug] Over NO objects.`);
-            }
-        });
     }
     /**
          * ★★★ 新規追加 ★★★

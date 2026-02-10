@@ -86,7 +86,7 @@ export default class TrialSegmentManager {
 
         // ★ 修正: 確実に全オブジェクトが生成されるのを待つため、微小な遅延を入れる
         this.scene.time.delayedCall(10, () => {
-            const menuObj = this.scene.children.getByName('interaction_menu');
+            const menuObj = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('interaction_menu') : this.scene.children.getByName('interaction_menu');
             if (menuObj && menuObj.components && menuObj.components.InteractionMenuComponent) {
                 this.interactionMenu = menuObj.components.InteractionMenuComponent;
                 this.interactionMenu.onSelection = (choice) => this.handleChoice(choice);
@@ -95,13 +95,13 @@ export default class TrialSegmentManager {
                 console.warn('[TrialSegmentManager] InteractionMenuComponent NOT found.');
             }
 
-            const indicatorObj = this.scene.children.getByName('progress_indicator');
+            const indicatorObj = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('progress_indicator') : this.scene.children.getByName('progress_indicator');
             if (indicatorObj && indicatorObj.components && indicatorObj.components.ProgressIndicatorComponent) {
                 this.progressIndicator = indicatorObj.components.ProgressIndicatorComponent;
             }
 
             // 早送りボタンの初期化
-            const ffButton = this.scene.children.getByName('fast_forward_button');
+            const ffButton = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('fast_forward_button') : this.scene.children.getByName('fast_forward_button');
             if (ffButton) {
                 ffButton.setInteractive(new Phaser.Geom.Circle(0, 0, 40), Phaser.Geom.Circle.Contains);
                 ffButton.isDown = false;
@@ -123,7 +123,7 @@ export default class TrialSegmentManager {
                 this.segmentData = layoutData.trial_data;
 
                 // タイマーの初期化 (あれば)
-                const timerObj = this.scene.children.getByName('timer_container');
+                const timerObj = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('timer_container') : this.scene.children.getByName('timer_container');
                 if (timerObj && timerObj.components && timerObj.components.TrialTimerComponent) {
                     const timer = timerObj.components.TrialTimerComponent;
                     if (this.segmentData.timeLimit) {
@@ -502,12 +502,8 @@ export default class TrialSegmentManager {
             container.input.useHandCursor = true;
 
             container.on('pointerdown', () => {
-                console.log('[TrialManager] Testimony highlight clicked! ID:', data.id, 'isInteracting:', this.isInteracting);
+                console.log(`[TrialManager] Testimony highlight clicked! ID: ${data.id}, isInteracting: ${this.isInteracting}`);
                 this.onHighlightClicked(data.highlights[0]);
-            });
-
-            container.on('pointerover', () => {
-                console.log('[TrialManager] Hover OVER testimony highlight:', data.id);
             });
         } else {
             // ハイライトがない場合もクリック領域自体は設定（ただし指マークはなし）
@@ -540,7 +536,7 @@ export default class TrialSegmentManager {
     _showInteractionMenu(highlightData) {
         // ★ 遅延検索: クリックされた瞬間にメニューを探す（確実に存在するため）
         if (!this.interactionMenu) {
-            const menuObj = this.scene.children.getByName('interaction_menu');
+            const menuObj = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('interaction_menu') : this.scene.children.getByName('interaction_menu');
             if (menuObj && menuObj.components && menuObj.components.InteractionMenuComponent) {
                 this.interactionMenu = menuObj.components.InteractionMenuComponent;
                 this.interactionMenu.onSelection = (choice) => this.handleChoice(choice);
@@ -865,7 +861,7 @@ export default class TrialSegmentManager {
         // 2. 画面上の「早送りボタン」(名前: fast_forward_button) が押されているか
         let isFF = this.fastForwardKey.isDown;
 
-        const ffButton = this.scene.children.getByName('fast_forward_button');
+        const ffButton = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('fast_forward_button') : this.scene.children.getByName('fast_forward_button');
         if (ffButton && ffButton.isDown) { // isDown は自前で管理する必要があるかもしれない
             isFF = true;
         }
