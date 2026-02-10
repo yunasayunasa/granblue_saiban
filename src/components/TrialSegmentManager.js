@@ -494,25 +494,26 @@ export default class TrialSegmentManager {
             }
 
             // コンテナもサイズ再計算（文字数が増えたため）
-            // updateTextなどでサイズが即時反映されない場合があるため少し余裕を持たせるか、
-            // 次のフレームで更新されるのを待つが、ここでは簡易的に再セット
             textObj.updateText();
             container.setSize(textObj.width, textObj.height);
 
             // 重要：ハイライトがある場合のみ指マークとクリックイベントを設定
-            container.setInteractive({ useHandCursor: true });
-            container.input.hitArea = new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height);
-            container.input.hitAreaCallback = Phaser.Geom.Rectangle.Contains;
+            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains);
+            container.input.useHandCursor = true;
 
             container.on('pointerdown', () => {
-                console.log('[TrialManager] Testimony clicked:', modifiedText);
+                console.log('[TrialManager] Testimony highlight clicked! ID:', data.id, 'isInteracting:', this.isInteracting);
                 this.onHighlightClicked(data.highlights[0]);
             });
+
+            container.on('pointerover', () => {
+                console.log('[TrialManager] Hover OVER testimony highlight:', data.id);
+            });
         } else {
-            // ハイライトがない場合は指マークを出さない（通常のヒットエリアのみ）
-            container.setInteractive({ useHandCursor: false });
-            container.input.hitArea = new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height);
-            container.input.hitAreaCallback = Phaser.Geom.Rectangle.Contains;
+            // ハイライトがない場合もクリック領域自体は設定（ただし指マークはなし）
+            textObj.updateText();
+            container.setSize(textObj.width, textObj.height);
+            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains);
         }
 
         this.activeTestimonies.push(container);
