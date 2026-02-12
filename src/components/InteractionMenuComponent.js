@@ -57,32 +57,34 @@ export default class InteractionMenuComponent {
     }
 
     createChoiceButton(choice, index) {
-        const spacing = 120; // 選択肢同士の間隔を広げる
+        const isBack = choice.isBack || false;
+        const spacing = 120;
         const y = index * spacing;
 
         const container = this.scene.add.container(0, y);
 
         // --- 1. 土台 (楕円) ---
-        const bgW = 900; // 横に長く
-        const bgH = 100; // 縦も少し厚めに
+        // 通常は600px、戻るボタンは半分の300px
+        const bgW = isBack ? 300 : 600;
+        const bgH = isBack ? 50 : 100;
         const bg = this.scene.add.graphics();
 
         const drawBg = (color, alpha) => {
             bg.clear();
             bg.fillStyle(color, alpha);
-            // 楕円を描画 (Phaser 3 では fillEllipse)
             bg.fillEllipse(0, 0, bgW, bgH);
             // 枠線
-            bg.lineStyle(3, 0xffffff, 0.4);
+            bg.lineStyle(isBack ? 2 : 3, 0xffffff, 0.4);
             bg.strokeEllipse(0, 0, bgW, bgH);
         };
 
-        drawBg(0x000000, 0.7); // 初期状態: 半透明黒
+        drawBg(0x000000, 0.7);
         container.add(bg);
 
-        // --- 2. テキスト (巨大/明朝体) ---
+        // --- 2. テキスト (通常は巨大、戻るは半分) ---
+        const fontSize = isBack ? '32px' : '64px';
         const btnText = this.scene.add.text(0, 0, choice.text, {
-            fontSize: '64px',
+            fontSize: fontSize,
             color: '#ffffff',
             fontFamily: '"Times New Roman", "MS PMincho", serif',
             fontStyle: 'bold'
@@ -90,14 +92,13 @@ export default class InteractionMenuComponent {
         container.add(btnText);
 
         // --- 3. インタラクション ---
-        // ヒットエリアを楕円に合わせる
         container.setSize(bgW, bgH);
         container.setInteractive(new Phaser.Geom.Ellipse(0, 0, bgW, bgH), Phaser.Geom.Ellipse.Contains);
         container.input.useHandCursor = true;
 
         container.on('pointerover', () => {
-            drawBg(0x000033, 0.9); // ホバー時: 少し青っぽく、濃く
-            btnText.setScale(1.05); // 少し大きく
+            drawBg(0x000033, 0.9);
+            btnText.setScale(1.05);
         });
 
         container.on('pointerout', () => {
