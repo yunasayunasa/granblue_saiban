@@ -92,9 +92,8 @@ export default class InteractionMenuComponent {
         container.add(btnText);
 
         // --- 3. インタラクション ---
-        // ★ 修正: Ellipse のパラメータは半径 (radiusX, radiusY) が必要
-        container.setSize(bgW, bgH);
-        const hitEllipse = new Phaser.Geom.Ellipse(0, 0, bgW / 2, bgH / 2);
+        // ★ 修正: Ellipse は直径ベース、setSizeは不要（Shapeで判定するため）
+        const hitEllipse = new Phaser.Geom.Ellipse(0, 0, bgW, bgH);
         container.setInteractive(hitEllipse, Phaser.Geom.Ellipse.Contains);
         container.input.useHandCursor = true;
 
