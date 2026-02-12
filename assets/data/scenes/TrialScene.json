@@ -75,8 +75,8 @@
     {
       "name": "timer_container",
       "type": "Container",
-      "x": 450,
-      "y": 60,
+      "x": 1230,
+      "y": 80,
       "layer": "UI",
       "depth": 2000,
       "components": [
@@ -91,7 +91,7 @@
         {
           "name": "timer_bg",
           "type": "Image",
-          "x": 0,
+          "x": -150,
           "y": 0,
           "texture": "timer_back",
           "origin": 0.5
@@ -99,7 +99,7 @@
         {
           "name": "timer_text",
           "type": "Text",
-          "x": -40,
+          "x": -190,
           "y": -12,
           "origin": 0.5,
           "text": "LIMIT 05:00",

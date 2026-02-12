@@ -64,9 +64,9 @@ export default class InteractionMenuComponent {
         const container = this.scene.add.container(0, y);
 
         // --- 1. 土台 (楕円) ---
-        // 通常は600px、戻るボタンは半分の300px
+        // 通常: 600x140、戻る: 300x70
         const bgW = isBack ? 300 : 600;
-        const bgH = isBack ? 50 : 100;
+        const bgH = isBack ? 70 : 140;
         const bg = this.scene.add.graphics();
 
         const drawBg = (color, alpha) => {
@@ -81,8 +81,8 @@ export default class InteractionMenuComponent {
         drawBg(0x000000, 0.7);
         container.add(bg);
 
-        // --- 2. テキスト (通常は巨大、戻るは半分) ---
-        const fontSize = isBack ? '32px' : '64px';
+        // --- 2. テキスト (通常: 48px、戻る: 28px) ---
+        const fontSize = isBack ? '28px' : '48px';
         const btnText = this.scene.add.text(0, 0, choice.text, {
             fontSize: fontSize,
             color: '#ffffff',
@@ -92,8 +92,10 @@ export default class InteractionMenuComponent {
         container.add(btnText);
 
         // --- 3. インタラクション ---
+        // ★ 修正: Ellipse のパラメータは半径 (radiusX, radiusY) が必要
         container.setSize(bgW, bgH);
-        container.setInteractive(new Phaser.Geom.Ellipse(0, 0, bgW, bgH), Phaser.Geom.Ellipse.Contains);
+        const hitEllipse = new Phaser.Geom.Ellipse(0, 0, bgW / 2, bgH / 2);
+        container.setInteractive(hitEllipse, Phaser.Geom.Ellipse.Contains);
         container.input.useHandCursor = true;
 
         container.on('pointerover', () => {
