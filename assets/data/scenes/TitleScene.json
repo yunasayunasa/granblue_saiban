@@ -39,10 +39,9 @@
           "nodes": [
             {
               "id": "node_1760055261835",
-              "type": "fire_game_flow_event",
+              "type": "run_scenario",
               "params": {
-                "data": "{}",
-                "event": "START_GAME"
+                "scenario": "first_converted.ks"
               },
               "x": 50,
               "y": 50
