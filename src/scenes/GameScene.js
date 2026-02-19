@@ -15,8 +15,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     init(data) {
-        this.charaDefs = data.charaDefs;
-        this.startScenario = data.startScenario || 'test';
+        this.charaDefs = data.charaDefs || {};
+        this.startScenario = data.startScenario || data.scenario || 'test';
         this.loadSlot = data.loadSlot; // ロードするスロット番号を受け取る
         this.returnParams = data.returnParams || null;
     }

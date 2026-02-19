@@ -87,6 +87,12 @@ export default class SceneTransitionManager {
         }
 
         const targetScene = this.systemScene.scene.get(sceneKey);
+        if (!targetScene) {
+            console.error(`[SceneTransitionManager] FATAL: Scene '${sceneKey}' could not be found or added. Aborting transition.`);
+            this.isProcessing = false;
+            this.systemScene.game.input.enabled = true;
+            return;
+        }
         if (sceneKey === 'GameScene') {
             // console.log(`[SceneTransitionManager] Attaching a one-time shutdown listener to GameScene.`);
             // GameSceneがシャットダウンするイベントを、一度だけリッスンする
