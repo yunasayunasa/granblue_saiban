@@ -14,11 +14,7 @@
     [p]
 
     #フェニー
-    サブリナにチョコを渡したくて、
-    [p]
-    その為の器材や材料が買いたいんだよ！
-    [p]
-    どっちを先に買いに行ったほうがいいかな？
+    サブリナにチョコを渡したくて、[br]その為の器材や材料が買いたいんだよ！[br]どっちを先に買いに行ったほうがいいかな？
     [l]
 
     ; 選択肢
@@ -40,11 +36,7 @@
 
     [chara_show name="fenny" storage="roger_normal" pos="center"] 
     #フェニー
-    ま、まずいんだよ！
-    [p]
-    サブリナにチョコを渡す計画がバレちゃうんだよ！
-    [p]
-    団長さん！なんとかしてぇ！
+    ま、まずいんだよ！[br]サブリナにチョコを渡す計画がバレちゃうんだよ！[br]団長さん！なんとかしてぇ！
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
@@ -70,13 +62,7 @@
     [chara_hide name="sabrina" time="200" wait="true"]
     [chara_show name="fenny" storage="roger_normal" pos="center"]
     #フェニー
-    ふぇぇ！なんとかして欲しいのは
-    [p]
-    フェニーの方なんだよ！？
-    [p]
-    で、でも、団長さんがいうなら、
-    [p]
-    なんとかしてみるんだよ！
+    ふぇぇ！なんとかして欲しいのは[br]フェニーの方なんだよ！？[br]で、でも、団長さんがいうなら、[br]なんとかしてみるんだよ！
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
@@ -90,9 +76,7 @@
 
     [chara_show name="fenny" storage="roger_normal" pos="center"]
     #フェニー
-    サブリナ！
-    [p]
-    実はその...団長さんとデート中んだよ！
+    サブリナ！[br]実はその...団長さんとデート中んだよ！
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
     [stopbgm] 
@@ -110,9 +94,7 @@
 
     [chara_show name="sabrina" storage="roger_normal" pos="center"]
     #サブリナ
-    団長...。どういうこと？
-    [p]
-    ちょっとあっちで"お話"しようか...
+    団長...。どういうこと？[br]ちょっとあっちで"お話"しようか...
     [p]
     [chara_hide name="sabrina" time="200" wait="true"]
 
@@ -126,6 +108,7 @@
     [p]
     ～バッドエンド～
     [l]
+    [jump storage="TitleScene"]
     [s]
 
 *ingredients_deceive
@@ -221,6 +204,7 @@
 
     ～ジュウダンロンパエンド～
     [l]
+    [jump storage="TitleScene"]
     [s]
 
 ; ----- 器材ルート -----
@@ -279,11 +263,7 @@
     [p]
     これは良いものよ...。
     [p]
-    ヒヒイロカネはその希少性から市場にほぼ出回ることはないわ。
-    [p]
-    だからこそそれを贅沢に使ったこのヒヒイロボウルは...
-    [p]
-    （中略：ハウヘトの講釈が続く）
+    ヒヒイロカネはその希少性から市場にほぼ出回ることはないわ。[br]だからこそそれを贅沢に使ったこのヒヒイロボウルは...[br]（中略：ハウヘトの講釈が続く）
     [p]
     [chara_hide name="hauhet" time="200" wait="true"]
     [chara_show name="fenny" storage="roger_normal" pos="center"]
@@ -292,12 +272,11 @@
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
     #
-    その後閉店時間まで延々とハウヘトの講釈を聞く羽目になった...
-    [p]
-    チョコ作りは当然間に合わなかった。
+    その後、閉店時間まで延々とハウヘトの講釈を聞く羽目になった...[br]チョコ作りは当然間に合わなかった。
     [p]
     ～ハウヘトEND～
     [l]
+    [jump storage="TitleScene"]
     [s]
 
 *equipment_decline
@@ -346,4 +325,5 @@
 
     ～逆転追求裁判エンド～
     [l]
+    [jump storage="TitleScene"]
     [s]

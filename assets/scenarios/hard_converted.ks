@@ -9,11 +9,7 @@
     [bg storage="bgtest" time="1000"]
     [playbgm storage="cafe" loop="true"]
     #
-    君はアウギュステに降り立った。
-    [p]
-    街はバレンタイン一色に染まり、右を見ても左を見ても、チョコを共に送り合う恋人達で溢れていた。
-    [p]
-    嫉嫉の炎が胸を焦がす。このままでは狂ってしまうだろう。
+    君はアウギュステに降り立った。[br]街はバレンタイン一色に染まり、右を見ても左を見ても、[br]チョコを共に送り合う恋人達で溢れていた。[br]嫉嫉の炎が胸を焦がす。このままでは狂ってしまうだろう。
     [p]
 
     君は...
@@ -36,6 +32,7 @@
     [p]
     BAD END 
     [l]
+    [jump storage="TitleScene"]
     [s]
 
 *shopping_mindlessly_badend 
@@ -44,14 +41,11 @@
     [p]
     しかし、どこへ行ってもカップルばかり。
     [p]
-    正気を保てる訳がない。
-    [p]
-    君は叫んだ、心の底から。
-    [p]
-    誰かが、肩に手を置いた。「事案ですか？」
+    正気を保てる訳がない。[br]君は叫んだ、心の底から。[br]誰かが、肩に手を置いた。「事案ですか？」
     [p]
     BAD END 
     [l]
+    [jump storage="TitleScene"]
     [s]
 
 *dash_to_sea 
@@ -83,6 +77,7 @@
     [p]
     BAD END 
     [l]
+    [jump storage="TitleScene"]
     [s]
 
 *lowain_appear_badend_hard 
@@ -147,14 +142,16 @@
 *final_battle_badend
     クァニ、灼弩火罹、ゾンビィ、更に増える生物達。
     [p]
-    無理だ。1人では━ 
-    [p]
-    君は押し迫る海の生物達の中に消えていった...。
+    無理だ。1人では━ [br]君は押し迫る海の生物達の中に消えていった...。
     [p]
     [stopbgm] 
     [link target="*pseudo_prologue_start" text="再演算する"] 
-    [link target="*start" text="あきらめる"]
+    [link target="*start_return_title" text="あきらめる"]
     [r]
+    [s]
+
+*start_return_title
+    [jump storage="TitleScene"]
     [s]
 
 *pseudo_prologue_start
@@ -209,15 +206,12 @@
 *true_ending 
     [playbgm storage="night_bgm" loop="true"]
     #ルリア
-    チョコを司る星晶獣なんて、びっくりです〜！あむっ！
-    [p]
-    はい！これ、どうぞ！ハッピーバレンタイン♪
+    チョコを司る星晶獣なんて、びっくりです〜！あむっ！[br]はい！これ、どうぞ！ハッピーバレンタイン♪
     [p]
     ～HAPPY END～
     [p]
     #ロジャー
-    うんうん、やっぱり最後はハッピーエンドよね！
-    [p]
-    ゲームブック【演算世界とチヨコレイト】 ～完～
+    うんうん、やっぱり最後はハッピーエンドよね！[br]ゲームブック【演算世界とチヨコレイト】 ～完～
     [l]
+    [jump storage="TitleScene"]
     [s]
