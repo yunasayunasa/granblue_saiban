@@ -1,11 +1,16 @@
 ; first.ks - エンジン用に変換
 ; スタートシナリオ（プロローグ + キャラ選択）
 
+; 動的アセット宣言
+@asset type=image key=enzan path=assets/images/enzan.jpg
+@asset type=image key=roger_normal path=assets/images/roger_normal.png
+@asset type=image key=roger_smile path=assets/images/roger_smile.png
+
 *start
     ; プロローグ開始
     [stopbgm]
-    [playbgm storage="enzan.mp3" loop="true"]
-    [bg storage="calc_space.jpg" time="1000"]
+    [playbgm storage="cafe" loop="true"]
+    [bg storage="enzan" time="1000"]
     [wait time=1000]
 
     #
@@ -16,8 +21,7 @@
     とても現実とは思えない。
     [p]
 
-    [chara_new name="roger" storage="roger_normal.png" jname="ロジャー"]
-    [chara_show name="roger" x="200" y="150"]
+    [chara_show name="roger" storage="roger_normal" x="200" y="150"]
 
     #ロジャー
     おはよう！お呼びとあらば即参上できない！
@@ -80,22 +84,22 @@
 
 ; ----- 各ルートへの分岐 -----
 *narumia_route_start
-    [chara_new name="narumia" storage="narumia_normal.png" jname="ナルメア"]
-    [chara_show name="narumia" time="500" wait="true"]
     #ナルメア
     よろしくね、団長ちゃん！
     [p]
     #
-    [jump storage="narumia_scenario.ks" target="*cafe_scene"]
+    （ナルメアルートは現在準備中です）
+    [p]
+    [s]
 
 *siete_route_start
-    [chara_new name="siete" storage="siete_normal.png" jname="シエテ"]
-    [chara_show name="siete" x="150" y="150" time="500" wait="true"]
     #シエテ
     やあ、団長ちゃん。俺と行くのかい？
     [p]
     #
-    [jump storage="siete_scenario.ks" target="*deck_scene_start"]
+    （シエテルートは現在準備中です）
+    [p]
+    [s]
 
 *hard_mode_start
     [chara_show name="roger" x="200" y="150"]
@@ -107,12 +111,16 @@
     …その先は地獄だよ？
     [p]
     [chara_hide name="roger" time="500" wait="true"]
-    [jump storage="hard_scenario.ks" target="*auguste_arrival"]
+    #
+    （ハードモードは現在準備中です）
+    [p]
+    [s]
 
 *fenny_route_start
-    [chara_new name="fenny" storage="fenny_normal.png" jname="フェニー"]
-    [chara_show name="fenny" x="150" y="150"]
     #フェニー
     団長さんとお出かけ楽しみなんだよ！
     [p]
-    [jump storage="fenny_scenario.ks" target="*port_breeze_arrival"]
+    #
+    （フェニールートは現在準備中です）
+    [p]
+    [s]
