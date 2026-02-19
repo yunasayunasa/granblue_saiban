@@ -18,7 +18,7 @@
             "type": "transitionTo",
             "params": {
               "scene": "GameScene",
-              "scenario": "test"
+              "scenario": "first"
             }
           }
         }
