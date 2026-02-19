@@ -26,7 +26,10 @@
     "hasira_center": "assets/images/hasira_center.png",
     "taimatsu_on": "assets/images/taimatsu_on.png",
     "timer_back": "assets/images/timer_back.png",
-    "speedbutton": "assets/images/speedbutton.png"
+    "speedbutton": "assets/images/speedbutton.png",
+    "enzan": "assets/images/enzan.jpg",
+    "roger_smile": "assets/images/roger_smile.png",
+    "hauhet_normal": "assets/images/hauhet_normal.png"
   },
   "spritesheets": {
     "walk": {

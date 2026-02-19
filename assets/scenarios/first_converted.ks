@@ -2,6 +2,7 @@
 ; スタートシナリオ（プロローグ + キャラ選択）
 
 ; 動的アセット宣言
+
 @asset type=image key=enzan path=assets/images/enzan.jpg
 @asset type=image key=roger_normal path=assets/images/roger_normal.png
 @asset type=image key=roger_smile path=assets/images/roger_smile.png

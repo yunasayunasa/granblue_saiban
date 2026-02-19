@@ -236,17 +236,22 @@ export default class ScenarioManager {
             if (trimedLine.startsWith('*')) break;
         }
 
-        // --- 3. 動的ロードの実行 ---
+        // --- 3. 動的ロードの実行 (LoadingScene不要版) ---
         if (assetsToLoad.length > 0) {
-            // console.log("追加アセットの動的ロードが必要です:", assetsToLoad);
+            console.log("[loadScenario] 追加アセットの動的ロードが必要です:", assetsToLoad);
 
             await new Promise(resolve => {
-                this.scene.scene.launch('LoadingScene', {
-                    assets: assetsToLoad,
-                    onComplete: resolve
-                });
+                for (const asset of assetsToLoad) {
+                    if (asset.type === 'image') {
+                        this.scene.load.image(asset.key, asset.path);
+                    } else if (asset.type === 'audio') {
+                        this.scene.load.audio(asset.key, asset.path);
+                    }
+                }
+                this.scene.load.once('complete', resolve);
+                this.scene.load.start();
             });
-            // console.log("追加アセットのロードが完了しました。");
+            console.log("[loadScenario] 追加アセットのロードが完了しました。");
         }
 
         // --- 4. ラベルへのジャンプ ---
