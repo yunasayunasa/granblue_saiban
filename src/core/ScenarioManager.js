@@ -24,6 +24,7 @@ export default class ScenarioManager {
         this.tagHandlers = new Map();
         this.ifStack = [];
         this.callStack = [];
+        this.lastSpeaker = null; // ★ 追加: 直前の話者を記憶
     }
 
     registerTag(tagName, handler) {
@@ -145,15 +146,29 @@ export default class ScenarioManager {
             }
         }
         else if (trimedLine.length > 0) {
-            // --- セリフまたは地の文 ---
+            // --- セリフまたは地の文 または 話者指定(#) ---
             const expandedLine = this.embedVariables(trimedLine);
+
+            // 1. #名前 形式 (話者の切り替えのみ)
+            if (expandedLine.startsWith('#')) {
+                const namePart = expandedLine.substring(1).trim();
+                this.lastSpeaker = namePart || null;
+                // console.log(`[ScenarioManager] Speaker changed to: ${this.lastSpeaker}`);
+                return;
+            }
+
             let speakerName = null;
-            let dialogue = expandedLine; // ★ 変数展開後のテキストを使う
+            let dialogue = expandedLine;
             const speakerMatch = expandedLine.match(/^([a-zA-Z0-9_]+):/);
 
             if (speakerMatch) {
+                // 2. 名前:メッセージ 形式
                 speakerName = speakerMatch[1];
                 dialogue = expandedLine.substring(speakerName.length + 1).trim();
+                this.lastSpeaker = speakerName;
+            } else {
+                // 3. 名前なし (継続)
+                speakerName = this.lastSpeaker;
             }
 
             this.stateManager.addHistory(speakerName, dialogue);
@@ -458,5 +473,29 @@ export default class ScenarioManager {
     showInterfaceForSkip() {
         this.layers.character.setAlpha(1);
         this.messageWindow.setAlpha(1);
+    }
+
+    /**
+     * アセットキーを解決する (完全一致 -> _normal -> _smile 等)
+     * @param {string} key 
+     * @param {string} type 'image' | 'audio'
+     * @returns {string} 解決されたキー
+     */
+    resolveAssetKey(key, type = 'image') {
+        if (!key) return key;
+
+        // 1. そのまま試す
+        if (type === 'image' && this.scene.textures.exists(key)) return key;
+        if (type === 'audio' && this.scene.cache.audio.has(key)) return key;
+
+        // 2. 接尾辞を試す
+        const suffixes = ['_normal', '_smile', '_angry', '_monster'];
+        for (const suffix of suffixes) {
+            const trialKey = key + suffix;
+            if (type === 'image' && this.scene.textures.exists(trialKey)) return trialKey;
+            if (type === 'audio' && this.scene.cache.audio.has(trialKey)) return trialKey;
+        }
+
+        return key; // 見つからなければそのまま返す
     }
 }

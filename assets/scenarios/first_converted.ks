@@ -17,7 +17,7 @@
     君は、見たこともない空間にいる。[br]幻想的な一面の花畑、[br]とても現実とは思えない。
     [p]
 
-    [chara_show name="roger" storage="roger_normal" pos="center"]
+    [chara_show name="roger" storage="roger" pos="center"]
 
     #ロジャー
     おはよう！お呼びとあらば即参上できない！[br]今日も今日とて限界勤務上等の[br]オロロジャイアちゃんでっす！

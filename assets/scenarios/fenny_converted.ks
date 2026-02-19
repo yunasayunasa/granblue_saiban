@@ -34,7 +34,7 @@
     [p]
     [chara_hide name="sabrina" time="200" wait="true"]
 
-    [chara_show name="fenny" storage="roger_normal" pos="center"] 
+    [chara_show name="fenny" storage="roger" pos="center"] 
     #フェニー
     ま、まずいんだよ！[br]サブリナにチョコを渡す計画がバレちゃうんだよ！[br]団長さん！なんとかしてぇ！
     [p]
@@ -155,11 +155,7 @@
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
-    [chara_show name="ruria" storage="roger_normal" pos="center"]
-    #ルリア
-    ち、違います！
-    [p]
-    私じゃありません！話を聞いて下さい！
+    ち、違います！[br]私じゃありません！話を聞いて下さい！
     [p]
     #
     どうやら証言を聞く必要があるようだ。
@@ -182,10 +178,7 @@
     ハウヘトが用意してくれた最高級品なんだよ！！
     [p]
 
-    #ルリア
-    そ、そんな...
-    [p]
-    ご、ごめんなさい〜！！
+    そ、そんな...[br]ご、ごめんなさい〜！！
     [p]
 
     #サブリナ

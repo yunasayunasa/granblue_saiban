@@ -29,7 +29,7 @@ export default async function handleCharaShow(manager, params) {
         storage = def.face[face];
         if (!storage) { console.warn(`[chara_show] キャラクター[${name}]の表情[${face}]のstorageが見つかりません。`); return; }
     }
-    
+
     // --- 2. 座標の決定 ---
     const orientation = scene.scale.isPortrait ? 'portrait' : 'landscape';
     const layoutPos = Layout[orientation]?.character?.[pos] || Layout[orientation]?.character?.center;
@@ -39,15 +39,16 @@ export default async function handleCharaShow(manager, params) {
     // --- 3. キャラクターオブジェクトの生成 ---
     if (scene.characters[name]) { scene.characters[name].destroy(); }
 
-    const chara = scene.add.image(x, y, storage);
+    const resolvedStorage = manager.resolveAssetKey(storage, 'image');
+    const chara = scene.add.image(x, y, resolvedStorage);
     chara.setAlpha(0); // ★★★ 最初は透明な状態で生成 ★★★
     chara.name = name;
-    
+
     manager.layers.character.add(chara);
     scene.characters[name] = chara;
-  // ▼▼▼ ログ爆弾 No.4 (最重要) ▼▼▼
+    // ▼▼▼ ログ爆弾 No.4 (最重要) ▼▼▼
     const messageWindow = scene.uiScene.uiElements.get('message_window');
-   
+
     // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
     // --- 4. エディタへの登録 ---
     const editorPlugin = scene.plugins.get('EditorPlugin');
