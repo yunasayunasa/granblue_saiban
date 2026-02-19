@@ -151,21 +151,27 @@ export default class GameScene extends Phaser.Scene {
         this.choiceInputBlocker.setVisible(true);
 
         const totalButtons = this.pendingChoices.length;
-        // Y座標の計算ロジックもあなたのものをそのまま使用
-        const startY = (this.scale.height / 2) - ((totalButtons - 1) * 60);
+        // 少し上にずらしてウィンドウとの被りを減らす
+        const startY = (this.scale.height / 2) - ((totalButtons - 1) * 65) - 40;
 
         this.pendingChoices.forEach((choice, index) => {
-            const y = startY + (index * 120);
+            const y = startY + (index * 130);
 
-            // ボタンのスタイルもあなたのものをそのまま使用
-            const button = this.add.text(this.scale.width / 2, y, choice.text, { fontSize: '40px', fill: '#fff', backgroundColor: '#555', padding: { x: 20, y: 10 } })
+            // ★ UISceneにボタンを追加して、メッセージウィンドウより前面に表示する
+            const button = this.uiScene.add.text(this.scale.width / 2, y, choice.text, {
+                fontSize: '40px',
+                fill: '#fff',
+                backgroundColor: '#333bb3', // 少し青みのある色でプレミアム感を出す
+                padding: { x: 30, y: 15 },
+                shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 4, fill: true }
+            })
                 .setOrigin(0.5)
                 .setInteractive()
-                .setDepth(30); // ★ ボタンを最前面に持ってくる (ブロッカーより手前)
+                .setDepth(10005); // ★ メッセージウィンドウ(9998)より手前へ
 
             button.on('pointerdown', (pointer, localX, localY, event) => {
-                // イベントの伝播を止めて、下のGameSceneのクリックリスナーが反応しないようにする
-                event.stopPropagation();
+                // イベントの伝播を止める
+                if (event) event.stopPropagation();
 
                 this.scenarioManager.jumpTo(choice.target);
                 this.clearChoiceButtons();
@@ -175,7 +181,7 @@ export default class GameScene extends Phaser.Scene {
             this.choiceButtons.push(button);
         });
 
-        // 選択肢を表示したら、保留リストはクリアするのが一般的
+        // 保留リストをクリア
         this.pendingChoices = [];
     }
 

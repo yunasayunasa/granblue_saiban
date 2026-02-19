@@ -40,9 +40,10 @@ export default class MessageWindow extends Container {
             '',
             {
                 fontFamily: '"Noto Sans JP", sans-serif',
-                fontSize: '36px',
+                fontSize: '30px',
                 fill: '#ffffff',
                 wordWrap: { width: textWidth, useAdvancedWrap: true },
+                lineSpacing: 8,
                 fixedWidth: textWidth,
                 fixedHeight: textHeight
             }
@@ -72,7 +73,7 @@ export default class MessageWindow extends Container {
 
         // --- 全ての要素をコンテナに追加 (変更なし) ---
         this.add([this.windowImage, this.textObject, this.nextArrow]);
-        
+
         // ★★★ 3. UISceneがadd.existing(this)を呼ぶので、シーンへの追加は不要 ★★★
     }
 
@@ -94,7 +95,7 @@ export default class MessageWindow extends Container {
         // 親のdestroyを呼び出す（Container内の全要素が破棄される）
         super.destroy(fromScene);
     }
-    
+
     updateTextSpeed() {
         const textSpeedValue = this.configManager.getValue('textSpeed');
         this.textDelay = 100 - textSpeedValue;
@@ -128,10 +129,10 @@ export default class MessageWindow extends Container {
                 if (this.typingResolve) this.typingResolve();
                 return;
             }
-            
+
             this.isTyping = true;
             let index = 0;
-            
+
             this.charByCharTimer = this.scene.time.addEvent({
                 delay: this.textDelay,
                 callback: () => {
@@ -141,7 +142,7 @@ export default class MessageWindow extends Container {
                     this.textObject.text += this.fullText[index];
                     index++;
                     if (index === this.fullText.length) {
-                        if(this.charByCharTimer) this.charByCharTimer.remove();
+                        if (this.charByCharTimer) this.charByCharTimer.remove();
                         this.charByCharTimer = null;
                         this.isTyping = false;
                         if (this.typingResolve) this.typingResolve();
@@ -159,9 +160,9 @@ export default class MessageWindow extends Container {
         this.charByCharTimer.remove();
         this.charByCharTimer = null;
         this.isTyping = false;
-        
+
         this.textObject.setText(this.fullText);
-        
+
         if (this.typingResolve) {
             this.typingResolve();
             this.typingResolve = null;
@@ -186,7 +187,7 @@ export default class MessageWindow extends Container {
             this.arrowTween.resume();
         }
     }
-    
+
     hideNextArrow() {
         this.nextArrow.setVisible(false);
         if (this.arrowTween && this.arrowTween.isPlaying()) {
