@@ -33,7 +33,7 @@ export default class SceneTransitionManager {
 
         const sceneToStop = this.systemScene.scene.get(from);
 
-        if (sceneToStop?.scene.isActive() && from !== 'UIScene') { // ?.で安全に
+        if (sceneToStop?.scene.isActive() && from !== 'UIScene' && from !== 'SystemScene') { // ?.で安全に
             sceneToStop.events.once('shutdown', () => {
                 this._startAndMonitorScene(to, finalParams); // ★ 修正したfinalParamsを渡す
             });
