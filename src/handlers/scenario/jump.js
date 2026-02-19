@@ -9,10 +9,20 @@
  */
 import EngineAPI from '../../core/EngineAPI.js'; // ★ インポート
 export default async function handleJump(manager, params) {
-    
-    // --- シーン間遷移の場合 ---
+
+    // --- シーン間遷移 または シナリオファイル遷移 の場合 ---
     if (params.storage) {
-        const toSceneKey = params.storage;
+        const storage = params.storage;
+
+        // A. 別のシナリオファイルへのジャンプ (.ks)
+        if (storage.endsWith('.ks')) {
+            // console.log(`[jump] 別のシナリオファイル[${storage}]をロードします。 target=[${params.target}]`);
+            await manager.loadScenario(storage, params.target || null);
+            return;
+        }
+
+        // B. 他のPhaserシーンへの遷移
+        const toSceneKey = storage;
         // console.log(`[jump] シーン[${toSceneKey}]へ遷移します。`);
 
         // 1. オートセーブを実行
@@ -22,27 +32,22 @@ export default async function handleJump(manager, params) {
         let transitionParams = {};
         if (params.params) {
             try {
-                // params="{ key1: f.value1, key2: 'some_string' }" のような形式を想定
-                // StateManagerのgetValueを使って、安全にオブジェクトを生成する
                 transitionParams = manager.stateManager.getValue(`(${params.params})`);
             } catch (e) {
                 console.error(`[jump] params属性の解析に失敗しました: "${params.params}"`, e);
-                transitionParams = {}; // 失敗した場合は空のオブジェクトにする
+                transitionParams = {};
             }
         }
-        
-           const fromSceneKey = manager.scene.scene.key;
-       
-        
 
-      // ★ 1. まずは遷移リクエストを確実に発行する
+        const fromSceneKey = manager.scene.scene.key;
+
+        // 遷移リクエストを確実に発行
         EngineAPI.requestJump(fromSceneKey, toSceneKey, transitionParams);
-    
-        // ★ 2. そして、即座に、同期的に、自分の仕事を終える
+
+        // 自分の仕事を終える
         manager.stop();
-        // console.log(`[handleJump] Ordering parent scene (${manager.scene.scene.key}) to shut down.`);
         manager.scene.scene.stop();
-    
+
     } else if (params.target && params.target.startsWith('*')) {
         manager.jumpTo(params.target);
     } else {

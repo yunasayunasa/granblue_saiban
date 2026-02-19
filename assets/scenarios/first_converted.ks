@@ -16,43 +16,43 @@
 
     #
     君は、見たこともない空間にいる。
-    [r]
+    [p]
     幻想的な一面の花畑、
-    [r]
+    [p]
     とても現実とは思えない。
     [p]
 
-    [chara_show name="roger" storage="roger_normal" x="200" y="150"]
+    [chara_show name="roger" storage="roger_normal" pos="center"]
 
     #ロジャー
     おはよう！お呼びとあらば即参上できない！
-    [r]
+    [p]
     今日も今日とて限界勤務上等の
-    [r]
+    [p]
     オロロジャイアちゃんでっす！
     [p]
 
     ｵﾎﾝｴﾍﾝ...!ここは演算世界。
-    [r]
+    [p]
     僕の力で作り出された世界。
-    [r]
+    [p]
     あらゆる可能性を探るための場所さ。
     [p]
 
     これから君には僕と一緒に
-    [r]
+    [p]
     旅をしてもらいたいんだ。
     [p]
 
     そう！君がチョコをもらえる世界を
-    [r]
+    [p]
     探り出す為に！
     [p]
 
     そんな訳で早速行ってみよう〜！
-    [r]
+    [p]
     と言っても...僕は一緒に行ける訳ではないんだけどね！
-    [r]
+    [p]
     社畜の悲しみ！
     [p]
 
@@ -85,43 +85,13 @@
 
 ; ----- 各ルートへの分岐 -----
 *narumia_route_start
-    #ナルメア
-    よろしくね、団長ちゃん！
-    [p]
-    #
-    （ナルメアルートは現在準備中です）
-    [p]
-    [s]
+    [jump storage="narumia_converted.ks"]
 
 *siete_route_start
-    #シエテ
-    やあ、団長ちゃん。俺と行くのかい？
-    [p]
-    #
-    （シエテルートは現在準備中です）
-    [p]
-    [s]
+    [jump storage="siete_converted.ks"]
 
 *hard_mode_start
-    [chara_show name="roger" x="200" y="150"]
-    #ロジャー
-    え！？誰もいらない！？
-    [p]
-    まぁ、君がそういうなら…
-    [r]
-    …その先は地獄だよ？
-    [p]
-    [chara_hide name="roger" time="500" wait="true"]
-    #
-    （ハードモードは現在準備中です）
-    [p]
-    [s]
+    [jump storage="hard_converted.ks"]
 
 *fenny_route_start
-    #フェニー
-    団長さんとお出かけ楽しみなんだよ！
-    [p]
-    #
-    （フェニールートは現在準備中です）
-    [p]
-    [s]
+    [jump storage="fenny_converted.ks"]
