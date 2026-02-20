@@ -16,6 +16,7 @@ import handleCharaMod from './scenario/chara_mod.js';
 import handleBg from './scenario/bg.js';
 import handleImage from './scenario/image.js';
 import handleFreeImage from './scenario/freeimage.js';
+import handleCharaNew from './scenario/chara_new.js';
 
 // --- アニメーション・演出系 ---
 import handleMove from './scenario/move.js';
@@ -76,64 +77,65 @@ import handleReturn from './scenario/return.js';
 // 全てのハンドラをこの tagHandlers オブジェクトにまとめてエクスポートする
 // ============================================================================
 export const tagHandlers = {
-    // 表示・画像・キャラクター系
-    'chara_show': handleCharaShow,
-    'chara_hide': handleCharaHide,
-    'chara_mod': handleCharaMod,
-    'bg': handleBg,
-    'image': handleImage,
-    'freeimage': handleFreeImage,
+  // 表示・画像・キャラクター系
+  'chara_show': handleCharaShow,
+  'chara_hide': handleCharaHide,
+  'chara_mod': handleCharaMod,
+  'bg': handleBg,
+  'image': handleImage,
+  'freeimage': handleFreeImage,
+  'chara_new': handleCharaNew,
 
-    // アニメーション・演出系
-    'move': handleMove,
-    'walk': handleWalk,
-    'shake': handleShake,
-    'vibrate': handleVibrate,
-    'flip': handleFlip,
-    'chara_jump': handleCharaJump,
-    'stop_anim': handleStopAnim,
-    'fadeout': handleFadeout,
-    'fadein': handleFadein,
+  // アニメーション・演出系
+  'move': handleMove,
+  'walk': handleWalk,
+  'shake': handleShake,
+  'vibrate': handleVibrate,
+  'flip': handleFlip,
+  'chara_jump': handleCharaJump,
+  'stop_anim': handleStopAnim,
+  'fadeout': handleFadeout,
+  'fadein': handleFadein,
   /*  'puppet_move': handlePuppetMove,
     'puppet_idle_start': handlePuppetIdleStart,
     'puppet_idle_stop': handlePuppetIdleStop,*/
-   'live_breath_start': handleLiveBreathStart,
-    //'live_breath_stop': handleLiveBreathStop,
-   // 'video': handleVideo,
-    //'stopvideo': handleStopVideo,
-    'vignette': vignette,
+  'live_breath_start': handleLiveBreathStart,
+  //'live_breath_stop': handleLiveBreathStop,
+  // 'video': handleVideo,
+  //'stopvideo': handleStopVideo,
+  'vignette': vignette,
 
-    // 音声系
-    'playse': handlePlaySe,
-    'playbgm': handlePlayBgm,
-    'stopbgm': handleStopBgm,
+  // 音声系
+  'playse': handlePlaySe,
+  'playbgm': handlePlayBgm,
+  'stopbgm': handleStopBgm,
   //  'voice': handleVoice,
 
-    // 変数・ロジック・デバッグ系
-    'eval': handleEval,
-    'if': handleIf,
-    'elsif': handleElsif,
-    'else': handleElse,
-    'endif': handleEndif,
-    'log': handleLog,
+  // 変数・ロジック・デバッグ系
+  'eval': handleEval,
+  'if': handleIf,
+  'elsif': handleElsif,
+  'else': handleElse,
+  'endif': handleEndif,
+  'log': handleLog,
 
-    // フロー制御・待機系
-    'p': handleP,
-    's': handleS,
-   'wait': handleWait,
-    'delay': handleDelay,
-    
-    // UI・インタラクション系
-    'cm': handleCm,
-    'er': handleEr,
-    'link': handleLink,
-    'r': handleR,
-    'button': handleButton,
-     'hidewindow': handleHideWindow,
-    'showwindow': handleShowWindow,
-    
-    // シーン・サブルーチン遷移系
-    'jump': handleJump,
-    'call': handleCall,
-   'return': handleReturn,
+  // フロー制御・待機系
+  'p': handleP,
+  's': handleS,
+  'wait': handleWait,
+  'delay': handleDelay,
+
+  // UI・インタラクション系
+  'cm': handleCm,
+  'er': handleEr,
+  'link': handleLink,
+  'r': handleR,
+  'button': handleButton,
+  'hidewindow': handleHideWindow,
+  'showwindow': handleShowWindow,
+
+  // シーン・サブルーチン遷移系
+  'jump': handleJump,
+  'call': handleCall,
+  'return': handleReturn,
 };

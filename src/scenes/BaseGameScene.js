@@ -85,7 +85,7 @@ export default class BaseGameScene extends Phaser.Scene {
         if (data && data.scene_settings) {
             const s = data.scene_settings;
             if (s.backgroundColor) {
-                // メインカメラの背景色を設定（PhaserはCSSカラー文字列を受け入れ可能）
+                console.log(`[BaseGameScene] Setting background color to ${s.backgroundColor} for ${this.scene.key}`);
                 this.cameras.main.setBackgroundColor(s.backgroundColor);
             }
             if (this.matter && this.matter.world && s.gravity) {
@@ -97,14 +97,10 @@ export default class BaseGameScene extends Phaser.Scene {
 
         // ★ デュアルカメラシステムの設定
         if (!this.uiCamera) {
-            // UIカメラを追加 (画面全体)
             this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height).setName('UICamera');
             this.uiCamera.setScroll(0, 0);
-
-            // 重要: メインカメラの結果の上に透明度を保持したまま重ねる
-            // 背景色を透明に設定し、クリアを有効にする (または clearBeforeRender=false にして背景色設定なしにする)
-            // ここでは clearBeforeRender=false が最も安全
             this.uiCamera.clearBeforeRender = false;
+            console.log(`[BaseGameScene] UICamera added for ${this.scene.key}`);
         }
     }
 
@@ -174,12 +170,18 @@ export default class BaseGameScene extends Phaser.Scene {
 
     buildSceneFromLayout(data) {
         if (!data) { this.finalizeSetup([]); return; }
+        // console.log(`[BaseGameScene] Building scene from layout: ${this.scene.key}`);
         if (this.editorUI && data.layers) this.editorUI.setLayers(data.layers);
         const objs = [];
         if (data.objects) {
             data.objects.forEach(l => {
                 const obj = this.createObjectFromLayout(l);
-                if (obj) { this.applyProperties(obj, l); this.initComponentsAndEvents(obj); objs.push(obj); }
+                if (obj) {
+                    this.applyProperties(obj, l);
+                    this.initComponentsAndEvents(obj);
+                    objs.push(obj);
+                    // console.log(`[BaseGameScene] Created object: ${obj.name} (Type: ${l.type}, Texture: ${l.texture}, Layer: ${l.layer}, Depth: ${obj.depth}, Visible: ${obj.visible}, Alpha: ${obj.alpha})`);
+                }
             });
         }
         this.finalizeSetup(objs);

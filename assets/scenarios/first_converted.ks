@@ -8,6 +8,12 @@
 @asset type=image key=roger_smile path=assets/images/roger_smile.png
 
 *start
+    ; キャラクター定義 (名前と表示名の紐付け)
+    [chara_new name="roger" jname="ロジャー"]
+    [chara_new name="fenny" jname="フェニー"]
+    [chara_new name="narumia" jname="ナルメア"]
+    [chara_new name="siete" jname="シエテ"]
+
     ; プロローグ開始
     [stopbgm]
     [playbgm storage="cafe" loop="true"]
@@ -26,7 +32,9 @@
     ｵﾎﾝｴﾍﾝ...!ここは演算世界。[br]僕の力で作り出された世界。[br]あらゆる可能性を探るための場所さ。
     [p]
 
-    これから君には僕と一緒に[br]旅をしてもらいたいんだ。[br]そう！君がチョコをもらえる世界を[br]探り出す為に！
+    これから君には僕と一緒に[br]旅をしてもらいたいんだ。
+    [p]
+    そう！君がチョコをもらえる世界を[br]探り出す為に！
     [p]
 
     そんな訳で早速行ってみよう〜！[br]と言っても...僕は一緒に行ける訳ではないんだけどね！[br]社畜の悲しみ！

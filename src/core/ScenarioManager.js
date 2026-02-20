@@ -357,18 +357,40 @@ export default class ScenarioManager {
     }
 
     highlightSpeaker(speakerName) {
+        // speakerName: スクリプト上の名前 (例: "ロジャー", "roger", null)
         const bright = 0xffffff;
         const dark = 0x888888;
+
         for (const name in this.scene.characters) {
             const chara = this.scene.characters[name];
-            if (chara && chara.active) {
-                if (speakerName === null || speakerName === name) {
-                    chara.setTint(bright);
-                } else {
-                    chara.setTint(dark);
-                }
+            if (!chara || !chara.active) continue;
+
+            // characterDefs から表示名 (jname) を取得
+            const def = this.characterDefs[name];
+            const jname = def ? def.jname : name;
+
+            // スクリプト上の名前が「ID」または「jname」と一致するかチェック
+            // speakerName が null の場合は全員ハイライト
+            if (speakerName === null || speakerName === "" || speakerName === name || speakerName === jname) {
+                chara.setTint(bright);
+            } else {
+                chara.setTint(dark);
             }
         }
+    }
+
+    /**
+     * キャラクター情報を登録・更新する (chara_new 等で使用)
+     * @param {string} name - 管理ID (例: "roger")
+     * @param {object} data - { jname: "ロジャー", ... }
+     */
+    registerCharacter(name, data) {
+        if (!this.characterDefs[name]) {
+            this.characterDefs[name] = { face: {} };
+        }
+        // jname などの情報をマージ
+        Object.assign(this.characterDefs[name], data);
+        // console.log(`[ScenarioManager] Character registered: ${name} (jname: ${this.characterDefs[name].jname})`);
     }
 
 

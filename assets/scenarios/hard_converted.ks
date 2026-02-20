@@ -6,6 +6,12 @@
 @asset type=image key=roger_normal path=assets/images/roger_normal.png
 
 *auguste_arrival
+    ; キャラクター定義
+    [chara_new name="roger" jname="ロジャー"]
+    [chara_new name="fenny" jname="フェニー"]
+    [chara_new name="narumia" jname="ナルメア"]
+    [chara_new name="siete" jname="シエテ"]
+
     [bg storage="bgtest" time="1000"]
     [playbgm storage="cafe" loop="true"]
     #
