@@ -52,6 +52,9 @@
     ソイヤッ！ソイヤッ！
     [p]
 
+    [chara_hide name="siete" time="200" wait="true"]
+    [chara_show name="oigen" storage="oigen_normal" pos="center" time="300" wait="true"]
+
     [quake time="500" count="3" hmax="15" vmax="15" wait="false"]
     [playse storage="smash" stop="false"]
 
@@ -77,6 +80,7 @@
     君はシエテと手合わせする事にした。
     [p]
     [playbgm storage="bgm_action" loop="true"]
+    [chara_show name="siete" storage="siete_normal" pos="center" time="500" wait="true"]
 
     #シエテ
     さて、君がどれほど強くなったか
@@ -101,23 +105,11 @@
     [s]
 
 *spar_block_sword_badend
-    [stopbgm]
-
-    #
-    君は、暗闇から目を覚ました。[br]どうやら気絶していたらしい。
-    [p]
-
-    ごめん！団長ちゃん！[br]団長ちゃんならこれぐらいなら大丈夫と思って、[br]強く打ち込みすぎちゃった！[br]本当ごめんね！
-    [p]
-
-    #
-    ベッドの横の時計を見ると、[br]既に0時を回っていた。[br]バレンタインは、終わったのだ。
-    [p]
-
     BAD END
     [p]
 
     ; ロジャー登場
+    [chara_hide name="siete" time="200" wait="true"]
     [chara_show name="roger" storage="roger_normal" pos="center" time="500" wait="true"]
     #ロジャー
     ありゃ！バレンタインおわちゃた！
@@ -228,6 +220,7 @@
 
     ～シエテEND～
     [l]
+    [chara_hide name="siete" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 
@@ -244,6 +237,7 @@
     [p]
     ソイヤソイヤソイヤソイヤッ！
     [p]
+    [chara_hide name="oigen" time="100" wait="true"]
 
     ; 全員でソイヤ
     「ソイヤッサ！」
@@ -264,6 +258,7 @@
     [p]
     ～ソイヤッ！END～
     [l]
+    [chara_hide name="siete" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 
@@ -276,7 +271,7 @@
     #三羽烏
     ｿｲﾔｧ...(´；ω；`)
     [p]
-
+    [chara_hide name="oigen" time="500" wait="true"]
     #
     肩を落とし船内に戻っていく3人を見送りながら、
     [p]
@@ -296,17 +291,21 @@
     #
     現れたのは六竜のウィルナスとルオーだった。
     [p]
-
-    [chara_show name="wilnas" storage="wilnas_normal" pos="center"]
+    [chara_hide name="siete" time="200" wait="true"]
+    [chara_show name="wilnas" storage="wilnas_normal" pos="left"]
+    #ウィルナス
+    重畳！重畳！
+ここにいやがりやがったか！
     [p]
-    ここにいやがりやがったか！
-    [p]
 
-    [chara_show name="luoh" storage="luoh_normal" pos="center"]
+    [chara_show name="luoh" storage="luoh_normal" pos="right"]
+    #ルオー
+    探していたのだよ。
     [p]
     これを渡す為に。
     [p]
-
+    [chara_hide name="wilnas" time="200"]
+    [chara_hide name="luoh" time="200"]
     #
     2人はその手に綺麗にラッピングされた包みを
     [p]
@@ -326,19 +325,23 @@
     #
     現れたのは六竜のワムデュスとガレヲンだった。
     [p]
-
-    [chara_show name="wamdus" storage="wamdus_normal" pos="center"]
+    [chara_hide name="siete" time="200" wait="true"]
+    [chara_show name="wamdus" storage="wamdus_normal" pos="left"]
+    #ワムデュス
+    特異点、探した。
+ロジャーに作ってもらった。
     [p]
-    これあげる。ロジャーに作ってもらった。
-    [p]
 
-    [chara_show name="galleon" storage="galleon_normal" pos="center"]
+    [chara_show name="galleon" storage="galleon_normal" pos="right"]
+    #ガレオン
+    賞賛。(この空の世界で生きる全ての命に
     [p]
     幸いあれ。無論、特異点にも。
     [p]
     これをどうぞ)
     [p]
-
+    [chara_hide name="wamdus" time="200"]
+    [chara_hide name="galleon" time="200"]
     #
     2人は綺麗なラッピングがなされた包みを
     [p]
@@ -368,7 +371,8 @@
     [p]
     さぁくらいやがるといい！
     [p]
-
+    [chara_hide name="wilnas" time="200"]
+    [chara_show name="luoh" storage="luoh_normal" pos="center"]
     #ルオー
     くっ...！
     [p]
@@ -392,6 +396,7 @@
     [p]
     ～ウィルナスEND～
     [l]
+    [chara_hide name="wilnas" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 
@@ -429,6 +434,7 @@
     [p]
     ～ルオーEND～
     [l]
+    [chara_hide name="luoh" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 
@@ -474,6 +480,7 @@
     [p]
     ～ワムデュスEND～
     [l]
+    [chara_hide name="wamdus" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 
@@ -514,6 +521,7 @@
     [p]
     ～ガレヲンEND～
     [l]
+    [chara_hide name="galleon" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 ```

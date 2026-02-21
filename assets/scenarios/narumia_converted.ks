@@ -46,21 +46,24 @@
     君はホットチョコレートを注文した。
     [p]
 
-    美味しい？よかった！[br]ふふっ♪すぐに見つかったね、[br]チョコがもらえる世界。
+    #ナルメア
+    熱いからお姉さんがふーふーして[br]冷ましてあげるね、ふー、ふー...[br]はい、あーん
+    [p]
+
+    美味しい？よかった！
+    [p]
+    ふふっ♪すぐに見つかったね、[br]チョコがもらえる世界。
     [p]
 
     ハッピーバレンタイン♪
     [p]
 
     #
-    君は無事チョコを貰うことができた。[br]団欒していると、いつの間にか君の周りには[br]仲間達が現れ、チョコを渡しに来た。
+    君は無事チョコを貰うことができた。
     [p]
-
-    ━皆と大切に絆を紡いでいた君は、[br]態々演算するまでもなく、[br]チョコを貰える世界にいたのだ。
-    [p]
-
     ～ナルメアEND～
     [l]
+    [chara_hide name="narumia" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 
@@ -102,6 +105,7 @@
     君は苦いと答えた
     [p]
 
+    [chara_show name="sandalphon" storage="sandalphon_normal" pos="center" time="300" wait="true"]
     #サンダルフォン
     そうか...、苦ければラテにする事もできる。
     [p]
@@ -130,12 +134,13 @@
     君は美味しいと答えた。
     [p]
 
+    [chara_show name="sandalphon" storage="sandalphon_normal" pos="center" time="300" wait="true"]
     #サンダルフォン
     口にあったのならよかった。
     [p]
     ペアリングは要るか？
     [p]
-    ...ちょうどバレンタインだしな。
+    ...ちょうどバレンタインだしな.
     [p]
     こんなものでよければ、食べてくれ。
     [p]
@@ -153,6 +158,7 @@
     #
     ～サンダルフォンEND～
     [l]
+    [chara_hide name="sandalphon" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 
@@ -199,11 +205,12 @@
     [s]
 
 *receive_diantha_or_anthuria
+    [chara_hide name="nier" time="100" wait="true"]
     君はチョコを受け取った。
     [p]
     [stopbgm]
 
-    ; ニーアのセリフ (再登場)
+    [chara_show name="nier" storage="nier_yandere" pos="center" time="300" wait="true"]
     #ニーア
     どうして...？どうして受け取ってくれないの...？[br]愛してくれないの...？私のことを捨てるの...？[br]あの人達みたいに...
     [p]
@@ -232,6 +239,7 @@
 
     ; ニーア再登場 (暗い背景に)
     #ニーア
+    [chara_show name="nier" storage="nier_yandere" pos="center" time="300" wait="true"]
     ずっと、ずっと一緒だよ...。
     [p]
 
@@ -254,29 +262,39 @@
     君はニーアからチョコを受け取った。
     [p]
 
+    [chara_show name="nier" storage="nier_normal" pos="center" time="300" wait="true"]
     #ニーア
     嬉しい...！私ね、団長さんの為なら[br]なんでもできる...。[br]団長さんが愛してくれるなら、なんでも...。
     [p]
+    [chara_hide name="nier" time="200" wait="true"]
 
     ; ディアンサのセリフ
+    [chara_show name="diantha" storage="diantha_normal" pos="center" time="300" wait="true"]
     #ディアンサ
     あー！ずるい！ニーアさんだけじゃなくて、[br]私のも受け取ってよ！
     [p]
+    [chara_hide name="diantha" time="200" wait="true"]
 
     ; アンスリアのセリフ
+    [chara_show name="asuria" storage="asuria_normal" pos="center" time="300" wait="true"]
     #アンスリア
     わ、私のも受け取って！[br]それで、中に手紙が入ってるの...！[br]そこで待ってるから！2人っきりで...
     [p]
+    [chara_hide name="asuria" time="200" wait="true"]
 
     ; ナルメアのセリフ
+    [chara_show name="narumia" storage="narumia_normal" pos="center" time="300" wait="true"]
     #ナルメア
     お姉さんも用意してあるんだから！[br]はい、あーんしてあげる♪
     [p]
+    [chara_hide name="narumia" time="200" wait="true"]
 
     ; サンダルフォンのセリフ
+    [chara_show name="sandalphon" storage="sandalphon_normal" pos="center" time="300" wait="true"]
     #サンダルフォン
     お前達、静かにしろ！
     [p]
+    [chara_hide name="sandalphon" time="200" wait="true"]
 
     #
     ━━かしましい声が響き辺り、[br]今日もグランサイファーは平和そのものであった。

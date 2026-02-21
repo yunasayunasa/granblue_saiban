@@ -157,6 +157,7 @@
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
+    [chara_show name="ruria" storage="ruria_normal" pos="center" time="300" wait="true"]
     ち、違います！[br]私じゃありません！話を聞いて下さい！
     [p]
     #
@@ -169,10 +170,19 @@
     [playbgm storage="bgm_action" loop="true"] 
     これより議論が始まります。
     [p]
-    （中略：本来は複雑なシステムですが、ここではナラティブに進行します）
+
+    #ルリア
+    フェニーちゃんのチョコはここにあります！
+    [p]
+    サンダルフォンさんが用意したこの銀の器材の中です！
+    [p]
+    ヘラもちゃんと用意してくれました！
+    [p]
+    ハウヘトさんから何か受け取ってましたけど、それが何だっていうんですか！
     [p]
     
     #フェニー
+    [chara_show name="fenny" storage="fenny_normal" pos="center" time="300" wait="true"]
     それは違うんだよ！！
     [p]
     フェニーが使ってたのはヒヒイロボウル！
@@ -182,14 +192,19 @@
 
     そ、そんな...[br]ご、ごめんなさい〜！！
     [p]
+    [chara_hide name="ruria" time="200" wait="true"]
 
+    [chara_show name="sabrina" storage="sabrina_normal" pos="center" time="300" wait="true"]
     #サブリナ
     あはは！みんなで一緒に作ろっか？
     [p]
-
+    [chara_hide name="sabrina" time="200" wait="true"]
+ 
+    [chara_show name="fenny" storage="fenny_normal" pos="center" time="300" wait="true"]
     #フェニー
     みんなで作るんだよ！
     [p]
+    [chara_hide name="fenny" time="200" wait="true"]
 
     #
     君は、みんなと共にチョコを作り始めた。
@@ -199,6 +214,7 @@
 
     ～ジュウダンロンパエンド～
     [l]
+    [chara_hide name="fenny" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 
@@ -269,8 +285,10 @@
     #
     その後、閉店時間まで延々とハウヘトの講釈を聞く羽目になった...[br]チョコ作りは当然間に合わなかった。
     [p]
+    [chara_show name="hauhet" storage="hauhet_normal" pos="center" time="300" wait="true"]
     ～ハウヘトEND～
     [l]
+    [chara_hide name="hauhet" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
 
@@ -298,7 +316,7 @@
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
-    [chara_show name="ruria" storage="roger_normal" pos="center"]
+    [chara_show name="ruria" storage="ruria_normal" pos="center"]
     #ルリア
     ええーーーー！！
     [p]
@@ -312,13 +330,15 @@
     （中略：裁判パートを経てハッピーエンドへ）
     [p]
 
+    [chara_show name="fenny" storage="fenny_normal" pos="center" time="300" wait="true"]
     #フェニー
     はい！団長さんにも！
     [p]
     ハッピーバレンタインなんだよ！
     [p]
-
+ 
     ～逆転追求裁判エンド～
     [l]
+    [chara_hide name="fenny" time="500" wait="true"]
     [jump storage="TitleScene"]
     [s]
