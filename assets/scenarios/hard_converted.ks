@@ -1,16 +1,18 @@
-; hard_scenario.ks - エンジン用に変換
-; ハードモード
-
-; 動的アセット宣言
-@asset type=image key=enzan path=assets/images/enzan.jpg
-@asset type=image key=roger_normal path=assets/images/roger_normal.png
-
 *auguste_arrival
     ; キャラクター定義
     [chara_new name="roger" jname="ロジャー"]
     [chara_new name="fenny" jname="フェニー"]
     [chara_new name="narumia" jname="ナルメア"]
     [chara_new name="siete" jname="シエテ"]
+    [chara_new name="thug" jname="荒くれ者"]
+    [chara_new name="lowain" jname="ローアイン"]
+    [chara_new name="kaki" jname="カキフライ"]
+    [chara_new name="nni" jname="ンニ"]
+    [chara_new name="katuo" jname="カツウォヌス"]
+    [chara_new name="same" jname="サメ"]
+    [chara_new name="koa" jname="アルバコア"]
+    [chara_new name="chocokoa" jname="チョコアルバコア"]
+    [chara_new name="zombie" jname="ゾンビィ"]
 
     [bg storage="bgtest" time="1000"]
     [playbgm storage="cafe" loop="true"]
@@ -71,8 +73,7 @@
     [s]
 
 *thugs_appear_badend_hard 
-    君の前に現れたのは荒くれ者達だった。
-    [p]
+    [chara_show name="thug" storage="thug_normal" pos="center"]
     #荒くれ者
     こんなとこで剣なんか振ってんじゃねえよ！あぶねえだろうが！
     [p]
@@ -85,8 +86,7 @@
     [s]
 
 *lowain_appear_badend_hard 
-    君の前に現れたのはローアイン達だった。
-    [p]
+    [chara_show name="lowain" storage="lowain_normal" pos="center"]
     #ローアイン
     あれ？ﾀﾞﾝﾁｮ？こんなとこで剣なんか振っちゃってDoしたん？
     [p]
@@ -104,8 +104,9 @@
 
 *sea_creatures_appear_hard 
     [playbgm storage="bgm_action" loop="true"]
-    君の前に現れたのは、海のトンチキ生物達だった。
-    [p]
+    [chara_show name="kaki" storage="kaki" pos="left"]
+    [chara_show name="nni" storage="nni" pos="right"]
+    [chara_show name="katuo" storage="katuo" pos="center"]
     カキフライ、ンニ、カツウォヌス、前から後ろから、左右から、海の生物が襲いかかる。
     [p]
     どれから対処すべきか...
@@ -129,9 +130,9 @@
     [s]
 
 *progress_battle_1 
-    [playse storage="smash" stop="false"]
-    まずは1つ、次は━
-    [p]
+    [chara_hide name="katuo" time="200"]
+    [chara_show name="same" storage="same" pos="left"]
+    [chara_show name="koa" storage="koa" pos="right"]
     サメ、アルバコア、増援。君は選択を迫られる...
     [l]
 
@@ -144,6 +145,7 @@
     [s]
 
 *final_battle_badend
+    [chara_show name="zombie" storage="zombie" pos="center"]
     クァニ、灼弩火罹、ゾンビィ、更に増える生物達。
     [p]
     無理だ。1人では━ [br]君は押し迫る海の生物達の中に消えていった...。

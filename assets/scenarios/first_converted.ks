@@ -1,14 +1,5 @@
-; first.ks - エンジン用に変換
-; スタートシナリオ（プロローグ + キャラ選択）
-
-; 動的アセット宣言
-
-@asset type=image key=enzan path=assets/images/enzan.jpg
-@asset type=image key=roger_normal path=assets/images/roger_normal.png
-@asset type=image key=roger_smile path=assets/images/roger_smile.png
-
 *start
-    ; キャラクター定義 (名前と表示名の紐付け)
+    ; キャラクター定義
     [chara_new name="roger" jname="ロジャー"]
     [chara_new name="fenny" jname="フェニー"]
     [chara_new name="narumia" jname="ナルメア"]
@@ -23,7 +14,7 @@
     君は、見たこともない空間にいる。[br]幻想的な一面の花畑、[br]とても現実とは思えない。
     [p]
 
-    [chara_show name="roger" storage="roger" pos="center"]
+    [chara_show name="roger" storage="roger_normal" pos="center"]
 
     #ロジャー
     おはよう！お呼びとあらば即参上できない！[br]今日も今日とて限界勤務上等の[br]オロロジャイアちゃんでっす！

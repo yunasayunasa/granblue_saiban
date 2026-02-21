@@ -1,15 +1,14 @@
-; narumia_scenario.ks - エンジン用に変換
-; ナルメアルート
-
-; 動的アセット宣言（存在しない画像はプレースホルダー）
-@asset type=image key=roger_normal path=assets/images/roger_normal.png
-
 *cafe_scene
     ; キャラクター定義
     [chara_new name="roger" jname="ロジャー"]
     [chara_new name="fenny" jname="フェニー"]
     [chara_new name="narumia" jname="ナルメア"]
     [chara_new name="siete" jname="シエテ"]
+    [chara_new name="sandalphon" jname="サンダルフォン"]
+    [chara_new name="asuria" jname="アンスリア"]
+    [chara_new name="diantha" jname="ディアンサ"]
+    [chara_new name="nier" jname="ニーア"]
+    [chara_new name="death" jname="デス"]
 
     ; 背景をカフェに変更
     [bg storage="bgtest" time="1000"]
@@ -19,14 +18,15 @@
     君はナルメアと共にグランサイファー船内にある[br]カフェへと辿り着いた。
     [p]
 
-    [chara_show name="roger" storage="roger_normal" pos="center" time="500" wait="true"]
+    [chara_show name="sandalphon" storage="sandalphon_normal" pos="center" time="500" wait="true"]
 
     #サンダルフォン
     注文は？
     [p]
 
-    [chara_hide name="roger" time="200" wait="true"]
+    [chara_hide name="sandalphon" time="200" wait="true"]
 
+    [chara_show name="narumia" storage="narumia_normal" pos="center"]
     #ナルメア
     団長ちゃん！[br]この【熱々！ホットチョコレート】なんて[br]いいんじゃないかな？
     [p]
@@ -170,16 +170,19 @@
     [l]
 
     ; ディアンサのセリフ
+    [chara_show name="diantha" storage="diantha_normal" pos="left"]
     #ディアンサ
     団長さん！はい！チョコレート！[br]受け取って！
     [p]
 
     ; アンスリアのセリフ
+    [chara_show name="asuria" storage="asuria_normal" pos="right"]
     #アンスリア
     チョコ、作ってきたの、団長さんの為に。[br]受け取って欲しいな...？
     [p]
 
     ; ニーアのセリフ
+    [chara_show name="nier" storage="nier_normal" pos="center"]
     #ニーア
     団長さん...？[br]受け取ってくれるよね...？[br]愛して...くれるよね...？
     [p]
@@ -209,6 +212,7 @@
     [p]
 
     ; デス登場
+    [chara_show name="death" storage="death_stand" pos="right"]
     #デス
     愛シイ人、人ノ愛ハ移リ行クモノ。[br]永遠ノ愛ヲ求メルナラ、答エハヒトツ...
     [p]

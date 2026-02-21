@@ -1,24 +1,20 @@
-; siete_scenario.ks - エンジン用に変換
-; シエテルート
-
-; 動的アセット宣言
-@asset type=image key=roger_normal path=assets/images/roger_normal.png
-
 *deck_scene_start
     ; キャラクター定義
     [chara_new name="roger" jname="ロジャー"]
     [chara_new name="fenny" jname="フェニー"]
     [chara_new name="narumia" jname="ナルメア"]
     [chara_new name="siete" jname="シエテ"]
+    [chara_new name="wilnas" jname="ウィルナス"]
+    [chara_new name="luoh" jname="ル・オー"]
+    [chara_new name="wamdus" jname="ワムデュス"]
+    [chara_new name="galleon" jname="ガレオン"]
+    [chara_new name="ruria" jname="ルリア"]
 
     ; 背景を甲板に変更
     [bg storage="bgtest" time="1000"]
     [playbgm storage="cafe" loop="true"]
 
-    #
-    君はシエテと共に甲板に出た。
-    [p]
-
+    [chara_show name="siete" storage="siete_normal" pos="center"]
     #シエテ
     チョコを受け取れる世界と言っても、
     [p]
@@ -172,7 +168,7 @@
     「本気、出しちゃおっかな。」
     [p]
 
-    ; グランシャリオ発動演出
+    [chara_show name="siete" storage="siete_stance" pos="center"]
     [quake time="1000" count="5" hmax="5" vmax="5" wait="false"]
 
     #
@@ -186,8 +182,7 @@
     まともに受ければ、死だと。
     [p]
 
-    #シエテ
-    「グラン•シャリオ」
+    [chara_show name="siete" storage="siete_granchariot" pos="center"]
     [p]
     [playse storage="smash" stop="false"]
     [quake time="800" count="10" hmax="30" vmax="30" wait="false"]
@@ -302,14 +297,12 @@
     現れたのは六竜のウィルナスとルオーだった。
     [p]
 
-    #ウィルナス
-    重畳！重畳！
+    [chara_show name="wilnas" storage="wilnas_normal" pos="center"]
     [p]
     ここにいやがりやがったか！
     [p]
 
-    #ルオー
-    探していたのだよ。
+    [chara_show name="luoh" storage="luoh_normal" pos="center"]
     [p]
     これを渡す為に。
     [p]
@@ -334,14 +327,12 @@
     現れたのは六竜のワムデュスとガレヲンだった。
     [p]
 
-    #ワムデュス
-    特異点、探した。
+    [chara_show name="wamdus" storage="wamdus_normal" pos="center"]
     [p]
     これあげる。ロジャーに作ってもらった。
     [p]
 
-    #ガレヲン
-    賞賛。(この空の世界で生きる全ての命に
+    [chara_show name="galleon" storage="galleon_normal" pos="center"]
     [p]
     幸いあれ。無論、特異点にも。
     [p]

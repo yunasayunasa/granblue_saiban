@@ -1,16 +1,12 @@
-; fenny_scenario.ks - エンジン用に変換
-; フェニールート
-
-; 動的アセット宣言
-@asset type=image key=enzan path=assets/images/enzan.jpg
-@asset type=image key=roger_normal path=assets/images/roger_normal.png
-
 *port_breeze_arrival
     ; キャラクター定義
     [chara_new name="roger" jname="ロジャー"]
     [chara_new name="fenny" jname="フェニー"]
     [chara_new name="narumia" jname="ナルメア"]
     [chara_new name="siete" jname="シエテ"]
+    [chara_new name="sabrina" jname="サブリナ"]
+    [chara_new name="ruria" jname="ルリア"]
+    [chara_new name="hauhet" jname="ハウヘト"]
 
     ; フェニーは表示されている状態
     [bg storage="bgtest" time="1000"] 
@@ -34,19 +30,19 @@
 *buy_ingredients_route
     [chara_hide name="fenny" time="200" wait="true"]
     [bg storage="bgtest2" time="1000"] 
-    [chara_show name="sabrina" storage="roger_normal" pos="center"] 
+    [chara_show name="sabrina" storage="sabrina_normal" pos="center"] 
     #サブリナ
     お、フェニー！団長と買い物？
     [p]
     [chara_hide name="sabrina" time="200" wait="true"]
 
-    [chara_show name="fenny" storage="roger" pos="center"] 
+    [chara_show name="fenny" storage="fenny_normal" pos="center"] 
     #フェニー
     ま、まずいんだよ！[br]サブリナにチョコを渡す計画がバレちゃうんだよ！[br]団長さん！なんとかしてぇ！
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
-    [chara_show name="sabrina" storage="roger_normal" pos="center"]
+    [chara_show name="sabrina" storage="sabrina_normal" pos="center"]
     #サブリナ
     なーにをこそこそと相談してるんだい？
     [p]
@@ -66,13 +62,13 @@
 
 *ingredients_leave_to_fenny_badend
     [chara_hide name="sabrina" time="200" wait="true"]
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     ふぇぇ！なんとかして欲しいのは[br]フェニーの方なんだよ！？[br]で、でも、団長さんがいうなら、[br]なんとかしてみるんだよ！
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
-    [chara_show name="sabrina" storage="roger_normal" pos="center"]
+    [chara_show name="sabrina" storage="sabrina_normal" pos="center"]
     #サブリナ
     何か悩みがあるならなんでも言って。
     [p]
@@ -80,31 +76,31 @@
     [p]
     [chara_hide name="sabrina" time="200" wait="true"]
 
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     サブリナ！[br]実はその...団長さんとデート中んだよ！
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
     [stopbgm] 
-    [chara_show name="sabrina" storage="roger_normal" pos="center"]
+    [chara_show name="sabrina" storage="sabrina_normal" pos="center"]
     #サブリナ
     は！？
     [p]
     [chara_hide name="sabrina" time="200" wait="true"]
 
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     だから...その...邪魔しないで欲しいんだよ！！！
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
-    [chara_show name="sabrina" storage="roger_normal" pos="center"]
+    [chara_show name="sabrina" storage="sabrina_normal" pos="center"]
     #サブリナ
     団長...。どういうこと？[br]ちょっとあっちで"お話"しようか...
     [p]
     [chara_hide name="sabrina" time="200" wait="true"]
 
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     あ、、あれ？なんか不穏なんだよ...？
     [p]
@@ -123,7 +119,7 @@
     なんとかサブリナをごまかし、退散することができた君たちは、カフェのキッチンでチョコの制作に取り掛かった。
     [p]
 
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     〜♪〜♪サブリナ喜んでくれるかなぁ？
     [p]
@@ -142,7 +138,7 @@
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
-    [chara_show name="ruria" storage="roger_normal" pos="center"]
+    [chara_show name="ruria" storage="ruria_normal" pos="center"]
     #ルリア
     え、ええーーー！！
     [p]
@@ -155,7 +151,7 @@
     [p]
     [chara_hide name="ruria" time="200" wait="true"]
 
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     ...ルリア？ルリアなんだよ？
     [p]
@@ -213,19 +209,19 @@
     君は先に器材を買いに行くことにした。
     [p]
 
-    [chara_show name="hauhet" storage="roger_normal" pos="center"]
+    [chara_show name="hauhet" storage="hauhet_normal" pos="center"]
     #ハウヘト
     あら...特異点。あなたも買い物？
     [p]
     [chara_hide name="hauhet" time="200" wait="true"]
 
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     ハウヘト！ハウヘトも買い物なんだよ？
     [p]
     [chara_hide name="fenny" time="200" wait="true"]
 
-    [chara_show name="hauhet" storage="roger_normal" pos="center"]
+    [chara_show name="hauhet" storage="hauhet_normal" pos="center"]
     #ハウヘト
     えぇ、ここの店はポートブリーズでも特に質が良いの。
     [p]
@@ -235,7 +231,7 @@
     [p]
     [chara_hide name="hauhet" time="200" wait="true"]
 
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     団長さん！
     [p]
@@ -252,7 +248,7 @@
 
 *equipment_ask_hauhet_end
     [chara_hide name="fenny" time="200" wait="true"]
-    [chara_show name="hauhet" storage="roger_normal" pos="center"]
+    [chara_show name="hauhet" storage="hauhet_normal" pos="center"]
     #ハウヘト
     チョコを手作りするのね。
     [p]
@@ -265,7 +261,7 @@
     ヒヒイロカネはその希少性から市場にほぼ出回ることはないわ。[br]だからこそそれを贅沢に使ったこのヒヒイロボウルは...[br]（中略：ハウヘトの講釈が続く）
     [p]
     [chara_hide name="hauhet" time="200" wait="true"]
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     なんか...すっごい早口で何言ってるか全然わかんないんだよ...
     [p]
@@ -283,7 +279,7 @@
     買い物を終えた君たちは、船内のカフェのキッチンでチョコを作り始めた。
     [p]
 
-    [chara_show name="fenny" storage="roger_normal" pos="center"]
+    [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
     〜♪〜♪サブリナ、喜んでくれるかなあ？
     [p]
