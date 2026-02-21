@@ -13,6 +13,17 @@
     [chara_new name="koa" jname="アルバコア"]
     [chara_new name="chocokoa" jname="チョコアルバコア"]
     [chara_new name="zombie" jname="ゾンビィ"]
+    [chara_new name="ruria" jname="ルリア"]
+    [chara_new name="oigen" jname="三羽烏"]
+    [chara_new name="wilnas" jname="ウィルナス"]
+    [chara_new name="luoh" jname="ル・オー"]
+    [chara_new name="wamdus" jname="ワムデュス"]
+    [chara_new name="galleon" jname="ガレオン"]
+    [chara_new name="sandalphon" jname="サンダルフォン"]
+    [chara_new name="diantha" jname="ディアンサ"]
+    [chara_new name="anthuria" jname="アンスリア"]
+    [chara_new name="nier" jname="ニーア"]
+    [chara_new name="death" jname="デス"]
 
     [bg storage="bgtest" time="1000"]
     [playbgm storage="cafe" loop="true"]
@@ -190,7 +201,8 @@
     君は、どこか見覚えのある空間にいる。
     [p]
 
-    [chara_show name="roger" storage="roger" pos="center"]
+    [chara_show name="roger" storage="roger_normal" pos="center"]
+    #ロジャー
     おはよう！お呼びとあらば即参上できない！[br]ここは演算世界。あらゆる可能性を探るための場所さ。
     [p]
     君がチョコをもらえる世界を探り出す為に、早速行ってみよう〜！

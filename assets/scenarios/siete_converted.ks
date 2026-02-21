@@ -9,6 +9,7 @@
     [chara_new name="wamdus" jname="ワムデュス"]
     [chara_new name="galleon" jname="ガレオン"]
     [chara_new name="ruria" jname="ルリア"]
+    [chara_new name="oigen" jname="三羽烏"]
 
     ; 背景を甲板に変更
     [bg storage="bgtest" time="1000"]
