@@ -361,20 +361,39 @@ export default class ScenarioManager {
         const bright = 0xffffff;
         const dark = 0x888888;
 
+        // 1. ノベルパートのキャラクタースプライト (GameScene.characters)
         for (const name in this.scene.characters) {
             const chara = this.scene.characters[name];
             if (!chara || !chara.active) continue;
 
-            // characterDefs から表示名 (jname) を取得
             const def = this.characterDefs[name];
             const jname = def ? def.jname : name;
 
-            // スクリプト上の名前が「ID」または「jname」と一致するかチェック
-            // speakerName が null の場合は全員ハイライト
             if (speakerName === null || speakerName === "" || speakerName === name || speakerName === jname) {
                 chara.setTint(bright);
             } else {
                 chara.setTint(dark);
+            }
+        }
+
+        // 2. 裁判パートのオブジェクト (TrialScene上の直接配置)
+        // TrialSegmentManagerが保持しているcharaImagesをチェック
+        const trialManager = this.scene.children.getByName ? this.scene.children.getByName('trial_manager') : null;
+        const managerComp = trialManager?.components?.TrialSegmentManager;
+        
+        if (managerComp && managerComp.charaImages) {
+            for (const [id, chara] of Object.entries(managerComp.charaImages)) {
+                if (!chara || !chara.active) continue;
+                
+                const def = this.characterDefs[id];
+                const jname = def ? def.jname : id;
+
+                if (speakerName === null || speakerName === "" || speakerName === id || speakerName === jname) {
+                    // console.log(`[highlightSpeaker] Highlighting Trial Object: ${id}`);
+                    chara.setTint(bright);
+                } else {
+                    chara.setTint(dark);
+                }
             }
         }
     }

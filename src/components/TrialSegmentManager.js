@@ -257,60 +257,70 @@ export default class TrialSegmentManager {
 
     // キャラ画像を一括検索する内部メソッド
     _findCharacterImages() {
-        const charNames = {
-            left: 'character_left',
-            center: 'character_center',
-            right: 'character_right'
-        };
+        // 固定の3枠（左・中・右）ではなく、ID（roger, fenny, ruriaなど）で検索・キャッシュする
+        // TrialScene.jsonで定義した名前に基づく
+        const charIds = ['roger', 'fenny', 'ruria', 'thug', 'nni', 'kaki', 'katuo', 'zombie', 'koa', 'chocokoa'];
 
-        for (const [key, name] of Object.entries(charNames)) {
-            if (this.scene.findGameObjectByName) {
-                this.charaImages[key] = this.scene.findGameObjectByName(name);
-            } else {
-                this.charaImages[key] = this.scene.children.getByName(name);
+        charIds.forEach(id => {
+            if (!this.charaImages[id]) {
+                if (this.scene.findGameObjectByName) {
+                    this.charaImages[id] = this.scene.findGameObjectByName(id);
+                } else {
+                    this.charaImages[id] = this.scene.children.getByName(id);
+                }
             }
-        }
+        });
 
-        console.log('[TrialSegmentManager] Found characters:',
-            Object.entries(this.charaImages).map(([k, v]) => `${k}: ${v ? v.name : 'null'}`).join(', '));
+        console.log('[TrialSegmentManager] Found characters:', 
+            Object.entries(this.charaImages).filter(([k, v]) => v).map(([k, v]) => `${k}`).join(', '));
     }
 
     // キャラ表示切り替えメソッド
     updateCharacterDisplay(index) {
-        // 画像がまだ見つかっていない場合は検索を試みる (Lazy Load)
         this._findCharacterImages();
 
-        if (this.charaImages.left) this.charaImages.left.setVisible(false);
-        if (this.charaImages.center) this.charaImages.center.setVisible(false);
-        if (this.charaImages.right) this.charaImages.right.setVisible(false);
+        // 全員消す
+        Object.values(this.charaImages).forEach(img => {
+            if (img) img.setVisible(false);
+        });
 
-        // インデックスに応じて表示 (0:左, 1:右, 2:中 のローテーション、またはデータ指定)
-        // データに position 指定がある場合はそれを優先
         const currentTestimony = this.segmentData.testimonies[index];
+        // データにキャラ名(name/id)の指定がある場合はそれを使う
+        // なければ以前と同様のローテーション（テスト用）
+        let charId = currentTestimony && (currentTestimony.charaId || currentTestimony.name);
         let posStr = currentTestimony && currentTestimony.position;
 
-        let pos = 2; // default center
-        if (posStr) {
-            if (posStr === 'left') pos = 0;
-            else if (posStr === 'right') pos = 1;
-            else pos = 2;
-        } else {
-            pos = index % 3;
+        if (!charId) {
+            // デフォルトローテーション (0:roger, 1:ruria, 2:fenny)
+            const rotation = ['roger', 'ruria', 'fenny'];
+            charId = rotation[index % 3];
         }
 
-        const target = (pos === 0) ? this.charaImages.left :
-            (pos === 1) ? this.charaImages.right :
-                this.charaImages.center;
+        const target = this.charaImages[charId];
 
         if (target) {
             target.setVisible(true);
-            console.log(`[TrialSegmentManager] Showing character target: ${target.name} at position: ${pos}`);
+            
+            // ポジション指定があれば座標を上書き
+            if (posStr === 'left') {
+                target.setX(300);
+            } else if (posStr === 'right') {
+                target.setX(980);
+            } else if (posStr === 'center') {
+                target.setX(640);
+            }
 
-            // ★ カメラ回転演出
-            this._rotateCameraForPosition(pos);
+            console.log(`[TrialSegmentManager] Showing character: ${charId} at X: ${target.x}`);
+
+            // ★ カメラ回転演出 (X座標から判断)
+            let posIndex = 2; // center
+            if (target.x < 500) posIndex = 0; // left
+            else if (target.x > 800) posIndex = 1; // right
+            
+            this._rotateCameraForPosition(posIndex);
 
         } else {
-            console.warn('[TrialSegmentManager] No character image for position:', pos);
+            console.warn('[TrialSegmentManager] No character image for ID:', charId);
         }
     }
 

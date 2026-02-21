@@ -25,29 +25,29 @@
       }
     },
     {
-      "name": "character_left",
+      "name": "roger",
       "type": "image",
       "x": 300,
       "y": 450,
-      "texture": "yuna_angry",
+      "texture": "roger_normal",
       "visible": false,
       "layer": "Gameplay"
     },
     {
-      "name": "character_center",
+      "name": "fenny",
       "type": "image",
       "x": 640,
       "y": 450,
-      "texture": "yuna_angry",
+      "texture": "fenny_normal",
       "visible": false,
       "layer": "Gameplay"
     },
     {
-      "name": "character_right",
+      "name": "ruria",
       "type": "image",
       "x": 980,
       "y": 450,
-      "texture": "yuna_angry",
+      "texture": "ruria_normal",
       "visible": false,
       "layer": "Gameplay"
     },
