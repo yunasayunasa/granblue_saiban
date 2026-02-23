@@ -144,7 +144,7 @@ export default class ScenarioManager {
                 console.error(`[ScenarioManager] Undefined Tag Error: [${tagName}] at Line ${this.currentLine}: "${line}"`);
                 console.error('Available tags:', Array.from(this.tagHandlers.keys()));
             }
-        }
+        } // Missing closing brace added here
         else if (trimedLine.length > 0) {
             // --- セリフまたは地の文 または 話者指定(#) ---
             const expandedLine = this.embedVariables(trimedLine);
@@ -153,7 +153,8 @@ export default class ScenarioManager {
             if (expandedLine.startsWith('#')) {
                 const namePart = expandedLine.substring(1).trim();
                 this.lastSpeaker = namePart || null;
-                // console.log(`[ScenarioManager] Speaker changed to: ${this.lastSpeaker}`);
+                // ★ 話者が変わった瞬間にハイライトを更新する
+                this.highlightSpeaker(this.lastSpeaker);
                 return;
             }
 
@@ -179,18 +180,12 @@ export default class ScenarioManager {
             await this.messageWindow.setText(wrappedLine, useTyping, speakerName);
         }
     }
-    // (constructor, next, parseなどの他の部分は、あなたの正常に動作しているコードのままでOKです)
-    // ★★★ loadScenarioメソッドだけを、以下のコードで完全に置き換えてください ★★★
-
-
-    // (constructor, next, parseなどの他の部分は、あなたの正常に動作しているコードのままでOKです)
-    // ★★★ loadScenarioメソッドだけを、以下のコードで完全に置き換えてください ★★★
 
     /**
-    * 指定されたシナリオをロードし、解析して実行準備を整える (最終版)
-    * @param {string} scenarioKey - 'scene2.ks' のようなファイル名
-    * @param {string|null} targetLabel - ジャンプ先のラベル (例: '*start')
-    */
+     * 指定されたシナリオをロードし、解析して実行準備を整える (最終版)
+     * @param {string} scenarioKey - 'scene2.ks' のようなファイル名
+     * @param {string|null} targetLabel - ジャンプ先のラベル (例: '*start')
+     */
     async loadScenario(scenarioKey, targetLabel = null) {
         // console.log(`%c[loadScenario] START: ${scenarioKey}`, "color: yellow; font-weight: bold;");
         let rawText;
@@ -380,11 +375,11 @@ export default class ScenarioManager {
         // TrialSegmentManagerが保持しているcharaImagesをチェック
         const trialManager = this.scene.children.getByName ? this.scene.children.getByName('trial_manager') : null;
         const managerComp = trialManager?.components?.TrialSegmentManager;
-        
+
         if (managerComp && managerComp.charaImages) {
             for (const [id, chara] of Object.entries(managerComp.charaImages)) {
                 if (!chara || !chara.active) continue;
-                
+
                 const def = this.characterDefs[id];
                 const jname = def ? def.jname : id;
 

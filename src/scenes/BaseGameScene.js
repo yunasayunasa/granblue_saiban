@@ -8,19 +8,29 @@ export default class BaseGameScene extends Phaser.Scene {
 
     constructor(config) {
         super(config);
-        // このクラスで定義されている他のプロパティは変更なし
-        this.dynamicColliders = [];
-        this.actionInterpreter = null;
-        this.keyPressEvents = new Map();
+        // シーン固有の定数やフラグ以外、動的な状態はここでは初期化しない
         this.layoutDataKey = null;
+    }
+
+    /**
+     * シーンの動的な状態を初期化/リセットする
+     */
+    resetProperties() {
+        this.dynamicColliders = [];
+        this.actionInterpreter = this.registry.get('actionInterpreter');
+        this.keyPressEvents = new Map();
         this.updatableComponents = new Set();
         this._deferredActions = [];
         this.joystick = null;
-
         this._sceneSettingsApplied = false;
         this.ySortEnabled = false;
-        this.ySortableObjects = new Set(); // ★ ArrayからSetに変更
-        this.layer = {}; // ★ レイヤーコンテナを保持するオブジェクトを追加
+        this.ySortableObjects = new Set();
+        this.layer = {};
+
+        // GameScene 等で使われることもある characters オブジェクトを初期化
+        if (this.characters) {
+            this.characters = {};
+        }
     }
     /**
     * ★★★ 新規メソッド ★★★
@@ -43,7 +53,8 @@ export default class BaseGameScene extends Phaser.Scene {
 
     }
     create() {
-        this.actionInterpreter = this.registry.get('actionInterpreter');
+        this.resetProperties();
+
         if (!this.actionInterpreter) {
             console.error(`[${this.scene.key}] CRITICAL: ActionInterpreter not found in registry!`);
         }
@@ -170,7 +181,7 @@ export default class BaseGameScene extends Phaser.Scene {
 
     buildSceneFromLayout(data) {
         if (!data) { this.finalizeSetup([]); return; }
-        // console.log(`[BaseGameScene] Building scene from layout: ${this.scene.key}`);
+        console.log(`[BaseGameScene] Building scene from layout: ${this.scene.key}`);
         if (this.editorUI && data.layers) this.editorUI.setLayers(data.layers);
         const objs = [];
         if (data.objects) {
@@ -180,7 +191,7 @@ export default class BaseGameScene extends Phaser.Scene {
                     this.applyProperties(obj, l);
                     this.initComponentsAndEvents(obj);
                     objs.push(obj);
-                    // console.log(`[BaseGameScene] Created object: ${obj.name} (Type: ${l.type}, Texture: ${l.texture}, Layer: ${l.layer}, Depth: ${obj.depth}, Visible: ${obj.visible}, Alpha: ${obj.alpha})`);
+                    console.log(`[BaseGameScene] Created object: ${obj.name} (Type: ${l.type}, Texture: ${l.texture}, Layer: ${l.layer}, Depth: ${obj.depth}, Visible: ${obj.visible}, Alpha: ${obj.alpha})`);
                 }
             });
         }
