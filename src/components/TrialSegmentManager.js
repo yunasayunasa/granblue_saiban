@@ -518,44 +518,15 @@ export default class TrialSegmentManager {
             // コンテナサイズを更新
             container.setSize(textObj.width, textObj.height);
 
-            // ★ ハイライトごとの個別判定範囲を生成 (文字位置ベースの近似)
-            const cleanDisplay = modifiedText;
-            data.highlights.forEach((h, index) => {
-                const targetText = `【${h.text}】`;
-                const charIndex = cleanDisplay.indexOf(targetText);
-                if (charIndex === -1) return;
-
-                const ratioStart = charIndex / cleanDisplay.length;
-                const ratioWidth = targetText.length / cleanDisplay.length;
-
-                const padding = 10;
-                const boxW = textObj.width * ratioWidth + padding;
-                const boxH = textObj.height + padding * 2;
-                const boxX = (textObj.width * ratioStart) - (padding / 2);
-                const boxY = -padding;
-
-                // 可視化ボックス (デバッグ用だが演出としても機能)
-                const hitBox = this.scene.add.graphics();
-                hitBox.fillStyle(0xffff00, 0.2); // さりげなく黄色
-                hitBox.lineStyle(2, 0xffff00, 0.5);
-                hitBox.fillRect(boxX, boxY, boxW, boxH);
-                hitBox.strokeRect(boxX, boxY, boxW, boxH);
-                container.add(hitBox);
-
-                // ★ 判定ゾーン: 中央座標指定
-                const hitZone = this.scene.add.zone(boxX + boxW / 2, boxY + boxH / 2, boxW, boxH);
-                hitZone.setInteractive({ useHandCursor: true })
-                    .on('pointerdown', (pointer, localX, localY, event) => {
-                        if (event) event.stopPropagation(); // 貫通・重なり防止
-                        console.log(`[TrialManager] Highlight Area '${h.text}' clicked!`);
-                        this.onHighlightClicked(h);
-                    });
-
-                container.add(hitZone);
-            });
-
-            // コンテナ自体のクリックは無効化（個別Zoneに任せる）
-            container.input.enabled = false;
+            // ★ 【改善】テキスト全体のクリック判定を有効化
+            // 個別のZone判定はズレやすいため、証言全体を判定範囲とする
+            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
+                .on('pointerdown', (pointer, localX, localY, event) => {
+                    if (event) event.stopPropagation();
+                    console.log(`[TrialManager] Testimony clicked! Triggering menu for: ${data.highlights[0].text}`);
+                    this.onHighlightClicked(data.highlights[0]);
+                });
+            container.input.cursor = 'pointer';
         } else {
             // ハイライトがない場合
             textObj.updateText();
@@ -796,40 +767,18 @@ export default class TrialSegmentManager {
                 textObj.updateText();
                 activeObj.setSize(textObj.width, textObj.height);
 
-                // ★ 高精度ハイライト判定の再構築
-                // 既存のZoneやGraphicsを掃除
+                // ★ 【改善】テキスト全体のクリック判定を再構築
                 activeObj.list.filter(child => child.type === 'Graphics' || child.type === 'Zone').forEach(child => child.destroy());
 
                 if (newHighlights && newHighlights.length > 0) {
-                    const cleanDisplay = displayText;
-                    newHighlights.forEach((h, index) => {
-                        const targetText = `【${h.text}】`;
-                        const charIndex = cleanDisplay.indexOf(targetText);
-                        if (charIndex === -1) return;
-
-                        const ratioStart = charIndex / cleanDisplay.length;
-                        const ratioWidth = targetText.length / cleanDisplay.length;
-
-                        const padding = 10;
-                        const boxW = textObj.width * ratioWidth + padding;
-                        const boxH = textObj.height + padding * 2;
-                        const boxX = (textObj.width * ratioStart) - (padding / 2);
-                        const boxY = -padding;
-
-                        // 可視化（さりげなく）
-                        const hitBox = this.scene.add.graphics();
-                        hitBox.fillStyle(0xffff00, 0.2);
-                        hitBox.fillRect(boxX, boxY, boxW, boxH);
-                        activeObj.add(hitBox);
-
-                        const hitZone = this.scene.add.zone(boxX + boxW / 2, boxY + boxH / 2, boxW, boxH);
-                        hitZone.setInteractive({ useHandCursor: true })
-                            .on('pointerdown', (pointer, localX, localY, event) => {
-                                if (event) event.stopPropagation();
-                                this.onHighlightClicked(h);
-                            });
-                        activeObj.add(hitZone);
-                    });
+                    activeObj.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
+                        .on('pointerdown', (pointer, localX, localY, event) => {
+                            if (event) event.stopPropagation();
+                            this.onHighlightClicked(newHighlights[0]);
+                        });
+                    activeObj.input.cursor = 'pointer';
+                } else {
+                    activeObj.disableInteractive();
                 }
             }
 
