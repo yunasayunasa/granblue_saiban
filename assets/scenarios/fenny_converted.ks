@@ -215,7 +215,7 @@
     ～ジュウダンロンパエンド～
     [l]
     [chara_hide name="fenny" time="500" wait="true"]
-    [jump storage="TitleScene"]
+    [jump storage="TrialScene" params="{ layoutDataKey: 'trial_demo' }"]
     [s]
 
 ; ----- 器材ルート -----
@@ -289,7 +289,7 @@
     ～ハウヘトEND～
     [l]
     [chara_hide name="hauhet" time="500" wait="true"]
-    [jump storage="TitleScene"]
+    [jump storage="TrialScene" params="{ layoutDataKey: 'trial_demo' }"]
     [s]
 
 *equipment_decline
@@ -327,18 +327,5 @@
     [p]
     どうやら裁判が必要なようだ。
     [p]
-    （中略：裁判パートを経てハッピーエンドへ）
-    [p]
-
-    [chara_show name="fenny" storage="fenny_normal" pos="center" time="300" wait="true"]
-    #フェニー
-    はい！団長さんにも！
-    [p]
-    ハッピーバレンタインなんだよ！
-    [p]
- 
-    ～逆転追求裁判エンド～
-    [l]
-    [chara_hide name="fenny" time="500" wait="true"]
-    [jump storage="TitleScene"]
+    [jump storage="TrialScene" params="{ layoutDataKey: 'trial_demo' }"]
     [s]

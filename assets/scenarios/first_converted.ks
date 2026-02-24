@@ -52,9 +52,7 @@
     [link target="*narumia_route_start" text="ナルメア"]
     [link target="*siete_route_start" text="シエテ"]
     [link target="*hard_mode_start" text="誰も仲間にしない"]
-    [if exp="sf.hard_mode_cleared == true"]
-        [link target="*fenny_route_start" text="フェニー"]
-    [endif]
+    [link target="*fenny_route_start" text="フェニー"]
     [r]
     [s]
 
