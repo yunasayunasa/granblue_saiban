@@ -271,7 +271,7 @@ export default class TrialSegmentManager {
             }
         });
 
-        console.log('[TrialSegmentManager] Found characters:', 
+        console.log('[TrialSegmentManager] Found characters:',
             Object.entries(this.charaImages).filter(([k, v]) => v).map(([k, v]) => `${k}`).join(', '));
     }
 
@@ -300,7 +300,7 @@ export default class TrialSegmentManager {
 
         if (target) {
             target.setVisible(true);
-            
+
             // ポジション指定があれば座標を上書き
             if (posStr === 'left') {
                 target.setX(300);
@@ -316,7 +316,7 @@ export default class TrialSegmentManager {
             let posIndex = 2; // center
             if (target.x < 500) posIndex = 0; // left
             else if (target.x > 800) posIndex = 1; // right
-            
+
             this._rotateCameraForPosition(posIndex);
 
         } else {
@@ -518,22 +518,26 @@ export default class TrialSegmentManager {
             // コンテナサイズを更新
             container.setSize(textObj.width, textObj.height);
 
-            // ★ ハイライトごとの個別判定範囲を生成
-            // 本来は正確な座標計算が必要だが、ここでは簡易的に
-            // 「ハイライトの数だけ、テキストの下に並べる or 特定のオフセットで配置」
-            // ユーザー要望の「可視化」として、黄色いボックスを作成
-
+            // ★ ハイライトごとの個別判定範囲を生成 (文字位置ベースの近似)
+            const cleanDisplay = modifiedText;
             data.highlights.forEach((h, index) => {
+                const targetText = `【${h.text}】`;
+                const charIndex = cleanDisplay.indexOf(targetText);
+                if (charIndex === -1) return;
+
+                const ratioStart = charIndex / cleanDisplay.length;
+                const ratioWidth = targetText.length / cleanDisplay.length;
+
                 const padding = 10;
-                const boxW = textObj.width / data.highlights.length;
+                const boxW = textObj.width * ratioWidth + padding;
                 const boxH = textObj.height + padding * 2;
-                const boxX = (index * boxW);
+                const boxX = (textObj.width * ratioStart) - (padding / 2);
                 const boxY = -padding;
 
-                // 可視化ボックス
+                // 可視化ボックス (デバッグ用だが演出としても機能)
                 const hitBox = this.scene.add.graphics();
-                hitBox.fillStyle(0xffff00, 0.3); // 半透明黄色
-                hitBox.lineStyle(2, 0xffff00, 0.8);
+                hitBox.fillStyle(0xffff00, 0.2); // さりげなく黄色
+                hitBox.lineStyle(2, 0xffff00, 0.5);
                 hitBox.fillRect(boxX, boxY, boxW, boxH);
                 hitBox.strokeRect(boxX, boxY, boxW, boxH);
                 container.add(hitBox);
@@ -543,21 +547,19 @@ export default class TrialSegmentManager {
                 hitZone.setInteractive({ useHandCursor: true })
                     .on('pointerdown', (pointer, localX, localY, event) => {
                         if (event) event.stopPropagation(); // 貫通・重なり防止
-                        console.log(`[TrialManager] Highlight Area ${index} clicked!`, h.text);
+                        console.log(`[TrialManager] Highlight Area '${h.text}' clicked!`);
                         this.onHighlightClicked(h);
                     });
 
                 container.add(hitZone);
             });
 
-            // コンテナ自体のインタラクティブ設定（フォールバック用、または全体を吸い取らないように低優先に）
-            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains);
-            container.input.enabled = false; // 個別Zoneに任せる
+            // コンテナ自体のクリックは無効化（個別Zoneに任せる）
+            container.input.enabled = false;
         } else {
             // ハイライトがない場合
             textObj.updateText();
             container.setSize(textObj.width, textObj.height);
-            // 何もしない（クリック不可）
         }
 
         this.activeTestimonies.push(container);
@@ -794,16 +796,39 @@ export default class TrialSegmentManager {
                 textObj.updateText();
                 activeObj.setSize(textObj.width, textObj.height);
 
-                // イベント再設定
-                activeObj.off('pointerdown');
-                activeObj.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
-                    .on('pointerover', () => { if (activeObj.input.enabled) activeObj.scene.input.setDefaultCursor('pointer'); })
-                    .on('pointerout', () => { activeObj.scene.input.setDefaultCursor('default'); });
+                // ★ 高精度ハイライト判定の再構築
+                // 既存のZoneやGraphicsを掃除
+                activeObj.list.filter(child => child.type === 'Graphics' || child.type === 'Zone').forEach(child => child.destroy());
 
                 if (newHighlights && newHighlights.length > 0) {
-                    activeObj.on('pointerdown', () => {
-                        console.log('[TrialManager] Updated testimony clicked:', displayText);
-                        this.onHighlightClicked(newHighlights[0]); // 簡易的に最初のハイライトを使用
+                    const cleanDisplay = displayText;
+                    newHighlights.forEach((h, index) => {
+                        const targetText = `【${h.text}】`;
+                        const charIndex = cleanDisplay.indexOf(targetText);
+                        if (charIndex === -1) return;
+
+                        const ratioStart = charIndex / cleanDisplay.length;
+                        const ratioWidth = targetText.length / cleanDisplay.length;
+
+                        const padding = 10;
+                        const boxW = textObj.width * ratioWidth + padding;
+                        const boxH = textObj.height + padding * 2;
+                        const boxX = (textObj.width * ratioStart) - (padding / 2);
+                        const boxY = -padding;
+
+                        // 可視化（さりげなく）
+                        const hitBox = this.scene.add.graphics();
+                        hitBox.fillStyle(0xffff00, 0.2);
+                        hitBox.fillRect(boxX, boxY, boxW, boxH);
+                        activeObj.add(hitBox);
+
+                        const hitZone = this.scene.add.zone(boxX + boxW / 2, boxY + boxH / 2, boxW, boxH);
+                        hitZone.setInteractive({ useHandCursor: true })
+                            .on('pointerdown', (pointer, localX, localY, event) => {
+                                if (event) event.stopPropagation();
+                                this.onHighlightClicked(h);
+                            });
+                        activeObj.add(hitZone);
                     });
                 }
             }

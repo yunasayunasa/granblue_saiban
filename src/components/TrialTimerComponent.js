@@ -24,8 +24,21 @@ export default class TrialTimerComponent {
             this.textObject.setFontFamily('"Times New Roman", "MS PMincho", serif');
         }
 
+        // ★ StateManager 依存の宣言
+        this.dependencies = ['trial_timer'];
+
         if (this.scene.updatableComponents) {
             this.scene.updatableComponents.add(this);
+        }
+    }
+
+    /**
+     * StateManagerからの通知を受け取る
+     */
+    updateValue(state) {
+        if (state.trial_timer !== undefined) {
+            this.currentTime = state.trial_timer;
+            this.updateDisplay();
         }
     }
 
@@ -42,18 +55,9 @@ export default class TrialTimerComponent {
     }
 
     update(time, delta) {
-        if (!this.isActive || this.isPaused || this.scene.isPaused) return;
-
-        // 残り時間を減らす (timeScaleの影響を受ける)
-        this.currentTime -= (delta * this.scene.time.timeScale) / 1000;
-
-        if (this.currentTime <= 0) {
-            this.currentTime = 0;
-            this.isActive = false;
-            this.scene.events.emit('TRIAL_TIMEOUT');
-        }
-
-        this.updateDisplay();
+        // 表示更新だけなら updateDisplay で十分だが、 updateValue で行うため
+        // この定期 update は不要になる可能性がある。
+        // ここでは空にしておくか、あるいはアニメーション等が必要な場合のみ利用。
     }
 
     updateDisplay() {
