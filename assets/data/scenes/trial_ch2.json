@@ -1,0 +1,176 @@
+{
+    "scene_settings": {
+        "backgroundColor": "#000033",
+        "gravity": {
+            "enabled": false
+        },
+        "ySortEnabled": false
+    },
+    "objects": [
+        {
+            "name": "background_underlay",
+            "type": "image",
+            "x": 640,
+            "y": 360,
+            "texture": "bg_school",
+            "layer": "Background"
+        },
+        {
+            "name": "trial_manager",
+            "type": "container",
+            "x": 0,
+            "y": 0,
+            "components": {
+                "TrialSegmentManager": {}
+            }
+        },
+        {
+            "name": "siete",
+            "type": "image",
+            "x": 640,
+            "y": 450,
+            "texture": "siete_normal",
+            "visible": false,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "interaction_menu",
+            "type": "container",
+            "x": 640,
+            "y": 360,
+            "components": {
+                "InteractionMenuComponent": {}
+            },
+            "layer": "UI"
+        },
+        {
+            "name": "progress_indicator",
+            "type": "Text",
+            "x": 640,
+            "y": 200,
+            "text": "議論進行…",
+            "components": {
+                "ProgressIndicatorComponent": {}
+            },
+            "layer": "UI"
+        },
+        {
+            "name": "timer_container",
+            "type": "Container",
+            "x": 1100,
+            "y": 80,
+            "layer": "UI",
+            "depth": 2000,
+            "components": [
+                {
+                    "type": "TrialTimerComponent",
+                    "params": {
+                        "timeLimit": 300
+                    }
+                }
+            ],
+            "list": [
+                {
+                    "name": "timer_bg",
+                    "type": "Graphics",
+                    "draw": {
+                        "type": "roundedRect",
+                        "x": -150,
+                        "y": -35,
+                        "width": 300,
+                        "height": 70,
+                        "radius": 15,
+                        "fill": {
+                            "color": "0x000000",
+                            "alpha": 0.6
+                        },
+                        "lineStyle": {
+                            "width": 3,
+                            "color": "0xffffff",
+                            "alpha": 0.8
+                        }
+                    }
+                },
+                {
+                    "name": "timer_text",
+                    "type": "Text",
+                    "x": 0,
+                    "y": 0,
+                    "origin": 0.5,
+                    "text": "LIMIT 05:00",
+                    "style": {
+                        "fontSize": "36px",
+                        "color": "#ffffff",
+                        "fontFamily": "serif"
+                    }
+                }
+            ]
+        }
+    ],
+    "trial_data": {
+        "timeLimit": 300,
+        "timeoutScenario": "chapter1/trial_test_failure.ks",
+        "loop_scenario": "chapter1/loop_end.ks",
+        "testimonies": [
+            {
+                "id": "t1",
+                "position": "left",
+                "text": "やあオマエ。俺は遠くの修練場で、十天衆のみんなと特訓してたんだ。",
+                "highlights": [
+                    {
+                        "text": "みんなと特訓",
+                        "choices": [
+                            {
+                                "text": "ゆさぶる",
+                                "action": "update_testimony",
+                                "pre_update_scenario": "chapter1/ch2_doubt_siete.ks",
+                                "target": "t1",
+                                "new_text": "シスやウーノ、ソーンとかさ、みんなで修練場に集まってたんだ。",
+                                "new_highlights": [
+                                    {
+                                        "text": "みんなで",
+                                        "choices": [
+                                            {
+                                                "text": "反論：ありえない",
+                                                "evidence_required": "blue_feather",
+                                                "correct": true,
+                                                "success_scenario": "chapter1/ch2_success_siete.ks",
+                                                "next_trial_data": "scenes/trial_ch3.json"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "t2",
+                "position": "right",
+                "text": "夕方まで汗を流していたよ。爽やかだろ？{cam:shake}",
+                "highlights": []
+            },
+            {
+                "id": "t3",
+                "position": "center",
+                "style": "scroll",
+                "text": "チョコなんて見てないし、キッチンの場所すら怪しいくらいさ。",
+                "highlights": [
+                    {
+                        "text": "見てない",
+                        "choices": [
+                            {
+                                "text": "つきつける",
+                                "evidence_required": "blue_feather",
+                                "correct": true,
+                                "success_scenario": "chapter1/ch2_success_siete.ks",
+                                "next_trial_data": "scenes/trial_ch3.json"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

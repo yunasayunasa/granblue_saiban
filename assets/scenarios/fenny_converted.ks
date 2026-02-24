@@ -215,7 +215,7 @@
     ～ジュウダンロンパエンド～
     [l]
     [chara_hide name="fenny" time="500" wait="true"]
-    [jump storage="TrialScene" params="{ layoutDataKey: 'trial_demo' }"]
+    [jump storage="TrialScene" params="{ layoutDataKey: 'trial_ch1' }"]
     [s]
 
 ; ----- 器材ルート -----
@@ -289,7 +289,7 @@
     ～ハウヘトEND～
     [l]
     [chara_hide name="hauhet" time="500" wait="true"]
-    [jump storage="TrialScene" params="{ layoutDataKey: 'trial_demo' }"]
+    [jump storage="TrialScene" params="{ layoutDataKey: 'trial_ch1' }"]
     [s]
 
 *equipment_decline
@@ -327,5 +327,5 @@
     [p]
     どうやら裁判が必要なようだ。
     [p]
-    [jump storage="TrialScene" params="{ layoutDataKey: 'trial_demo' }"]
+    [jump storage="TrialScene" params="{ layoutDataKey: 'trial_ch1' }"]
     [s]

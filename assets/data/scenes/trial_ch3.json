@@ -1,0 +1,168 @@
+{
+    "scene_settings": {
+        "backgroundColor": "#000033",
+        "gravity": {
+            "enabled": false
+        },
+        "ySortEnabled": false
+    },
+    "objects": [
+        {
+            "name": "background_underlay",
+            "type": "image",
+            "x": 640,
+            "y": 360,
+            "texture": "bg_school",
+            "layer": "Background"
+        },
+        {
+            "name": "trial_manager",
+            "type": "container",
+            "x": 0,
+            "y": 0,
+            "components": {
+                "TrialSegmentManager": {}
+            }
+        },
+        {
+            "name": "bii",
+            "type": "image",
+            "x": 640,
+            "y": 150,
+            "texture": "clear_obj",
+            "visible": true,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "interaction_menu",
+            "type": "container",
+            "x": 640,
+            "y": 360,
+            "components": {
+                "InteractionMenuComponent": {}
+            },
+            "layer": "UI"
+        },
+        {
+            "name": "progress_indicator",
+            "type": "Text",
+            "x": 640,
+            "y": 200,
+            "text": "最終決戦…",
+            "components": {
+                "ProgressIndicatorComponent": {}
+            },
+            "layer": "UI"
+        },
+        {
+            "name": "timer_container",
+            "type": "Container",
+            "x": 1100,
+            "y": 80,
+            "layer": "UI",
+            "depth": 2000,
+            "components": [
+                {
+                    "type": "TrialTimerComponent",
+                    "params": {
+                        "timeLimit": 300
+                    }
+                }
+            ],
+            "list": [
+                {
+                    "name": "timer_bg",
+                    "type": "Graphics",
+                    "draw": {
+                        "type": "roundedRect",
+                        "x": -150,
+                        "y": -35,
+                        "width": 300,
+                        "height": 70,
+                        "radius": 15,
+                        "fill": {
+                            "color": "0x000000",
+                            "alpha": 0.6
+                        },
+                        "lineStyle": {
+                            "width": 3,
+                            "color": "0xffffff",
+                            "alpha": 0.8
+                        }
+                    }
+                },
+                {
+                    "name": "timer_text",
+                    "type": "Text",
+                    "x": 0,
+                    "y": 0,
+                    "origin": 0.5,
+                    "text": "LIMIT 05:00",
+                    "style": {
+                        "fontSize": "36px",
+                        "color": "#ffffff",
+                        "fontFamily": "serif"
+                    }
+                }
+            ]
+        }
+    ],
+    "trial_data": {
+        "timeLimit": 300,
+        "timeoutScenario": "chapter1/timeout_bad_end.ks",
+        "loop_scenario": "chapter1/loop_end.ks",
+        "testimonies": [
+            {
+                "id": "t1",
+                "position": "left",
+                "text": "オマエはずっと団長と一緒にいたろ？{se:laugh}",
+                "highlights": []
+            },
+            {
+                "id": "t2",
+                "position": "right",
+                "text": "ルリアもシエテも怪しいけど、オイラは潔白だぜ！",
+                "highlights": []
+            },
+            {
+                "id": "t3",
+                "position": "center",
+                "style": "scroll",
+                "text": "チョコのくず？ そんなの、オイラの周りにはどこにも付いてねぇよ！",
+                "highlights": [
+                    {
+                        "text": "どこにも付いてねぇ",
+                        "choices": [
+                            {
+                                "text": "ゆさぶる",
+                                "action": "update_testimony",
+                                "pre_update_scenario": "chapter1/ch3_doubt_vyrn.ks",
+                                "target": "t3",
+                                "new_text": "オイラは今日、林檎しか食べてねぇ！ チョコなんて一口も……！",
+                                "new_highlights": [
+                                    {
+                                        "text": "一口も",
+                                        "choices": [
+                                            {
+                                                "text": "つきつける",
+                                                "evidence_required": "chocolate_crumbs",
+                                                "correct": true,
+                                                "success_scenario": "chapter1/ch3_success_vyrn.ks"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "text": "つきつける",
+                                "evidence_required": "chocolate_crumbs",
+                                "correct": true,
+                                "success_scenario": "chapter1/ch3_success_vyrn.ks"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

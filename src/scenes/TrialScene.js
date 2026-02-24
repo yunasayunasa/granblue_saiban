@@ -40,9 +40,10 @@ export default class TrialScene extends BaseGameScene {
         uiLayer.add(this.evidenceSelectOverlay);
         this.registerToCamera(this.evidenceSelectOverlay, 'UI');
 
-        // テスト用: 初期所持品の追加 (デバッグ)
-        this.evidenceManager.addEvidence('candy_wrapper');
-        this.evidenceManager.addEvidence('gum');
+        // 本番用: 初期所持品の追加 (ストーリーの進行に合わせて追加するのが理想だが、ここではテスト用に揃える)
+        this.evidenceManager.addEvidence('blue_hair');
+        this.evidenceManager.addEvidence('blue_feather');
+        this.evidenceManager.addEvidence('chocolate_crumbs');
 
         this.initSceneWithData();
 

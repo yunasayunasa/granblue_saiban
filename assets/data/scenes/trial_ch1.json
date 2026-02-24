@@ -1,0 +1,181 @@
+{
+    "scene_settings": {
+        "backgroundColor": "#000033",
+        "gravity": {
+            "enabled": false
+        },
+        "ySortEnabled": false
+    },
+    "objects": [
+        {
+            "name": "background_underlay",
+            "type": "image",
+            "x": 640,
+            "y": 360,
+            "texture": "bg_school",
+            "layer": "Background"
+        },
+        {
+            "name": "trial_manager",
+            "type": "container",
+            "x": 0,
+            "y": 0,
+            "components": {
+                "TrialSegmentManager": {}
+            }
+        },
+        {
+            "name": "ruria",
+            "type": "image",
+            "x": 640,
+            "y": 450,
+            "texture": "ruria_normal",
+            "visible": false,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "interaction_menu",
+            "type": "container",
+            "x": 640,
+            "y": 360,
+            "components": {
+                "InteractionMenuComponent": {}
+            },
+            "layer": "UI"
+        },
+        {
+            "name": "progress_indicator",
+            "type": "Text",
+            "x": 640,
+            "y": 200,
+            "text": "議論進行…",
+            "components": {
+                "ProgressIndicatorComponent": {}
+            },
+            "layer": "UI"
+        },
+        {
+            "name": "timer_container",
+            "type": "Container",
+            "x": 1100,
+            "y": 80,
+            "layer": "UI",
+            "depth": 2000,
+            "components": [
+                {
+                    "type": "TrialTimerComponent",
+                    "params": {
+                        "timeLimit": 300
+                    }
+                }
+            ],
+            "list": [
+                {
+                    "name": "timer_bg",
+                    "type": "Graphics",
+                    "draw": {
+                        "type": "roundedRect",
+                        "x": -150,
+                        "y": -35,
+                        "width": 300,
+                        "height": 70,
+                        "radius": 15,
+                        "fill": {
+                            "color": "0x000000",
+                            "alpha": 0.6
+                        },
+                        "lineStyle": {
+                            "width": 3,
+                            "color": "0xffffff",
+                            "alpha": 0.8
+                        }
+                    }
+                },
+                {
+                    "name": "timer_text",
+                    "type": "Text",
+                    "x": 0,
+                    "y": 0,
+                    "origin": 0.5,
+                    "text": "LIMIT 05:00",
+                    "style": {
+                        "fontSize": "36px",
+                        "color": "#ffffff",
+                        "fontFamily": "serif"
+                    }
+                }
+            ]
+        }
+    ],
+    "trial_data": {
+        "timeLimit": 300,
+        "timeoutScenario": "chapter1/timeout_bad_end.ks",
+        "loop_scenario": "chapter1/loop_end.ks",
+        "testimonies": [
+            {
+                "id": "t1",
+                "position": "left",
+                "text": "私は、今日はずっと自分の部屋にいたんです！",
+                "highlights": [
+                    {
+                        "text": "部屋にいた",
+                        "choices": [
+                            {
+                                "text": "ゆさぶる",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch1_fail_ruria.ks"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "t2",
+                "position": "right",
+                "text": "キッチンの方には、一歩も近づいていません。{se:glass}",
+                "highlights": [
+                    {
+                        "text": "近づいていません",
+                        "choices": [
+                            {
+                                "text": "つきつける",
+                                "evidence_required": "blue_hair",
+                                "correct": true,
+                                "success_scenario": "chapter1/ch1_success_ruria.ks",
+                                "next_trial_data": "scenes/trial_ch2.json"
+                            },
+                            {
+                                "text": "ゆさぶる",
+                                "action": "update_testimony",
+                                "pre_update_scenario": "chapter1/ch1_doubt_ruria.ks",
+                                "target": "t2",
+                                "new_text": "甘い匂いに誘われて少しだけ入り口まで行ったんです。",
+                                "new_highlights": [
+                                    {
+                                        "text": "入り口まで",
+                                        "choices": [
+                                            {
+                                                "text": "つきつける",
+                                                "evidence_required": "blue_hair",
+                                                "correct": true,
+                                                "success_scenario": "chapter1/ch1_success_ruria.ks",
+                                                "next_trial_data": "scenes/trial_ch2.json"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "t3",
+                "position": "center",
+                "style": "scroll",
+                "text": "ビィさんとも遊んでないし、本当にお部屋にいたんですよぉ。",
+                "highlights": []
+            }
+        ]
+    }
+}
