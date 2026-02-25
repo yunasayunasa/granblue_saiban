@@ -11,7 +11,6 @@
     "enzan": "assets/images/enzan.jpg",
     "title": "assets/images/title.jpeg",
     "cutscene": "assets/images/cutscene.png",
-
     "roger_normal": "assets/images/roger_normal.png",
     "fenny_normal": "assets/images/fenny_normal.png",
     "fenny_smile": "assets/images/fenny_smile.png",
@@ -38,7 +37,6 @@
     "oigen_normal": "assets/images/oigen_normal2.png",
     "wamdus_normal": "assets/images/wamdus_normal.png",
     "wilnas_normal": "assets/images/wilnas_normal.png",
-
     "nni": "assets/images/nni.png",
     "kaki": "assets/images/kaki.png",
     "katuo": "assets/images/katuo.png",
@@ -125,7 +123,10 @@
         "TitleScene.json",
         "pause_menu.json",
         "trial_demo.json",
-        "TrialScene.json"
+        "TrialScene.json",
+        "trial_ch1.json",
+        "trial_ch2.json",
+        "trial_ch3.json"
       ]
     },
     "//": "--- ここにタイルセット用の定義を追加 ---",
