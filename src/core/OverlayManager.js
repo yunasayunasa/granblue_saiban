@@ -48,7 +48,7 @@ export default class OverlayManager {
      */
     closeOverlay(data) {
         console.group(`%c[OverlayManager] Group: closeOverlay (Lifecycle-Compliant)`, "color: #00BCD4;");
-        // console.log(`Request data:`, data);
+        console.log(`Request data:`, data);
 
         const closingSceneKey = data.from;
         const sceneToClose = this.systemScene.scene.get(closingSceneKey);
@@ -61,13 +61,13 @@ export default class OverlayManager {
 
         // 1. 閉じるシーンの 'shutdown' イベントを一度だけリッスンする
         sceneToClose.events.once('shutdown', () => {
-            // console.log(`%c[OverlayManager] CONFIRMED: Scene '${closingSceneKey}' has shut down.`, "color: #E91E63; font-weight: bold;");
+            console.log(`%c[OverlayManager] CONFIRMED: Scene '${closingSceneKey}' has shut down.`, "color: #E91E63; font-weight: bold;");
 
             // 3. shutdownが完了したこのタイミングで、シーンを完全に削除する
             //    これにより「キー重複エラー」を完全に防ぐ
             if (closingSceneKey === 'NovelOverlayScene') {
                 this.systemScene.scene.remove(closingSceneKey);
-                // console.log(`[OverlayManager] Scene '${closingSceneKey}' was completely removed.`);
+                console.log(`[OverlayManager] Scene '${closingSceneKey}' was completely removed.`);
             }
 
             // --- ここからが、安全なタイミングで実行される後処理 ---
@@ -91,12 +91,12 @@ export default class OverlayManager {
             }
 
             this.systemScene.events.emit('overlay-closed', { from: closingSceneKey, to: sceneToResumeKey });
-            // console.log(`Event 'overlay-closed' emitted.`);
+            console.log(`Event 'overlay-closed' emitted.`);
             console.groupEnd();
         });
 
         // 2. シーンに停止命令を出す。後はPhaserが良きに計らってくれる。
-        // console.log(`[OverlayManager] Requesting STOP for scene '${closingSceneKey}'. Awaiting shutdown event...`);
+        console.log(`[OverlayManager] Requesting STOP for scene '${closingSceneKey}'. Awaiting shutdown event...`);
         this.systemScene.scene.stop(closingSceneKey);
     }
 }

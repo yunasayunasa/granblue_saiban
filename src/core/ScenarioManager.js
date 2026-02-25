@@ -60,11 +60,12 @@ export default class ScenarioManager {
     // --- 新しいメインループ ---
     async gameLoop() {
         this.isLoopRunning = true;
-        // console.log(`[gameLoop] >> ループ開始 (Line: ${this.currentLine})`);
+        console.log(`%c[ScenarioManager] gameLoop START. File: ${this.currentFile}, Lines: ${this.scenario.length}`, 'color: #FF9800; font-weight: bold;');
 
         while (!this.isEnd && !this.isWaitingClick && !this.isWaitingChoice && !this.isStopped) {
 
             if (this.currentLine >= this.scenario.length) {
+                console.log(`[ScenarioManager] Reached end of scenario: ${this.currentFile}`);
                 this.isEnd = true;
                 this.messageWindow.setText('（シナリオ終了）', false);
                 break;
@@ -74,7 +75,7 @@ export default class ScenarioManager {
             const processingLine = this.currentLine; // ログ用に現在行を保持
             this.currentLine++;
 
-            // console.log(`[gameLoop] -> Line ${processingLine} のパースを開始: "${line}"`);
+            console.log(`[ScenarioManager] Parsing Line ${processingLine}: "${line}"`);
 
             await this.parse(line);
 
@@ -82,7 +83,7 @@ export default class ScenarioManager {
         }
 
         this.isLoopRunning = false;
-        // console.log(`[gameLoop] << ループ停止。isEnd=${this.isEnd}, isWaitingClick=${this.isWaitingClick}, isWaitingChoice=${this.isWaitingChoice}, Line: ${this.currentLine}`);
+        console.log(`%c[ScenarioManager] gameLoop STOP. isEnd=${this.isEnd}, isWaitingClick=${this.isWaitingClick}, Line: ${this.currentLine}`, 'color: #FF9800; font-weight: bold;');
     }
     // --- クリック処理 ---
     onClick() {

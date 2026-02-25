@@ -23,6 +23,7 @@ export default class NovelOverlayScene extends Phaser.Scene {
     }
 
     init(data) {
+        console.log(`[NovelOverlayScene] init called. Scenario: ${data.scenario}, from: ${data.returnTo}`);
         this.scene.bringToTop();
         this.startScenario = data.scenario;
         this.charaDefs = data.charaDefs;
@@ -81,7 +82,9 @@ export default class NovelOverlayScene extends Phaser.Scene {
             }
         });
 
+        console.log(`[NovelOverlayScene] Loading scenario: ${this.startScenario}`);
         this.scenarioManager.loadScenario(this.startScenario).then(() => {
+            console.log(`[NovelOverlayScene] loadScenario finished for: ${this.startScenario}`);
             this._finalizeSetup();
         });
     }

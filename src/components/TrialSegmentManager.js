@@ -640,11 +640,14 @@ export default class TrialSegmentManager {
     async _showEvidenceOverlay(choice) {
         const overlay = this.scene.evidenceSelectOverlay;
         if (overlay) {
+            console.log('[TrialManager] _showEvidenceOverlay started.');
             // ★ 【要望】シナリオファイルを再生してから証拠品提示へ
             if (choice.pre_present_scenario) {
-                console.log(`[TrialManager] Playing pre-present scenario: ${choice.pre_present_scenario}`);
+                console.log(`[TrialManager] pre_present_scenario found: ${choice.pre_present_scenario}. Awaiting execution...`);
                 await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, choice.pre_present_scenario, true);
+                console.log(`[TrialManager] pre_present_scenario execution finished. Now showing overlay.`);
             } else {
+                console.log('[TrialManager] No pre_present_scenario. Checking pre_present_message...');
                 // 旧方式 (メッセージウィンドウでの口上) も一応残す (なければなにもしない)
                 const msg = choice.pre_present_message;
                 if (msg) {
@@ -657,6 +660,7 @@ export default class TrialSegmentManager {
                 }
             }
 
+            console.log('[TrialManager] Calling overlay.show("present")');
             overlay.show('present', (selectedEvidenceId) => {
                 this._onEvidencePresented(selectedEvidenceId, choice);
             });

@@ -22,14 +22,14 @@ class EngineAPI {
         this.timeManager = systemSceneInstance.timeManager;
         // gameFlowManagerはSystemSceneが直接セットする
     }
-    
-    
-        /**
-     * ★★★ 新設：シーンを安全にレジュームするための公式API ★★★
-     * GameFlowManagerからの要求を受け、SystemSceneに安全なレジューム処理を依頼する。
-     * @param {string} sceneKey - レジュームするシーンのキー
-     * @returns {Promise<void>} レジュームが完了したときに解決されるPromise
-     */
+
+
+    /**
+ * ★★★ 新設：シーンを安全にレジュームするための公式API ★★★
+ * GameFlowManagerからの要求を受け、SystemSceneに安全なレジューム処理を依頼する。
+ * @param {string} sceneKey - レジュームするシーンのキー
+ * @returns {Promise<void>} レジュームが完了したときに解決されるPromise
+ */
     requestSafeResume(sceneKey) {
         return new Promise(resolve => {
             if (!this.systemScene || !sceneKey) {
@@ -37,7 +37,7 @@ class EngineAPI {
                 resolve();
                 return;
             }
-            
+
             // SystemSceneの内部メソッドを呼び出し、完了時にPromiseを解決する
             this.systemScene._safeResumeScene(sceneKey, () => {
                 resolve();
@@ -65,7 +65,7 @@ class EngineAPI {
         if (!this.timeManager) return false;
         return this.timeManager.isTimeStopped;
     }
-    
+
     /**
      * APIが利用可能かどうかを確認する。
      * @returns {boolean}
@@ -76,16 +76,16 @@ class EngineAPI {
 
     // src/core/EngineAPI.js
 
-/**
- * ゲームフローの状態遷移を要求するイベントを発行する。
- * @param {string} eventName 
- * @param {object} [data={}] イベントに関連するデータ
- */
-fireGameFlowEvent(eventName, data = {}) { // ★ data引数を追加
-// // console.log(`%c[EngineAPI] Game Flow Event Fired: ${eventName}. Relaying to GameFlowManager.`, 'color: #2196F3; font-weight: bold;');
-    if (!this.gameFlowManager) return;
-    this.gameFlowManager.handleEvent(eventName, data); // ★ dataを渡す
-}
+    /**
+     * ゲームフローの状態遷移を要求するイベントを発行する。
+     * @param {string} eventName 
+     * @param {object} [data={}] イベントに関連するデータ
+     */
+    fireGameFlowEvent(eventName, data = {}) { // ★ data引数を追加
+        // // console.log(`%c[EngineAPI] Game Flow Event Fired: ${eventName}. Relaying to GameFlowManager.`, 'color: #2196F3; font-weight: bold;');
+        if (!this.gameFlowManager) return;
+        this.gameFlowManager.handleEvent(eventName, data); // ★ dataを渡す
+    }
 
     // --- Scene Transitions ---
     requestSimpleTransition(fromSceneKey, toSceneKey, params = {}) {
@@ -99,7 +99,7 @@ fireGameFlowEvent(eventName, data = {}) { // ★ data引数を追加
     }
 
     requestJump(fromSceneKey, toSceneKey, params = {}) {
-// // console.log(`%c[EngineAPI] JUMP request received and PENDING. Waiting for ${fromSceneKey} to shut down.`, 'color: #FFC107; font-weight: bold;');
+        // // console.log(`%c[EngineAPI] JUMP request received and PENDING. Waiting for ${fromSceneKey} to shut down.`, 'color: #FFC107; font-weight: bold;');
         this.pendingJumpRequest = { to: toSceneKey, params: params };
     }
 
@@ -111,20 +111,20 @@ fireGameFlowEvent(eventName, data = {}) { // ★ data引数を追加
 
     runScenarioAsOverlay(fromSceneKey, scenarioFile, blockInput) {
         if (!this.overlayManager || !this.systemScene) {
-            return Promise.resolve(); // APIが準備できていなければ即時解決
+            console.warn('[EngineAPI] runScenarioAsOverlay aborted: overlayManager or systemScene not ready.');
+            return Promise.resolve();
         }
-        
-        // Promiseを返すことで、呼び出し元(GameFlowManager)が await できるようにする
+
         return new Promise(resolve => {
-            console.log(`[EngineAPI] runScenarioAsOverlay START: ${scenarioFile}`);
+            console.log(`%c[EngineAPI] runScenarioAsOverlay START: ${scenarioFile}`, 'color: #4CAF50; font-weight: bold;');
+
             // 1. "オーバーレイが閉じた" という公式イベントを一度だけリッスンする
             this.systemScene.events.once('overlay-closed', (data) => {
-                console.log(`[EngineAPI] 'overlay-closed' received for ${scenarioFile}. Resolving...`); 
+                console.log(`%c[EngineAPI] 'overlay-closed' detected for ${scenarioFile}. Resolving Promise.`, 'color: #4CAF50; font-weight: bold;');
                 resolve();
             });
 
             // 2. オーバーレイの表示をリクエストする
-            //    このメソッドの実行自体はすぐに終わる
             this.overlayManager.openNovelOverlay({
                 from: fromSceneKey,
                 scenario: scenarioFile,
@@ -155,7 +155,7 @@ fireGameFlowEvent(eventName, data = {}) { // ★ data引数を追加
         if (!this.systemScene) return;
         this.systemScene.events.emit(eventName, data);
     }
-    
+
 } // ★★★ ここがクラスの正しい閉じ括弧 ★★★
 
 const engineAPI = new EngineAPI();
