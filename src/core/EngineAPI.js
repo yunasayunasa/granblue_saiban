@@ -111,20 +111,20 @@ class EngineAPI {
 
     runScenarioAsOverlay(fromSceneKey, scenarioFile, blockInput) {
         if (!this.overlayManager || !this.systemScene) {
-            console.warn('[EngineAPI] runScenarioAsOverlay aborted: overlayManager or systemScene not ready.');
-            return Promise.resolve();
+            return Promise.resolve(); // APIが準備できていなければ即時解決
         }
 
+        // Promiseを返すことで、呼び出し元(GameFlowManager)が await できるようにする
         return new Promise(resolve => {
-            console.log(`%c[EngineAPI] runScenarioAsOverlay START: ${scenarioFile}`, 'color: #4CAF50; font-weight: bold;');
-
+            console.log(`[EngineAPI] runScenarioAsOverlay START: ${scenarioFile}`);
             // 1. "オーバーレイが閉じた" という公式イベントを一度だけリッスンする
             this.systemScene.events.once('overlay-closed', (data) => {
-                console.log(`%c[EngineAPI] 'overlay-closed' detected for ${scenarioFile}. Resolving Promise.`, 'color: #4CAF50; font-weight: bold;');
+                console.log(`[EngineAPI] 'overlay-closed' received for ${scenarioFile}. Resolving...`);
                 resolve();
             });
 
             // 2. オーバーレイの表示をリクエストする
+            //    このメソッドの実行自体はすぐに終わる
             this.overlayManager.openNovelOverlay({
                 from: fromSceneKey,
                 scenario: scenarioFile,
