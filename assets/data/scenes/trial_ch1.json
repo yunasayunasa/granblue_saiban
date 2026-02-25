@@ -57,8 +57,8 @@
         {
             "name": "timer_container",
             "type": "Container",
-            "x": 1100,
-            "y": 80,
+            "x": 200,
+            "y": 60,
             "layer": "UI",
             "depth": 2000,
             "components": [
@@ -105,6 +105,49 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "fast_forward_button",
+            "type": "Container",
+            "x": 200,
+            "y": 150,
+            "layer": "UI",
+            "depth": 2000,
+            "list": [
+                {
+                    "name": "ff_bg",
+                    "type": "Graphics",
+                    "draw": {
+                        "type": "circle",
+                        "x": 0,
+                        "y": 0,
+                        "radius": 40,
+                        "fill": {
+                            "color": "0xffffff",
+                            "alpha": 0.2
+                        },
+                        "lineStyle": {
+                            "width": 2,
+                            "color": "0xffffff",
+                            "alpha": 0.5
+                        }
+                    }
+                },
+                {
+                    "name": "ff_text",
+                    "type": "Text",
+                    "x": 0,
+                    "y": 0,
+                    "origin": 0.5,
+                    "text": ">>",
+                    "style": {
+                        "fontSize": "32px",
+                        "color": "#ffffff",
+                        "fontFamily": "sans-serif",
+                        "fontStyle": "bold"
+                    }
+                }
+            ]
         }
     ],
     "trial_data": {
@@ -114,6 +157,7 @@
         "testimonies": [
             {
                 "id": "t1",
+                "charaId": "ruria",
                 "position": "left",
                 "text": "私は、今日はずっと自分の部屋にいたんです！",
                 "highlights": [
@@ -121,7 +165,7 @@
                         "text": "部屋にいた",
                         "choices": [
                             {
-                                "text": "ゆさぶる",
+                                "text": "わかった！それはおかしい！",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch1_fail_ruria.ks"
                             }
@@ -131,6 +175,7 @@
             },
             {
                 "id": "t2",
+                "charaId": "ruria",
                 "position": "right",
                 "text": "キッチンの方には、一歩も近づいていません。{se:glass}",
                 "highlights": [
@@ -138,14 +183,15 @@
                         "text": "近づいていません",
                         "choices": [
                             {
-                                "text": "つきつける",
+                                "text": "その証拠これだ！",
                                 "evidence_required": "blue_hair",
+                                "pre_present_message": "「その証言、矛盾してるよ！キッチンにいた証拠はこれだ！」",
                                 "correct": true,
                                 "success_scenario": "chapter1/ch1_success_ruria.ks",
                                 "next_trial_data": "scenes/trial_ch2.json"
                             },
                             {
-                                "text": "ゆさぶる",
+                                "text": "その証言はおかしい！",
                                 "action": "update_testimony",
                                 "pre_update_scenario": "chapter1/ch1_doubt_ruria.ks",
                                 "target": "t2",
@@ -155,7 +201,7 @@
                                         "text": "入り口まで",
                                         "choices": [
                                             {
-                                                "text": "つきつける",
+                                                "text": "その証拠これだ！",
                                                 "evidence_required": "blue_hair",
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch1_success_ruria.ks",
@@ -171,8 +217,9 @@
             },
             {
                 "id": "t3",
+                "charaId": "ruria",
                 "position": "center",
-                "style": "scroll",
+                "style": "typewriter",
                 "text": "ビィさんとも遊んでないし、本当にお部屋にいたんですよぉ。",
                 "highlights": []
             }

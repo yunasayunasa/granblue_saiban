@@ -1,10 +1,11 @@
 /**
- * 裁判中のインタラクション（反論/賛成/疑問）メニューを表示するコンポーネント。
+ * 裁判中のインタラクション（選択肢）メニューを表示するコンポーネント。
+ * 選択肢は縦に並べて表示。重なりと見切れを防ぐため、ボタン数に応じてY座標を調整。
  */
 export default class InteractionMenuComponent {
     constructor(scene, gameObject, params) {
         this.scene = scene;
-        this.gameObject = gameObject; // 通常、メニュー用のContainer
+        this.gameObject = gameObject;
         this.menuItems = [];
         this.onSelection = params.onSelection || null;
 
@@ -16,18 +17,14 @@ export default class InteractionMenuComponent {
     }
 
     show(highlightData) {
-        // ★ 修正: removeAllが使えない場合を考慮し、手動で子要素を破棄
+        // 既存の子要素を破棄
         if (typeof this.gameObject.removeAll === 'function') {
             this.gameObject.removeAll(true);
         } else if (this.gameObject.list) {
-            // Containerのlistプロパティを直接操作して破棄
             while (this.gameObject.list.length > 0) {
-                const child = this.gameObject.list[0];
-                child.destroy();
+                this.gameObject.list[0].destroy();
             }
         }
-
-        this.gameObject.setVisible(true);
 
         this.gameObject.setVisible(true);
 
@@ -39,76 +36,78 @@ export default class InteractionMenuComponent {
         const choices = highlightData.choices || [];
         if (choices.length === 0) {
             console.warn('[InteractionMenu] No choices defined.');
-            // デフォルトを入れるか、何もしないか。ここではスキップ
         }
 
-        choices.forEach((choice, index) => {
-            this.createChoiceButton(choice, index);
+        // ボタン定義 (選択肢 + 戻るボタン)
+        const allButtons = [...choices, { text: '戻る', isBack: true }];
+        const BTN_H = 100;         // ボタン高さ (通常)
+        const BACK_H = 60;         // 戻るボタン高さ
+        const SPACING = 20;        // ボタン間の余白
+
+        // 総高さを計算してY開始位置を決定（画面中央から上に寄せる）
+        const normalCount = choices.length;
+        const totalH = normalCount * BTN_H + BACK_H + (allButtons.length - 1) * SPACING;
+        let currentY = -totalH / 2;
+
+        allButtons.forEach((choice) => {
+            const btnH = choice.isBack ? BACK_H : BTN_H;
+            const centerY = currentY + btnH / 2;
+            this.createChoiceButton(choice, centerY);
+            currentY += btnH + SPACING;
         });
-
-        // ★ 修正: 「戻る」ボタンを追加
-        this.createChoiceButton({
-            text: "戻る",
-            isBack: true
-        }, choices.length);
-
-        // 背景などの装飾
-        // ...
     }
 
-    createChoiceButton(choice, index) {
+    createChoiceButton(choice, centerY) {
         const isBack = choice.isBack || false;
-        const spacing = 120;
-        const y = index * spacing;
 
-        const container = this.scene.add.container(0, y);
+        const container = this.scene.add.container(0, centerY);
 
-        // --- 1. 土台 (楕円) ---
-        // 通常: 600x140、戻る: 300x70
-        const bgW = isBack ? 300 : 600;
-        const bgH = isBack ? 70 : 140;
+        // ボタンサイズ
+        const bgW = isBack ? 260 : 580;
+        const bgH = isBack ? 60 : 100;
+
         const bg = this.scene.add.graphics();
 
         const drawBg = (color, alpha) => {
             bg.clear();
             bg.fillStyle(color, alpha);
-            bg.fillEllipse(0, 0, bgW, bgH);
-            // 枠線
-            bg.lineStyle(isBack ? 2 : 3, 0xffffff, 0.4);
-            bg.strokeEllipse(0, 0, bgW, bgH);
+            bg.fillRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 14);
+            bg.lineStyle(isBack ? 1 : 2, 0xffffff, isBack ? 0.3 : 0.7);
+            bg.strokeRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 14);
         };
 
-        drawBg(0x000000, 0.7);
+        drawBg(isBack ? 0x111111 : 0x000033, isBack ? 0.6 : 0.85);
         container.add(bg);
 
-        // --- 2. テキスト (通常: 48px、戻る: 28px) ---
-        const fontSize = isBack ? '28px' : '48px';
+        // テキスト
+        const fontSize = isBack ? '26px' : '40px';
         const btnText = this.scene.add.text(0, 0, choice.text, {
             fontSize: fontSize,
-            color: '#ffffff',
+            color: isBack ? '#aaaaaa' : '#ffffff',
             fontFamily: '"Times New Roman", "MS PMincho", serif',
             fontStyle: 'bold'
         }).setOrigin(0.5);
         container.add(btnText);
 
-        // --- 3. インタラクション ---
-        // ★ 修正: Ellipse は直径ベース、setSizeは不要（Shapeで判定するため）
-        const hitEllipse = new Phaser.Geom.Ellipse(0, 0, bgW, bgH);
-        container.setInteractive(hitEllipse, Phaser.Geom.Ellipse.Contains);
+        // インタラクション (矩形ヒットエリア)
+        container.setInteractive(
+            new Phaser.Geom.Rectangle(-bgW / 2, -bgH / 2, bgW, bgH),
+            Phaser.Geom.Rectangle.Contains
+        );
         container.input.useHandCursor = true;
 
         container.on('pointerover', () => {
-            drawBg(0x000033, 0.9);
-            btnText.setScale(1.05);
+            drawBg(isBack ? 0x333333 : 0x001166, isBack ? 0.8 : 0.95);
+            btnText.setScale(1.04);
         });
 
         container.on('pointerout', () => {
-            drawBg(0x000000, 0.7);
+            drawBg(isBack ? 0x111111 : 0x000033, isBack ? 0.6 : 0.85);
             btnText.setScale(1.0);
         });
 
         container.on('pointerdown', () => {
-            console.log('[InteractionMenu] Selected:', choice);
+            console.log('[InteractionMenu] Selected:', choice.text);
             this.hide();
             if (this.onSelection) {
                 this.onSelection(choice);

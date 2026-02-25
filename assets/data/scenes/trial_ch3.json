@@ -25,12 +25,40 @@
             }
         },
         {
-            "name": "bii",
+            "name": "vyrn",
             "type": "image",
             "x": 640,
-            "y": 150,
-            "texture": "clear_obj",
-            "visible": true,
+            "y": 450,
+            "texture": "vyrn_normal",
+            "visible": false,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "ruria",
+            "type": "image",
+            "x": 300,
+            "y": 450,
+            "texture": "ruria_normal",
+            "visible": false,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "siete",
+            "type": "image",
+            "x": 980,
+            "y": 450,
+            "texture": "siete_normal",
+            "visible": false,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "fenny",
+            "type": "image",
+            "x": 640,
+            "y": 450,
+            "texture": "fenny_normal",
+            "visible": false,
+            "opacity": 0.5,
             "layer": "Gameplay"
         },
         {
@@ -57,8 +85,8 @@
         {
             "name": "timer_container",
             "type": "Container",
-            "x": 1100,
-            "y": 80,
+            "x": 200,
+            "y": 60,
             "layer": "UI",
             "depth": 2000,
             "components": [
@@ -105,6 +133,49 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "fast_forward_button",
+            "type": "Container",
+            "x": 200,
+            "y": 150,
+            "layer": "UI",
+            "depth": 2000,
+            "list": [
+                {
+                    "name": "ff_bg",
+                    "type": "Graphics",
+                    "draw": {
+                        "type": "circle",
+                        "x": 0,
+                        "y": 0,
+                        "radius": 40,
+                        "fill": {
+                            "color": "0xffffff",
+                            "alpha": 0.2
+                        },
+                        "lineStyle": {
+                            "width": 2,
+                            "color": "0xffffff",
+                            "alpha": 0.5
+                        }
+                    }
+                },
+                {
+                    "name": "ff_text",
+                    "type": "Text",
+                    "x": 0,
+                    "y": 0,
+                    "origin": 0.5,
+                    "text": ">>",
+                    "style": {
+                        "fontSize": "32px",
+                        "color": "#ffffff",
+                        "fontFamily": "sans-serif",
+                        "fontStyle": "bold"
+                    }
+                }
+            ]
         }
     ],
     "trial_data": {
@@ -114,38 +185,64 @@
         "testimonies": [
             {
                 "id": "t1",
+                "charaId": "ruria",
+                "position": "left",
+                "text": "ビィさん、さっき口の周りに何か付いてませんでしたか……？",
+                "highlights": []
+            },
+            {
+                "id": "t2",
+                "charaId": "siete",
+                "position": "right",
+                "text": "そう言えば俺も見たよ。茶色い何かを満足げに咀嚼している姿をね。",
+                "highlights": []
+            },
+            {
+                "id": "t3",
+                "charaId": "fenny",
+                "position": "center",
+                "style": "typewriter",
+                "text": "……（じーっとビィを睨んでいる）",
+                "highlights": []
+            },
+            {
+                "id": "t4",
+                "charaId": "vyrn",
                 "position": "left",
                 "text": "おいらはずっとお前といっしょにいたろ？{se:laugh}",
                 "highlights": []
             },
             {
-                "id": "t2",
+                "id": "t5",
+                "charaId": "vyrn",
                 "position": "right",
                 "text": "ルリアもシエテも怪しいけど、オイラは潔白だぜ！",
                 "highlights": []
             },
             {
-                "id": "t3",
+                "id": "t6",
+                "charaId": "vyrn",
                 "position": "center",
-                "style": "scroll",
+                "style": "typewriter",
                 "text": "チョコのくず？ そんなの、オイラの周りにはどこにも付いてねぇよ！",
                 "highlights": [
                     {
                         "text": "どこにも付いてねぇ",
                         "choices": [
                             {
-                                "text": "ゆさぶる",
+                                "text": "「一口も」なんておかしい！",
                                 "action": "update_testimony",
                                 "pre_update_scenario": "chapter1/ch3_doubt_vyrn.ks",
-                                "target": "t3",
+                                "target": "t6",
                                 "new_text": "オイラは今日、林檎しか食べてねぇ！ チョコなんて一口も……！",
                                 "new_highlights": [
                                     {
                                         "text": "一口も",
                                         "choices": [
                                             {
-                                                "text": "つきつける",
+                                                "text": "その証拠これだ！",
                                                 "evidence_required": "chocolate_crumbs",
+                                                "pre_present_message": "「嘘をつけ！リンゴを食べてる時、そんなクズは出ないはずだ！」",
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch3_success_vyrn.ks"
                                             }
@@ -154,8 +251,9 @@
                                 ]
                             },
                             {
-                                "text": "つきつける",
+                                "text": "その証拠これだ！",
                                 "evidence_required": "chocolate_crumbs",
+                                "pre_present_message": "「どこにも付いてないだって？じゃあこれは何なんだ！」",
                                 "correct": true,
                                 "success_scenario": "chapter1/ch3_success_vyrn.ks"
                             }

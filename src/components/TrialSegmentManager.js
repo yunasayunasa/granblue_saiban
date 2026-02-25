@@ -259,7 +259,7 @@ export default class TrialSegmentManager {
     _findCharacterImages() {
         // 固定の3枠（左・中・右）ではなく、ID（roger, fenny, ruriaなど）で検索・キャッシュする
         // TrialScene.jsonで定義した名前に基づく
-        const charIds = ['roger', 'fenny', 'ruria', 'thug', 'nni', 'kaki', 'katuo', 'zombie', 'koa', 'chocokoa'];
+        const charIds = ['roger', 'fenny', 'ruria', 'siete', 'vyrn', 'thug', 'nni', 'kaki', 'katuo', 'zombie', 'koa', 'chocokoa'];
 
         charIds.forEach(id => {
             if (!this.charaImages[id]) {
@@ -642,13 +642,15 @@ export default class TrialSegmentManager {
         }
     }
 
-    _showEvidenceOverlay(choice) {
+    async _showEvidenceOverlay(choice) {
         const overlay = this.scene.evidenceSelectOverlay;
         if (overlay) {
-            // ポーズ状態にする
-            // this.scene.setPause(true); // EvidenceSelectOverlay側で制御されている場合もあるが念のため
-            // -> EvidenceSelectOverlay.show は内部で特にPauseしないようなので、呼ぶ側でするか、
-            //    あるいは handleChoice 時点ですでに InteractionMenu で Pause されているはず。
+            // ★ 【要望追加】証拠品提示前にショートテキストを表示
+            if (this.progressIndicator) {
+                const msg = choice.pre_present_message || "「その証言はおかしい！証拠はこれだ！」";
+                this.progressIndicator.show(msg, 1200);
+                await new Promise(resolve => this.scene.time.delayedCall(1200, resolve));
+            }
 
             overlay.show('present', (selectedEvidenceId) => {
                 this._onEvidencePresented(selectedEvidenceId, choice);
@@ -789,6 +791,39 @@ export default class TrialSegmentManager {
         } else {
             // resumeなし
         }
+    }
+
+    async _playBreakEffect() {
+        return new Promise(resolve => {
+            // ★ 論破カットイン (igiari_cutin使用)
+            const img = this.scene.add.image(640, 360, 'igiari_cutin')
+                .setDepth(5000)
+                .setScrollFactor(0)
+                .setScale(0);
+
+            this.scene.tweens.add({
+                targets: img,
+                scale: 1.2,
+                alpha: { from: 0, to: 1 },
+                duration: 250,
+                ease: 'Back.easeOut',
+                onComplete: () => {
+                    this.scene.cameras.main.shake(300, 0.02);
+                    this.scene.time.delayedCall(1200, () => {
+                        this.scene.tweens.add({
+                            targets: img,
+                            alpha: 0,
+                            scale: 1.5,
+                            duration: 300,
+                            onComplete: () => {
+                                img.destroy();
+                                resolve();
+                            }
+                        });
+                    });
+                }
+            });
+        });
     }
 
     loadNextTrialData(jsonPath) {

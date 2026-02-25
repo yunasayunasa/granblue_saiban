@@ -57,8 +57,8 @@
         {
             "name": "timer_container",
             "type": "Container",
-            "x": 1100,
-            "y": 80,
+            "x": 200,
+            "y": 60,
             "layer": "UI",
             "depth": 2000,
             "components": [
@@ -105,6 +105,49 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "fast_forward_button",
+            "type": "Container",
+            "x": 200,
+            "y": 150,
+            "layer": "UI",
+            "depth": 2000,
+            "list": [
+                {
+                    "name": "ff_bg",
+                    "type": "Graphics",
+                    "draw": {
+                        "type": "circle",
+                        "x": 0,
+                        "y": 0,
+                        "radius": 40,
+                        "fill": {
+                            "color": "0xffffff",
+                            "alpha": 0.2
+                        },
+                        "lineStyle": {
+                            "width": 2,
+                            "color": "0xffffff",
+                            "alpha": 0.5
+                        }
+                    }
+                },
+                {
+                    "name": "ff_text",
+                    "type": "Text",
+                    "x": 0,
+                    "y": 0,
+                    "origin": 0.5,
+                    "text": ">>",
+                    "style": {
+                        "fontSize": "32px",
+                        "color": "#ffffff",
+                        "fontFamily": "sans-serif",
+                        "fontStyle": "bold"
+                    }
+                }
+            ]
         }
     ],
     "trial_data": {
@@ -114,6 +157,7 @@
         "testimonies": [
             {
                 "id": "t1",
+                "charaId": "siete",
                 "position": "left",
                 "text": "やあ団長。俺は遠くの修練場で、十天衆のみんなと特訓してたんだ。",
                 "highlights": [
@@ -121,7 +165,7 @@
                         "text": "みんなと特訓",
                         "choices": [
                             {
-                                "text": "ゆさぶる",
+                                "text": "十天衆がそろうなんてありえない！",
                                 "action": "update_testimony",
                                 "pre_update_scenario": "chapter1/ch2_doubt_siete.ks",
                                 "target": "t1",
@@ -131,7 +175,7 @@
                                         "text": "みんなで",
                                         "choices": [
                                             {
-                                                "text": "反論：ありえない",
+                                                "text": "その証拠これだ！",
                                                 "evidence_required": "blue_feather",
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch2_success_siete.ks",
@@ -147,22 +191,25 @@
             },
             {
                 "id": "t2",
+                "charaId": "siete",
                 "position": "right",
                 "text": "夕方まで汗を流していたよ。爽やかだろ？{cam:shake}",
                 "highlights": []
             },
             {
                 "id": "t3",
+                "charaId": "siete",
                 "position": "center",
-                "style": "scroll",
+                "style": "typewriter",
                 "text": "チョコなんて見てないし、キッチンの場所すら怪しいくらいさ。",
                 "highlights": [
                     {
                         "text": "見てない",
                         "choices": [
                             {
-                                "text": "つきつける",
+                                "text": "その証拠これだ！",
                                 "evidence_required": "blue_feather",
+                                "pre_present_message": "「しらじらしいぞシエテ！お前がいた証拠はあがってるんだ！」",
                                 "correct": true,
                                 "success_scenario": "chapter1/ch2_success_siete.ks",
                                 "next_trial_data": "scenes/trial_ch3.json"
