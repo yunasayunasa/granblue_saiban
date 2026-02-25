@@ -119,10 +119,23 @@ export default class TrialScene extends BaseGameScene {
         console.log(`[TrialScene] Object setup complete. Initializing trial logic.`);
 
         // 議論開始イベントの待機
-        // 議論開始イベントの待機
         this.events.on('START_DEBATE', this.startDebate, this);
         this.events.on('PAUSE_TRIAL', () => this.setPause(true));
         this.events.on('RESUME_TRIAL', () => this.setPause(false));
+
+        // ★ 裁判クリア時の処理
+        this.events.on('TRIAL_COMPLETE', () => {
+            console.log('[TrialScene] TRIAL_COMPLETE received. Transitioning to TitleScene.');
+            // タイマーを止める
+            if (this.timerEvent) {
+                this.timerEvent.destroy();
+                this.timerEvent = null;
+            }
+            // 少し待ってからタイトルへ (シナリオ表示完了を待つ)
+            this.time.delayedCall(500, () => {
+                this.scene.start('TitleScene');
+            });
+        });
 
         // ★ リセット要求の処理
         this.events.on('RESTART_DEBATE_REQUEST', () => {

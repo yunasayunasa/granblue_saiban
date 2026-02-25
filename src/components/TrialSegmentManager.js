@@ -478,14 +478,6 @@ export default class TrialSegmentManager {
         }
         container.add(textObj);
 
-        // コンテナのクリック範囲を設定（テキストのサイズに合わせる）
-        container.setSize(textObj.width, textObj.height);
-
-        // ★ Phaser 3.60のContainerでは、明示的にヒットエリアを指定し、カーソルをpointerに設定する
-        container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
-            .on('pointerover', () => { if (container.input.enabled) container.scene.input.setDefaultCursor('pointer'); })
-            .on('pointerout', () => { container.scene.input.setDefaultCursor('default'); });
-
         // ★ IDを保存 (後で検索できるように)
         if (data.id) {
             container.setData('id', data.id);
@@ -495,7 +487,7 @@ export default class TrialSegmentManager {
             text: data.text,
             speed: 50,
             moveSpeed: 120,
-            style: style // ★ スタイルを渡す
+            style: style
         });
 
         // ★★★ 【重要修正】動的に追加したコンポーネントは手動で開始する必要がある ★★★
@@ -503,35 +495,29 @@ export default class TrialSegmentManager {
             flowComponent.start();
         }
 
-        // ハイライト設定と当たり判定の構築
+        // ★ 【クリック判定修正】
+        // textObj.width はタイプライター開始前は 0 のため、固定の大きな範囲で判定エリアを設定する
+        const HIT_W = posIndex === 2 ? 1100 : 600;
+        const HIT_H = 200;
+
         if (data.highlights && data.highlights.length > 0) {
-            // テキストの加工（強調表示）
+            // ハイライトテキストを【 】で囲む（視覚的強調）
             let modifiedText = data.text;
             data.highlights.forEach(h => {
                 modifiedText = modifiedText.replace(h.text, `【${h.text}】`);
             });
-
-            textObj.setText(modifiedText);
             if (flowComponent) flowComponent.fullText = modifiedText;
-            textObj.updateText();
 
-            // コンテナサイズを更新
-            container.setSize(textObj.width, textObj.height);
-
-            // ★ 【改善】テキスト全体のクリック判定を有効化
-            // 個別のZone判定はズレやすいため、証言全体を判定範囲とする
-            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
+            // ハイライトがある証言: テキスト全体をクリック可能にする
+            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, HIT_W, HIT_H), Phaser.Geom.Rectangle.Contains)
                 .on('pointerdown', (pointer, localX, localY, event) => {
                     if (event) event.stopPropagation();
-                    console.log(`[TrialManager] Testimony clicked! Triggering menu for: ${data.highlights[0].text}`);
+                    console.log(`[TrialManager] Testimony clicked!`);
                     this.onHighlightClicked(data.highlights[0]);
                 });
             container.input.cursor = 'pointer';
-        } else {
-            // ハイライトがない場合
-            textObj.updateText();
-            container.setSize(textObj.width, textObj.height);
         }
+        // ハイライトなしの場合: クリック不要
 
         this.activeTestimonies.push(container);
     }
