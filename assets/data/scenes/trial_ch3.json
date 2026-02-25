@@ -246,7 +246,7 @@
                                             {
                                                 "text": "その証拠これだ！",
                                                 "evidence_required": "chocolate_crumbs",
-                                                "pre_present_message": "「嘘をつけ！リンゴを食べてる時、そんなクズは出ないはずだ！」",
+                                                "pre_present_scenario": "chapter1/ch3_pre_vyrn1.ks",
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch3_success_vyrn.ks"
                                             }
@@ -257,7 +257,7 @@
                             {
                                 "text": "その証拠これだ！",
                                 "evidence_required": "chocolate_crumbs",
-                                "pre_present_message": "「どこにも付いてないだって？じゃあこれは何なんだ！」",
+                                "pre_present_scenario": "chapter1/ch3_pre_vyrn2.ks",
                                 "correct": true,
                                 "success_scenario": "chapter1/ch3_success_vyrn.ks"
                             }

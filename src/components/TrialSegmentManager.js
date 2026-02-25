@@ -640,16 +640,21 @@ export default class TrialSegmentManager {
     async _showEvidenceOverlay(choice) {
         const overlay = this.scene.evidenceSelectOverlay;
         if (overlay) {
-            // ★ 【要望】メッセージウィンドウで口上を表示
-            const msg = choice.pre_present_message || "「その証言はおかしい！　証拠はこれだ！」";
-
-            // シナリオエンジンを介して表示（NovelOverlaySceneがアクティブな前提）
-            if (typeof EngineAPI.showMessage === 'function') {
-                await EngineAPI.showMessage(msg);
-            } else if (this.progressIndicator) {
-                // フォールバック
-                this.progressIndicator.show(msg, 1200);
-                await new Promise(resolve => this.scene.time.delayedCall(1200, resolve));
+            // ★ 【要望】シナリオファイルを再生してから証拠品提示へ
+            if (choice.pre_present_scenario) {
+                console.log(`[TrialManager] Playing pre-present scenario: ${choice.pre_present_scenario}`);
+                await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, choice.pre_present_scenario, true);
+            } else {
+                // 旧方式 (メッセージウィンドウでの口上) も一応残す (なければなにもしない)
+                const msg = choice.pre_present_message;
+                if (msg) {
+                    if (typeof EngineAPI.showMessage === 'function') {
+                        await EngineAPI.showMessage(msg);
+                    } else if (this.progressIndicator) {
+                        this.progressIndicator.show(msg, 1200);
+                        await new Promise(resolve => this.scene.time.delayedCall(1200, resolve));
+                    }
+                }
             }
 
             overlay.show('present', (selectedEvidenceId) => {
