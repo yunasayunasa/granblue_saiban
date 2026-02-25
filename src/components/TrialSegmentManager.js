@@ -259,69 +259,56 @@ export default class TrialSegmentManager {
     _findCharacterImages() {
         // 固定の3枠（左・中・右）ではなく、ID（roger, fenny, ruriaなど）で検索・キャッシュする
         // TrialScene.jsonで定義した名前に基づく
-        const charIds = ['roger', 'fenny', 'ruria', 'siete', 'vyrn', 'thug', 'nni', 'kaki', 'katuo', 'zombie', 'koa', 'chocokoa'];
+        const charIds = ['roger', 'fenny', 'ruria', 'siete', 'vyrn'];
 
         charIds.forEach(id => {
             if (!this.charaImages[id]) {
-                if (this.scene.findGameObjectByName) {
-                    this.charaImages[id] = this.scene.findGameObjectByName(id);
-                } else {
-                    this.charaImages[id] = this.scene.children.getByName(id);
+                const img = this.scene.children.getByName(id);
+                if (img) {
+                    this.charaImages[id] = img;
+                    console.log(`[TrialManager] Character cached: ${id}`);
                 }
             }
         });
-
-        console.log('[TrialSegmentManager] Found characters:',
-            Object.entries(this.charaImages).filter(([k, v]) => v).map(([k, v]) => `${k}`).join(', '));
     }
 
     // キャラ表示切り替えメソッド
     updateCharacterDisplay(index) {
         this._findCharacterImages();
 
-        // 全員消す
-        Object.values(this.charaImages).forEach(img => {
-            if (img) img.setVisible(false);
-        });
-
         const currentTestimony = this.segmentData.testimonies[index];
-        // データにキャラ名(name/id)の指定がある場合はそれを使う
-        // なければ以前と同様のローテーション（テスト用）
         let charId = currentTestimony && (currentTestimony.charaId || currentTestimony.name);
-        let posStr = currentTestimony && currentTestimony.position;
 
         if (!charId) {
-            // デフォルトローテーション (0:roger, 1:ruria, 2:fenny)
             const rotation = ['roger', 'ruria', 'fenny'];
             charId = rotation[index % 3];
         }
 
-        const target = this.charaImages[charId];
+        // 全員消す (フェニーとシエテが表示されない問題を解決するため、確実にステートを制御)
+        Object.keys(this.charaImages).forEach(id => {
+            const img = this.charaImages[id];
+            if (img) {
+                if (id === charId) {
+                    img.setVisible(true);
 
-        if (target) {
-            target.setVisible(true);
+                    // ポジション指定があれば座標を上書き
+                    const posStr = currentTestimony && currentTestimony.position;
+                    if (posStr === 'left') target.setX(300);
+                    else if (posStr === 'right') target.setX(980);
+                    else if (posStr === 'center') target.setX(640);
 
-            // ポジション指定があれば座標を上書き
-            if (posStr === 'left') {
-                target.setX(300);
-            } else if (posStr === 'right') {
-                target.setX(980);
-            } else if (posStr === 'center') {
-                target.setX(640);
+                    console.log(`[TrialSegmentManager] Showing character: ${id} at X: ${img.x}`);
+
+                    // カメラ回転演出
+                    let posIndex = 2; // center
+                    if (img.x < 500) posIndex = 0; // left
+                    else if (img.x > 800) posIndex = 1; // right
+                    this._rotateCameraForPosition(posIndex);
+                } else {
+                    img.setVisible(false);
+                }
             }
-
-            console.log(`[TrialSegmentManager] Showing character: ${charId} at X: ${target.x}`);
-
-            // ★ カメラ回転演出 (X座標から判断)
-            let posIndex = 2; // center
-            if (target.x < 500) posIndex = 0; // left
-            else if (target.x > 800) posIndex = 1; // right
-
-            this._rotateCameraForPosition(posIndex);
-
-        } else {
-            console.warn('[TrialSegmentManager] No character image for ID:', charId);
-        }
+        });
     }
 
     _rotateCameraForPosition(pos) {
@@ -516,6 +503,14 @@ export default class TrialSegmentManager {
                     this.onHighlightClicked(data.highlights[0]);
                 });
             container.input.cursor = 'pointer';
+
+            // ★ デバッグ用: ヒットボックスの可視化
+            if (this.scene.game.config.physics && this.scene.game.config.physics.arcade && this.scene.game.config.physics.arcade.debug) {
+                const dbg = this.scene.add.graphics();
+                dbg.lineStyle(2, 0x00ff00, 1);
+                dbg.strokeRect(0, 0, HIT_W, HIT_H);
+                container.add(dbg);
+            }
         }
         // ハイライトなしの場合: クリック不要
 
@@ -645,9 +640,14 @@ export default class TrialSegmentManager {
     async _showEvidenceOverlay(choice) {
         const overlay = this.scene.evidenceSelectOverlay;
         if (overlay) {
-            // ★ 【要望追加】証拠品提示前にショートテキストを表示
-            if (this.progressIndicator) {
-                const msg = choice.pre_present_message || "「その証言はおかしい！証拠はこれだ！」";
+            // ★ 【要望】メッセージウィンドウで口上を表示
+            const msg = choice.pre_present_message || "「その証言はおかしい！　証拠はこれだ！」";
+
+            // シナリオエンジンを介して表示（NovelOverlaySceneがアクティブな前提）
+            if (typeof EngineAPI.showMessage === 'function') {
+                await EngineAPI.showMessage(msg);
+            } else if (this.progressIndicator) {
+                // フォールバック
                 this.progressIndicator.show(msg, 1200);
                 await new Promise(resolve => this.scene.time.delayedCall(1200, resolve));
             }
@@ -715,7 +715,39 @@ export default class TrialSegmentManager {
 
     async _playBreakEffect() {
         return new Promise(resolve => {
-            this.cutInEffect.play(resolve);
+            // ★ 論破カットイン (ronpa_cutin使用)
+            const img = this.scene.add.image(640, 360, 'ronpa_cutin')
+                .setDepth(10000)
+                .setScrollFactor(0)
+                .setScale(0);
+
+            // 効果音
+            this.scene.sound.play('smash');
+
+            this.scene.tweens.add({
+                targets: img,
+                scale: 1,
+                alpha: { from: 0, to: 1 },
+                duration: 200,
+                ease: 'Back.easeOut',
+                onComplete: () => {
+                    // カメラ揺れ
+                    this.scene.cameras.main.shake(400, 0.03);
+
+                    this.scene.time.delayedCall(1500, () => {
+                        this.scene.tweens.add({
+                            targets: img,
+                            alpha: 0,
+                            scale: 1.2,
+                            duration: 300,
+                            onComplete: () => {
+                                img.destroy();
+                                resolve();
+                            }
+                        });
+                    });
+                }
+            });
         });
     }
 
@@ -793,38 +825,7 @@ export default class TrialSegmentManager {
         }
     }
 
-    async _playBreakEffect() {
-        return new Promise(resolve => {
-            // ★ 論破カットイン (igiari_cutin使用)
-            const img = this.scene.add.image(640, 360, 'igiari_cutin')
-                .setDepth(5000)
-                .setScrollFactor(0)
-                .setScale(0);
 
-            this.scene.tweens.add({
-                targets: img,
-                scale: 1.2,
-                alpha: { from: 0, to: 1 },
-                duration: 250,
-                ease: 'Back.easeOut',
-                onComplete: () => {
-                    this.scene.cameras.main.shake(300, 0.02);
-                    this.scene.time.delayedCall(1200, () => {
-                        this.scene.tweens.add({
-                            targets: img,
-                            alpha: 0,
-                            scale: 1.5,
-                            duration: 300,
-                            onComplete: () => {
-                                img.destroy();
-                                resolve();
-                            }
-                        });
-                    });
-                }
-            });
-        });
-    }
 
     loadNextTrialData(jsonPath) {
         console.log(`[TrialManager] Loading next trial data: ${jsonPath}`);

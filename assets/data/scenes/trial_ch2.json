@@ -57,8 +57,8 @@
         {
             "name": "timer_container",
             "type": "Container",
-            "x": 200,
-            "y": 60,
+            "x": 1100,
+            "y": 80,
             "layer": "UI",
             "depth": 2000,
             "components": [
@@ -109,8 +109,8 @@
         {
             "name": "fast_forward_button",
             "type": "Container",
-            "x": 200,
-            "y": 150,
+            "x": 1100,
+            "y": 180,
             "layer": "UI",
             "depth": 2000,
             "list": [
@@ -159,6 +159,7 @@
                 "id": "t1",
                 "charaId": "siete",
                 "position": "left",
+                "style": "typewriter",
                 "text": "やあ団長。俺は遠くの修練場で、十天衆のみんなと特訓してたんだ。",
                 "highlights": [
                     {
@@ -193,6 +194,7 @@
                 "id": "t2",
                 "charaId": "siete",
                 "position": "right",
+                "style": "typewriter",
                 "text": "夕方まで汗を流していたよ。爽やかだろ？{cam:shake}",
                 "highlights": []
             },

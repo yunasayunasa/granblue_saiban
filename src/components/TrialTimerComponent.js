@@ -55,26 +55,19 @@ export default class TrialTimerComponent {
     }
 
     update(time, delta) {
-        // 表示更新だけなら updateDisplay で十分だが、 updateValue で行うため
-        // この定期 update は不要になる可能性がある。
-        // ここでは空にしておくか、あるいはアニメーション等が必要な場合のみ利用。
+        // タイマーの更新は TrialScene.js 側で行うため、ここでは何もしない。
+        // StateManager からの通知 (updateValue) に基づいて表示のみ更新する。
     }
 
     updateDisplay() {
         if (!this.textObject) return;
 
-        const minutes = Math.floor(this.currentTime / 60);
-        const seconds = Math.floor(this.currentTime % 60);
+        const displayTime = Math.max(0, Math.floor(this.currentTime));
+        const minutes = Math.floor(displayTime / 60);
+        const seconds = Math.floor(displayTime % 60);
         const displayStr = `LIMIT ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
         this.textObject.setText(displayStr);
-
-        // 残り時間が少ない場合に赤くする演出
-        if (this.currentTime < 30) {
-            this.textObject.setColor('#ff0000');
-        } else {
-            this.textObject.setColor('#ffffff');
-        }
     }
 
     setTime(seconds) {

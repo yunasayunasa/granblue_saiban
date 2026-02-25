@@ -55,5 +55,4 @@
 #システム
 ～逆転追求裁判・完食エンド～
 [p]
-[jump storage="TitleScene"]
 [s]

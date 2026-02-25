@@ -48,7 +48,10 @@
     "kani": "assets/images/kani.png",
     "same": "assets/images/same.png",
     "tartman_normal": "assets/images/tartman_normal.png",
-    "death_stand": "assets/images/death_stand.png"
+    "death_stand": "assets/images/death_stand.png",
+    "ronpa_cutin": "assets/images/ronpa_cutin.png",
+    "matta_cutin": "assets/images/matta_cutin.png",
+    "igiari_cutin": "assets/images/igiari_cutin.png"
   },
   "spritesheets": {
     "walk": {

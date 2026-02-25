@@ -59,12 +59,22 @@ export default class InteractionMenuComponent {
 
     createChoiceButton(choice, centerY) {
         const isBack = choice.isBack || false;
-
         const container = this.scene.add.container(0, centerY);
 
-        // ボタンサイズ
-        const bgW = isBack ? 260 : 580;
-        const bgH = isBack ? 60 : 100;
+        // テキスト (まず作成して幅を測る)
+        const fontSize = isBack ? '26px' : '36px'; // 少しサイズ調整
+        const btnText = this.scene.add.text(0, 0, choice.text, {
+            fontSize: fontSize,
+            color: isBack ? '#aaaaaa' : '#ffffff',
+            fontFamily: '"Times New Roman", "MS PMincho", serif',
+            fontStyle: 'bold',
+            padding: { x: 40, y: 10 }
+        }).setOrigin(0.5);
+
+        // ボタンサイズ (テキストに合わせて動的に計算)
+        const minW = isBack ? 260 : 500;
+        const bgW = Math.max(minW, btnText.width + 40);
+        const bgH = isBack ? 60 : 90;
 
         const bg = this.scene.add.graphics();
 
@@ -78,18 +88,9 @@ export default class InteractionMenuComponent {
 
         drawBg(isBack ? 0x111111 : 0x000033, isBack ? 0.6 : 0.85);
         container.add(bg);
-
-        // テキスト
-        const fontSize = isBack ? '26px' : '40px';
-        const btnText = this.scene.add.text(0, 0, choice.text, {
-            fontSize: fontSize,
-            color: isBack ? '#aaaaaa' : '#ffffff',
-            fontFamily: '"Times New Roman", "MS PMincho", serif',
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
         container.add(btnText);
 
-        // インタラクション (矩形ヒットエリア)
+        // インタラクション (矩形ヒットエリア も動的に)
         container.setInteractive(
             new Phaser.Geom.Rectangle(-bgW / 2, -bgH / 2, bgW, bgH),
             Phaser.Geom.Rectangle.Contains

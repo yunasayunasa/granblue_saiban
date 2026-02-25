@@ -85,8 +85,8 @@
         {
             "name": "timer_container",
             "type": "Container",
-            "x": 200,
-            "y": 60,
+            "x": 1100,
+            "y": 80,
             "layer": "UI",
             "depth": 2000,
             "components": [
@@ -137,8 +137,8 @@
         {
             "name": "fast_forward_button",
             "type": "Container",
-            "x": 200,
-            "y": 150,
+            "x": 1100,
+            "y": 180,
             "layer": "UI",
             "depth": 2000,
             "list": [
@@ -187,6 +187,7 @@
                 "id": "t1",
                 "charaId": "ruria",
                 "position": "left",
+                "style": "typewriter",
                 "text": "ビィさん、さっき口の周りに何か付いてませんでしたか……？",
                 "highlights": []
             },
@@ -194,6 +195,7 @@
                 "id": "t2",
                 "charaId": "siete",
                 "position": "right",
+                "style": "typewriter",
                 "text": "そう言えば俺も見たよ。茶色い何かを満足げに咀嚼している姿をね。",
                 "highlights": []
             },
@@ -209,6 +211,7 @@
                 "id": "t4",
                 "charaId": "vyrn",
                 "position": "left",
+                "style": "typewriter",
                 "text": "おいらはずっとお前といっしょにいたろ？{se:laugh}",
                 "highlights": []
             },
@@ -216,6 +219,7 @@
                 "id": "t5",
                 "charaId": "vyrn",
                 "position": "right",
+                "style": "typewriter",
                 "text": "ルリアもシエテも怪しいけど、オイラは潔白だぜ！",
                 "highlights": []
             },
