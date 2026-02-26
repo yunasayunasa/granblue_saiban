@@ -82,8 +82,13 @@
     "walk": "assets/audio/walk.mp3",
     "cafe": "assets/cafe.mp3",
     "bgm_action": "assets/gyakuten_bgm.mp3",
+    "gyakuten_bgm": "assets/gyakuten_bgm.mp3",
     "ronpa_bgm": "assets/ronpa_bgm.mp3",
-    "smash": "assets/smash.mp3"
+    "ending_bgm": "assets/ending_bgm.mp3",
+    "smash": "assets/smash.mp3",
+    "correct": "assets/smash.mp3",
+    "shock": "assets/smash.mp3",
+    "glass": "assets/smash.mp3"
   },
   "//": "--- ここからが新しいカテゴリです ---",
   "prefabs": [
