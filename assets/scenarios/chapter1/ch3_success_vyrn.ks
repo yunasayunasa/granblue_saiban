@@ -50,9 +50,4 @@
 [p]
 誰かを想い、誰かに想われたチョコの味は、[br]きっとどんな高級品よりも甘かったに違いない。
 [p]
-[playbgm storage="ending_bgm" loop="true"]
-[bg storage="title" time="2000"]
-#システム
-～逆転追求裁判・完食エンド～
-[p]
-[s]
+[jump storage="chapter1/ending.ks"]
