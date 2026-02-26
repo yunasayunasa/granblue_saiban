@@ -720,7 +720,7 @@ export default class TrialSegmentManager {
     async _playBreakEffect() {
         return new Promise(resolve => {
             // ★ 論破カットイン (ronpa_cutin使用) - サイズを1.5倍に拡大
-            const img = this.scene.add.image(640, 360, 'ronpa_cutin')
+            const img = this.scene.add.image(640, 460, 'ronpa_cutin')
                 .setDepth(10000)
                 .setScrollFactor(0)
                 .setScale(0);

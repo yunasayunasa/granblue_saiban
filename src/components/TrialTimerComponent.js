@@ -30,6 +30,25 @@ export default class TrialTimerComponent {
         if (this.scene.updatableComponents) {
             this.scene.updatableComponents.add(this);
         }
+
+        // ★ StateManager からの通知を購読
+        this.stateManager = this.scene.registry.get('stateManager');
+        if (this.stateManager) {
+            this.listener = (key, value) => {
+                if (key === 'trial_timer') {
+                    this.currentTime = value;
+                    this.updateDisplay();
+                }
+            };
+            this.stateManager.on('f-variable-changed', this.listener);
+
+            // 初期値の反映
+            const initial = this.stateManager.getF('trial_timer');
+            if (initial !== undefined) {
+                this.currentTime = initial;
+                this.updateDisplay();
+            }
+        }
     }
 
     /**
