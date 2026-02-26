@@ -112,8 +112,8 @@
         {
           "name": "timer_text",
           "type": "Text",
-          "x": 0,
-          "y": 0,
+          "x": -30,
+          "y": -10,
           "origin": 0.5,
           "text": "LIMIT 05:00",
           "style": {
@@ -134,36 +134,11 @@
       "list": [
         {
           "name": "ff_bg",
-          "type": "Graphics",
-          "draw": {
-            "type": "circle",
-            "x": 0,
-            "y": 0,
-            "radius": 40,
-            "fill": {
-              "color": "0xffffff",
-              "alpha": 0.2
-            },
-            "lineStyle": {
-              "width": 2,
-              "color": "0xffffff",
-              "alpha": 0.5
-            }
-          }
-        },
-        {
-          "name": "ff_text",
-          "type": "Text",
+          "type": "Image",
           "x": 0,
           "y": 0,
-          "origin": 0.5,
-          "text": ">>",
-          "style": {
-            "fontSize": "32px",
-            "color": "#ffffff",
-            "fontFamily": "sans-serif",
-            "fontStyle": "bold"
-          }
+          "texture": "fast_forward",
+          "origin": 0.5
         }
       ]
     }
