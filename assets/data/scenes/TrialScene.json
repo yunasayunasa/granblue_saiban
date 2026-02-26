@@ -99,7 +99,7 @@
         {
           "name": "timer_text",
           "type": "Text",
-          "x": -250,
+          "x": -280,
           "y": -5,
           "origin": 0.5,
           "text": "LIMIT 05:00",

@@ -122,7 +122,7 @@
                 {
                     "name": "timer_text",
                     "type": "Text",
-                    "x": -30,
+                    "x": -60,
                     "y": -10,
                     "origin": 0.5,
                     "text": "LIMIT 05:00",
