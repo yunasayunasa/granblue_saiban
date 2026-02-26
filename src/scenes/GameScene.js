@@ -83,6 +83,7 @@ export default class GameScene extends Phaser.Scene {
             this.soundManager
             // ここに引数を追加する必要はない
         );
+        this.uiScene.setActiveNovelManager(this.scenarioManager); // ★ 追加: UISceneに自分のマネージャーを登録
         for (const tagName in tagHandlers) { this.scenarioManager.registerTag(tagName, tagHandlers[tagName]); }
         this.stateManager.off('f-variable-changed', this.onFVariableChanged, this);
         this.stateManager.on('f-variable-changed', this.onFVariableChanged, this);
@@ -269,6 +270,10 @@ export default class GameScene extends Phaser.Scene {
 
     shutdown() {
         if (this.input) this.input.off('pointerdown');
+        // ★ 追加: シーン終了時にマネージャーを登録解除
+        if (this.uiScene && this.uiScene.activeNovelManager === this.scenarioManager) {
+            this.uiScene.setActiveNovelManager(null);
+        }
     }
 }
 

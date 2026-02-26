@@ -25,6 +25,7 @@ export default class ScenarioManager {
         this.ifStack = [];
         this.callStack = [];
         this.lastSpeaker = null; // ★ 追加: 直前の話者を記憶
+        this.suspendedMode = null; // ★ 追加: 選択肢などで一時中断されたモードを記憶
     }
 
     registerTag(tagName, handler) {
@@ -41,6 +42,14 @@ export default class ScenarioManager {
         this.isWaitingChoice = false;
         this.isStopped = false;
         this.isEnd = false;
+
+        // ★ 選択肢後にモードを復元する
+        if (this.suspendedMode) {
+            const modeToRestore = this.suspendedMode;
+            this.suspendedMode = null;
+            this.setMode(modeToRestore);
+        }
+
         // ループが既に動いている場合は、重複して実行しないようにする
         if (this.isLoopRunning) return;
 
@@ -426,6 +435,11 @@ export default class ScenarioManager {
         if (this.autoTimer) this.autoTimer.remove();
 
         if (this.mode === 'skip') {
+            // ★ もしクリック待ち状態なら、即座に次の行へ進める（レスポンス改善）
+            if (this.isWaitingClick) {
+                this.onClick();
+                return; // skipLoopはonClickの中から間接的に呼ばれる
+            }
             // ★★★ スキップループを開始 ★★★
             this.skipLoop();
         } else if (this.mode === 'auto') {
@@ -435,10 +449,17 @@ export default class ScenarioManager {
 
     // ★★★ スキップ専用のループメソッドを新設 ★★★
     skipLoop() {
-        // スキップモードでない、または待機状態ならループを止める
-        if (this.mode !== 'skip' || this.isWaitingChoice || this.isEnd) {
+        // 選択肢待ちなら、モードを一時中断して止める（選択肢後に自動再開させるため）
+        if (this.isWaitingChoice) {
+            this.suspendedMode = 'skip';
+            this.mode = 'normal';
+            return;
+        }
+
+        // スキップモードでない、または終了状態ならループを止める
+        if (this.mode !== 'skip' || this.isEnd) {
             // console.log("スキップを停止します。");
-            this.setMode('normal'); // 通常モードに戻す
+            this.mode = 'normal'; // 通常モードに戻す
             return;
         }
 

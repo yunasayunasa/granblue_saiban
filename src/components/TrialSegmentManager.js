@@ -719,18 +719,18 @@ export default class TrialSegmentManager {
 
     async _playBreakEffect() {
         return new Promise(resolve => {
-            // ★ 論破カットイン (ronpa_cutin使用)
+            // ★ 論破カットイン (ronpa_cutin使用) - サイズを1.5倍に拡大
             const img = this.scene.add.image(640, 360, 'ronpa_cutin')
                 .setDepth(10000)
                 .setScrollFactor(0)
                 .setScale(0);
 
-            // 効果音
+            // 表示時の効果音
             this.scene.sound.play('smash');
 
             this.scene.tweens.add({
                 targets: img,
-                scale: 1,
+                scale: 1.5, // 1.0 -> 1.5 に変更（迫力アップ）
                 alpha: { from: 0, to: 1 },
                 duration: 200,
                 ease: 'Back.easeOut',
@@ -738,21 +738,77 @@ export default class TrialSegmentManager {
                     // カメラ揺れ
                     this.scene.cameras.main.shake(400, 0.03);
 
+                    // 1.5秒待機後に粉砕
                     this.scene.time.delayedCall(1500, () => {
-                        this.scene.tweens.add({
-                            targets: img,
-                            alpha: 0,
-                            scale: 1.2,
-                            duration: 300,
-                            onComplete: () => {
-                                img.destroy();
-                                resolve();
-                            }
-                        });
+                        this._shatterImage(img);
+                        resolve();
                     });
                 }
             });
         });
+    }
+
+    /**
+     * 画像を粉砕して飛び散らせる演出 (新規追加)
+     * @param {Phaser.GameObjects.Image} img 
+     */
+    _shatterImage(img) {
+        const scene = this.scene;
+        const rows = 5;
+        const cols = 5;
+        const pieceWidth = img.width / cols;
+        const pieceHeight = img.height / rows;
+        const scale = img.scaleX;
+
+        // 1. 画面フラッシュ
+        scene.cameras.main.flash(200, 255, 255, 255);
+
+        // 2. ガラス粉砕音 (SoundManager経由で安全に再生)
+        if (this.soundManager) {
+            this.soundManager.playSe('glass').catch(() => { });
+        } else {
+            scene.sound.play('glass', { volume: 0.5 });
+        }
+
+        // 3. 破片の生成とアニメーション
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                // 破片を作成
+                const piece = scene.add.image(img.x, img.y, 'ronpa_cutin')
+                    .setDepth(img.depth)
+                    .setScrollFactor(0)
+                    .setScale(scale);
+
+                // 各破片の表示領域を制限
+                piece.setCrop(x * pieceWidth, y * pieceHeight, pieceWidth, pieceHeight);
+
+                // 破片の初期位置を元の画像のパーツ位置に合わせる (アンカーポイント考慮)
+                const offsetX = (x - (cols - 1) / 2) * pieceWidth * scale;
+                const offsetY = (y - (rows - 1) / 2) * pieceHeight * scale;
+                piece.setPosition(img.x + offsetX, img.y + offsetY);
+
+                // ランダムな飛び散り方向
+                const angle = Phaser.Math.Between(0, 360) * (Math.PI / 180);
+                const speed = Phaser.Math.Between(300, 800);
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed - 200; // 少し上に放り投げる
+
+                // 物理シミュレーション風の Tween
+                scene.tweens.add({
+                    targets: piece,
+                    x: piece.x + vx,
+                    y: piece.y + vy + 1000, // 重力で落ちる
+                    angle: Phaser.Math.Between(-180, 180),
+                    alpha: 0,
+                    duration: 1000,
+                    ease: 'Quad.easeIn',
+                    onComplete: () => piece.destroy()
+                });
+            }
+        }
+
+        // 元の画像を消去
+        img.destroy();
     }
 
     _resumeFromMenu() {
