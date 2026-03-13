@@ -7,6 +7,7 @@
 
     ; プロローグ開始
     [stopbgm]
+    [er]
     [playbgm storage="cafe" loop="true"]
     [bg storage="enzan" time="1000"]
     [wait time=1000]
@@ -62,7 +63,7 @@
     #ナルメア
     よろしくね、団長ちゃん！
     [p]
-    [chara_hide name="narumia" time="200" wait="true"]
+    
     [jump storage="narumia_converted.ks"]
 
 *siete_route_start
@@ -70,7 +71,8 @@
     #シエテ
     やあ、団長ちゃん。俺と行くのかい？
     [p]
-    [chara_hide name="siete" time="200" wait="true"]
+   
+   
     [jump storage="siete_converted.ks"]
 
 *hard_mode_start
@@ -87,5 +89,6 @@
     #フェニー
     団長さんとお出かけ楽しみなんだよ！
     [p]
-    [chara_hide name="fenny" time="200" wait="true"]
+   
+   
     [jump storage="fenny_converted.ks"]
