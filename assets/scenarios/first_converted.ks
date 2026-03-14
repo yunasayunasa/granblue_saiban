@@ -6,7 +6,10 @@
     [chara_new name="siete" jname="シエテ"]
 
     ; プロローグ開始
+     [fadein]
+    [fadeout]
     [stopbgm]
+    #
     [er]
     [playbgm storage="cafe" loop="true"]
     [bg storage="enzan" time="1000"]
@@ -78,9 +81,12 @@
 *hard_mode_start
     [chara_show name="roger" storage="roger_normal" pos="center" time="500" wait="true"]
     #ロジャー
-    え！？誰もいらない！？[p] 
-    まぁ、君がそういうなら…[r]
-    …その先は地獄だよ？[p]
+    え！？誰もいらない！？
+    [p] 
+    まぁ、君がそういうなら…
+    [p]
+    …その先は地獄だよ？
+    [p]
     [chara_hide name="roger" time="500" wait="true"]
     [jump storage="hard_converted.ks"]
 

@@ -171,12 +171,16 @@
     [s]
 
 *failed_battle_badend 
-    [stopbgm] 
+[fadein]
+[fadeout]
+    [stopbgm]
+    [er]
     [chara_show name="ruria" time="300" wait="true"]
     #ルリア
     大丈夫ですか？[br]今、ティコさんを呼んできますね！
     [p]
     [chara_hide name="ruria" time="300" wait="true"]
+    [fadein]
     #
     どうやら選択を誤ったらしい。[br]君は痛む体をさすりながら、眠りに落ちた。
     [p]
@@ -237,6 +241,8 @@
     [chara_new name="siete" jname="シエテ"]
 
     ; プロローグ開始
+    [fadein]
+    [fadeout]
     [stopbgm]
     [er]
     [playbgm storage="cafe" loop="true"]
@@ -303,9 +309,12 @@
 *hard_mode_start
     [chara_show name="roger" storage="roger_normal" pos="center" time="500" wait="true"]
     #ロジャー
-    え！？誰もいらない！？[p] 
-    まぁ、君がそういうなら…[r]
-    …その先は地獄だよ？[p]
+    え！？誰もいらない！？
+    [p] 
+    まぁ、君がそういうなら…
+    [p]
+    …その先は地獄だよ？
+    [p]
     [chara_hide name="roger" time="500" wait="true"]
     [jump storage="hard_converted.ks"]
 
@@ -375,10 +384,11 @@
   #ンニ
   ！！！？？
    [chara_hide name="nni"]
-  
-  [chara_show name="narumia" x="50" y="150" time="500" wait="true"]
+  [chara_hide name="katuo"]
+  [chara_show name="narumia" pos="right" time="500" wait="true"]
     #ナルメア
-    うん！団長ちゃんは正面に集中して！[p]
+    うん！団長ちゃんは正面に集中して！
+    [p]
  [chara_hide name="narumia" time="200" wait="true"]
     #
     [chara_show name="same" pos="center" time="500" wait="true"]
@@ -404,7 +414,8 @@
     
     クァニ、灼弩火罹、ゾンビィ、更に増えるトンチキ生物達。
     [p]
-    無理だ。1人では━ [br]君は押し迫る海の生物達の中に消えていった...。
+     [chara_hide name="zombie" storage="zombie" pos="center"]
+    無理だ。1人では━ 
     [p]
 
     ━でも、今は！
@@ -508,11 +519,11 @@
     最後の選択だ、君は...
     [p]
 
-    [link target="*true_ending" text="目を狙う"]
+    [link target="*shin_ending" text="目を狙う"]
     [link target="*failed_battle_badend" text="ヒレを狙う"]
     [r]
     [s]
-
+*shin_ending
     [playbgm storage="night_bgm" loop="true"]
     [chara_show name="ruria" storage="ruria_normal" pos="center" time="1000" wait="true"]
     #ルリア
