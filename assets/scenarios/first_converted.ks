@@ -8,6 +8,7 @@
     ; プロローグ開始
      [fadein]
     [fadeout]
+    [fadein]
     [stopbgm]
     #
     [er]
