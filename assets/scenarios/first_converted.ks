@@ -11,7 +11,7 @@
     [fadein]
     [stopbgm]
     #
-    [er]
+    [er layer="chara"]
     [playbgm storage="cafe" loop="true"]
     [bg storage="enzan" time="1000"]
     [wait time=1000]
