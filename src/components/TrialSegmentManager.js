@@ -259,69 +259,56 @@ export default class TrialSegmentManager {
     _findCharacterImages() {
         // 固定の3枠（左・中・右）ではなく、ID（roger, fenny, ruriaなど）で検索・キャッシュする
         // TrialScene.jsonで定義した名前に基づく
-        const charIds = ['roger', 'fenny', 'ruria', 'thug', 'nni', 'kaki', 'katuo', 'zombie', 'koa', 'chocokoa'];
+        const charIds = ['roger', 'fenny', 'ruria', 'siete', 'vyrn'];
 
         charIds.forEach(id => {
             if (!this.charaImages[id]) {
-                if (this.scene.findGameObjectByName) {
-                    this.charaImages[id] = this.scene.findGameObjectByName(id);
-                } else {
-                    this.charaImages[id] = this.scene.children.getByName(id);
+                const img = this.scene.children.getByName(id);
+                if (img) {
+                    this.charaImages[id] = img;
+                    console.log(`[TrialManager] Character cached: ${id}`);
                 }
             }
         });
-
-        console.log('[TrialSegmentManager] Found characters:', 
-            Object.entries(this.charaImages).filter(([k, v]) => v).map(([k, v]) => `${k}`).join(', '));
     }
 
     // キャラ表示切り替えメソッド
     updateCharacterDisplay(index) {
         this._findCharacterImages();
 
-        // 全員消す
-        Object.values(this.charaImages).forEach(img => {
-            if (img) img.setVisible(false);
-        });
-
         const currentTestimony = this.segmentData.testimonies[index];
-        // データにキャラ名(name/id)の指定がある場合はそれを使う
-        // なければ以前と同様のローテーション（テスト用）
         let charId = currentTestimony && (currentTestimony.charaId || currentTestimony.name);
-        let posStr = currentTestimony && currentTestimony.position;
 
         if (!charId) {
-            // デフォルトローテーション (0:roger, 1:ruria, 2:fenny)
             const rotation = ['roger', 'ruria', 'fenny'];
             charId = rotation[index % 3];
         }
 
-        const target = this.charaImages[charId];
+        // 全員消す (フェニーとシエテが表示されない問題を解決するため、確実にステートを制御)
+        Object.keys(this.charaImages).forEach(id => {
+            const img = this.charaImages[id];
+            if (img) {
+                if (id === charId) {
+                    img.setVisible(true);
 
-        if (target) {
-            target.setVisible(true);
-            
-            // ポジション指定があれば座標を上書き
-            if (posStr === 'left') {
-                target.setX(300);
-            } else if (posStr === 'right') {
-                target.setX(980);
-            } else if (posStr === 'center') {
-                target.setX(640);
+                    // ポジション指定があれば座標を上書き
+                    const posStr = currentTestimony && currentTestimony.position;
+                    if (posStr === 'left') target.setX(300);
+                    else if (posStr === 'right') target.setX(980);
+                    else if (posStr === 'center') target.setX(640);
+
+                    console.log(`[TrialSegmentManager] Showing character: ${id} at X: ${img.x}`);
+
+                    // カメラ回転演出
+                    let posIndex = 2; // center
+                    if (img.x < 500) posIndex = 0; // left
+                    else if (img.x > 800) posIndex = 1; // right
+                    this._rotateCameraForPosition(posIndex);
+                } else {
+                    img.setVisible(false);
+                }
             }
-
-            console.log(`[TrialSegmentManager] Showing character: ${charId} at X: ${target.x}`);
-
-            // ★ カメラ回転演出 (X座標から判断)
-            let posIndex = 2; // center
-            if (target.x < 500) posIndex = 0; // left
-            else if (target.x > 800) posIndex = 1; // right
-            
-            this._rotateCameraForPosition(posIndex);
-
-        } else {
-            console.warn('[TrialSegmentManager] No character image for ID:', charId);
-        }
+        });
     }
 
     _rotateCameraForPosition(pos) {
@@ -478,14 +465,6 @@ export default class TrialSegmentManager {
         }
         container.add(textObj);
 
-        // コンテナのクリック範囲を設定（テキストのサイズに合わせる）
-        container.setSize(textObj.width, textObj.height);
-
-        // ★ Phaser 3.60のContainerでは、明示的にヒットエリアを指定し、カーソルをpointerに設定する
-        container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
-            .on('pointerover', () => { if (container.input.enabled) container.scene.input.setDefaultCursor('pointer'); })
-            .on('pointerout', () => { container.scene.input.setDefaultCursor('default'); });
-
         // ★ IDを保存 (後で検索できるように)
         if (data.id) {
             container.setData('id', data.id);
@@ -495,7 +474,7 @@ export default class TrialSegmentManager {
             text: data.text,
             speed: 50,
             moveSpeed: 120,
-            style: style // ★ スタイルを渡す
+            style: style
         });
 
         // ★★★ 【重要修正】動的に追加したコンポーネントは手動で開始する必要がある ★★★
@@ -503,62 +482,37 @@ export default class TrialSegmentManager {
             flowComponent.start();
         }
 
-        // ハイライト設定と当たり判定の構築
+        // ★ 【クリック判定修正】
+        // textObj.width はタイプライター開始前は 0 のため、固定の大きな範囲で判定エリアを設定する
+        const HIT_W = posIndex === 2 ? 1100 : 600;
+        const HIT_H = 200;
+
         if (data.highlights && data.highlights.length > 0) {
-            // テキストの加工（強調表示）
+            // ハイライトテキストを【 】で囲む（視覚的強調）
             let modifiedText = data.text;
             data.highlights.forEach(h => {
                 modifiedText = modifiedText.replace(h.text, `【${h.text}】`);
             });
-
-            textObj.setText(modifiedText);
             if (flowComponent) flowComponent.fullText = modifiedText;
-            textObj.updateText();
 
-            // コンテナサイズを更新
-            container.setSize(textObj.width, textObj.height);
+            // ハイライトがある証言: テキスト全体をクリック可能にする
+            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, HIT_W, HIT_H), Phaser.Geom.Rectangle.Contains)
+                .on('pointerdown', (pointer, localX, localY, event) => {
+                    if (event) event.stopPropagation();
+                    console.log(`[TrialManager] Testimony clicked!`);
+                    this.onHighlightClicked(data.highlights[0]);
+                });
+            container.input.cursor = 'pointer';
 
-            // ★ ハイライトごとの個別判定範囲を生成
-            // 本来は正確な座標計算が必要だが、ここでは簡易的に
-            // 「ハイライトの数だけ、テキストの下に並べる or 特定のオフセットで配置」
-            // ユーザー要望の「可視化」として、黄色いボックスを作成
-
-            data.highlights.forEach((h, index) => {
-                const padding = 10;
-                const boxW = textObj.width / data.highlights.length;
-                const boxH = textObj.height + padding * 2;
-                const boxX = (index * boxW);
-                const boxY = -padding;
-
-                // 可視化ボックス
-                const hitBox = this.scene.add.graphics();
-                hitBox.fillStyle(0xffff00, 0.3); // 半透明黄色
-                hitBox.lineStyle(2, 0xffff00, 0.8);
-                hitBox.fillRect(boxX, boxY, boxW, boxH);
-                hitBox.strokeRect(boxX, boxY, boxW, boxH);
-                container.add(hitBox);
-
-                // ★ 判定ゾーン: 中央座標指定
-                const hitZone = this.scene.add.zone(boxX + boxW / 2, boxY + boxH / 2, boxW, boxH);
-                hitZone.setInteractive({ useHandCursor: true })
-                    .on('pointerdown', (pointer, localX, localY, event) => {
-                        if (event) event.stopPropagation(); // 貫通・重なり防止
-                        console.log(`[TrialManager] Highlight Area ${index} clicked!`, h.text);
-                        this.onHighlightClicked(h);
-                    });
-
-                container.add(hitZone);
-            });
-
-            // コンテナ自体のインタラクティブ設定（フォールバック用、または全体を吸い取らないように低優先に）
-            container.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains);
-            container.input.enabled = false; // 個別Zoneに任せる
-        } else {
-            // ハイライトがない場合
-            textObj.updateText();
-            container.setSize(textObj.width, textObj.height);
-            // 何もしない（クリック不可）
+            // ★ デバッグ用: ヒットボックスの可視化
+            if (this.scene.game.config.physics && this.scene.game.config.physics.arcade && this.scene.game.config.physics.arcade.debug) {
+                const dbg = this.scene.add.graphics();
+                dbg.lineStyle(2, 0x00ff00, 1);
+                dbg.strokeRect(0, 0, HIT_W, HIT_H);
+                container.add(dbg);
+            }
         }
+        // ハイライトなしの場合: クリック不要
 
         this.activeTestimonies.push(container);
     }
@@ -683,13 +637,24 @@ export default class TrialSegmentManager {
         }
     }
 
-    _showEvidenceOverlay(choice) {
+    async _showEvidenceOverlay(choice) {
         const overlay = this.scene.evidenceSelectOverlay;
         if (overlay) {
-            // ポーズ状態にする
-            // this.scene.setPause(true); // EvidenceSelectOverlay側で制御されている場合もあるが念のため
-            // -> EvidenceSelectOverlay.show は内部で特にPauseしないようなので、呼ぶ側でするか、
-            //    あるいは handleChoice 時点ですでに InteractionMenu で Pause されているはず。
+            // ★ 【要望】シナリオファイルを再生してから証拠品提示へ
+            if (choice.pre_present_scenario) {
+                await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, choice.pre_present_scenario, true);
+            } else {
+                // 旧方式 (メッセージウィンドウでの口上) も一応残す (なければなにもしない)
+                const msg = choice.pre_present_message;
+                if (msg) {
+                    if (typeof EngineAPI.showMessage === 'function') {
+                        await EngineAPI.showMessage(msg);
+                    } else if (this.progressIndicator) {
+                        this.progressIndicator.show(msg, 1200);
+                        await new Promise(resolve => this.scene.time.delayedCall(1200, resolve));
+                    }
+                }
+            }
 
             overlay.show('present', (selectedEvidenceId) => {
                 this._onEvidencePresented(selectedEvidenceId, choice);
@@ -754,8 +719,96 @@ export default class TrialSegmentManager {
 
     async _playBreakEffect() {
         return new Promise(resolve => {
-            this.cutInEffect.play(resolve);
+            // ★ 論破カットイン (ronpa_cutin使用) - サイズを1.5倍に拡大
+            const img = this.scene.add.image(640, 460, 'ronpa_cutin')
+                .setDepth(10000)
+                .setScrollFactor(0)
+                .setScale(0);
+
+            // 表示時の効果音
+            this.scene.sound.play('smash');
+
+            this.scene.tweens.add({
+                targets: img,
+                scale: 1.5, // 1.0 -> 1.5 に変更（迫力アップ）
+                alpha: { from: 0, to: 1 },
+                duration: 200,
+                ease: 'Back.easeOut',
+                onComplete: () => {
+                    // カメラ揺れ
+                    this.scene.cameras.main.shake(400, 0.03);
+
+                    // 1.5秒待機後に粉砕
+                    this.scene.time.delayedCall(1500, () => {
+                        this._shatterImage(img);
+                        resolve();
+                    });
+                }
+            });
         });
+    }
+
+    /**
+     * 画像を粉砕して飛び散らせる演出 (新規追加)
+     * @param {Phaser.GameObjects.Image} img 
+     */
+    _shatterImage(img) {
+        const scene = this.scene;
+        const rows = 5;
+        const cols = 5;
+        const pieceWidth = img.width / cols;
+        const pieceHeight = img.height / rows;
+        const scale = img.scaleX;
+
+        // 1. 画面フラッシュ
+        scene.cameras.main.flash(200, 255, 255, 255);
+
+        // 2. ガラス粉砕音 (SoundManager経由で安全に再生)
+        if (this.soundManager) {
+            this.soundManager.playSe('glass').catch(() => { });
+        } else {
+            scene.sound.play('glass', { volume: 0.5 });
+        }
+
+        // 3. 破片の生成とアニメーション
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                // 破片を作成
+                const piece = scene.add.image(img.x, img.y, 'ronpa_cutin')
+                    .setDepth(img.depth)
+                    .setScrollFactor(0)
+                    .setScale(scale);
+
+                // 各破片の表示領域を制限
+                piece.setCrop(x * pieceWidth, y * pieceHeight, pieceWidth, pieceHeight);
+
+                // 破片の初期位置を元の画像のパーツ位置に合わせる (アンカーポイント考慮)
+                const offsetX = (x - (cols - 1) / 2) * pieceWidth * scale;
+                const offsetY = (y - (rows - 1) / 2) * pieceHeight * scale;
+                piece.setPosition(img.x + offsetX, img.y + offsetY);
+
+                // ランダムな飛び散り方向
+                const angle = Phaser.Math.Between(0, 360) * (Math.PI / 180);
+                const speed = Phaser.Math.Between(300, 800);
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed - 200; // 少し上に放り投げる
+
+                // 物理シミュレーション風の Tween
+                scene.tweens.add({
+                    targets: piece,
+                    x: piece.x + vx,
+                    y: piece.y + vy + 1000, // 重力で落ちる
+                    angle: Phaser.Math.Between(-180, 180),
+                    alpha: 0,
+                    duration: 1000,
+                    ease: 'Quad.easeIn',
+                    onComplete: () => piece.destroy()
+                });
+            }
+        }
+
+        // 元の画像を消去
+        img.destroy();
     }
 
     _resumeFromMenu() {
@@ -794,17 +847,18 @@ export default class TrialSegmentManager {
                 textObj.updateText();
                 activeObj.setSize(textObj.width, textObj.height);
 
-                // イベント再設定
-                activeObj.off('pointerdown');
-                activeObj.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
-                    .on('pointerover', () => { if (activeObj.input.enabled) activeObj.scene.input.setDefaultCursor('pointer'); })
-                    .on('pointerout', () => { activeObj.scene.input.setDefaultCursor('default'); });
+                // ★ 【改善】テキスト全体のクリック判定を再構築
+                activeObj.list.filter(child => child.type === 'Graphics' || child.type === 'Zone').forEach(child => child.destroy());
 
                 if (newHighlights && newHighlights.length > 0) {
-                    activeObj.on('pointerdown', () => {
-                        console.log('[TrialManager] Updated testimony clicked:', displayText);
-                        this.onHighlightClicked(newHighlights[0]); // 簡易的に最初のハイライトを使用
-                    });
+                    activeObj.setInteractive(new Phaser.Geom.Rectangle(0, 0, textObj.width, textObj.height), Phaser.Geom.Rectangle.Contains)
+                        .on('pointerdown', (pointer, localX, localY, event) => {
+                            if (event) event.stopPropagation();
+                            this.onHighlightClicked(newHighlights[0]);
+                        });
+                    activeObj.input.cursor = 'pointer';
+                } else {
+                    activeObj.disableInteractive();
                 }
             }
 
@@ -830,6 +884,8 @@ export default class TrialSegmentManager {
             // resumeなし
         }
     }
+
+
 
     loadNextTrialData(jsonPath) {
         console.log(`[TrialManager] Loading next trial data: ${jsonPath}`);

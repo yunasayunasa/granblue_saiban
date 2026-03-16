@@ -1,0 +1,245 @@
+{
+    "scene_settings": {
+        "backgroundColor": "#000033",
+        "gravity": {
+            "enabled": false
+        },
+        "ySortEnabled": false
+    },
+    "objects": [
+        {
+            "name": "background_underlay",
+            "type": "image",
+            "x": 640,
+            "y": 360,
+            "texture": "bg_school",
+            "layer": "Background"
+        },
+        {
+            "name": "trial_manager",
+            "type": "container",
+            "x": 0,
+            "y": 0,
+            "components": {
+                "TrialSegmentManager": {}
+            }
+        },
+        {
+            "name": "vyrn",
+            "type": "image",
+            "x": 640,
+            "y": 450,
+            "texture": "vyrn_normal",
+            "visible": false,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "ruria",
+            "type": "image",
+            "x": 300,
+            "y": 450,
+            "texture": "ruria_normal",
+            "visible": false,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "siete",
+            "type": "image",
+            "x": 980,
+            "y": 450,
+            "texture": "siete_normal",
+            "visible": false,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "fenny",
+            "type": "image",
+            "x": 640,
+            "y": 450,
+            "texture": "fenny_normal",
+            "visible": false,
+            "opacity": 0.5,
+            "layer": "Gameplay"
+        },
+        {
+            "name": "interaction_menu",
+            "type": "container",
+            "x": 640,
+            "y": 360,
+            "components": {
+                "InteractionMenuComponent": {}
+            },
+            "layer": "UI"
+        },
+        {
+            "name": "progress_indicator",
+            "type": "Text",
+            "x": 640,
+            "y": 200,
+            "text": "最終決戦…",
+            "components": {
+                "ProgressIndicatorComponent": {}
+            },
+            "layer": "UI"
+        },
+        {
+            "name": "timer_container",
+            "type": "Container",
+            "x": 1100,
+            "y": 80,
+            "layer": "UI",
+            "depth": 2000,
+            "components": [
+                {
+                    "type": "TrialTimerComponent",
+                    "params": {
+                        "timeLimit": 300
+                    }
+                }
+            ],
+            "list": [
+                {
+                    "name": "timer_bg",
+                    "type": "Graphics",
+                    "draw": {
+                        "type": "roundedRect",
+                        "x": -150,
+                        "y": -35,
+                        "width": 300,
+                        "height": 70,
+                        "radius": 15,
+                        "fill": {
+                            "color": "0x000000",
+                            "alpha": 0.6
+                        },
+                        "lineStyle": {
+                            "width": 3,
+                            "color": "0xffffff",
+                            "alpha": 0.8
+                        }
+                    }
+                },
+                {
+                    "name": "timer_text",
+                    "type": "Text",
+                    "x": -60,
+                    "y": -10,
+                    "origin": 0.5,
+                    "text": "LIMIT 05:00",
+                    "style": {
+                        "fontSize": "36px",
+                        "color": "#ffffff",
+                        "fontFamily": "serif"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "fast_forward_button",
+            "type": "Container",
+            "x": 1100,
+            "y": 180,
+            "layer": "UI",
+            "depth": 2000,
+            "list": [
+                {
+                    "name": "ff_bg",
+                    "type": "Image",
+                    "x": 0,
+                    "y": 0,
+                    "texture": "fast_forward",
+                    "origin": 0.5
+                }
+            ]
+        }
+    ],
+    "trial_data": {
+        "timeLimit": 300,
+        "timeoutScenario": "chapter1/timeout_bad_end.ks",
+        "loop_scenario": "chapter1/loop_end.ks",
+        "testimonies": [
+            {
+                "id": "t1",
+                "charaId": "ruria",
+                "position": "left",
+                "style": "typewriter",
+                "text": "ビィさん、さっき口の周りに何か付いてませんでしたか……？",
+                "highlights": []
+            },
+            {
+                "id": "t2",
+                "charaId": "siete",
+                "position": "right",
+                "style": "typewriter",
+                "text": "そう言えば俺も見たよ。茶色い何かを満足げに咀嚼している姿をね。",
+                "highlights": []
+            },
+            {
+                "id": "t3",
+                "charaId": "fenny",
+                "position": "center",
+                "style": "typewriter",
+                "text": "……（じーっとビィを睨んでいる）",
+                "highlights": []
+            },
+            {
+                "id": "t4",
+                "charaId": "vyrn",
+                "position": "left",
+                "style": "typewriter",
+                "text": "おいらはずっとお前といっしょにいたろ？{se:laugh}",
+                "highlights": []
+            },
+            {
+                "id": "t5",
+                "charaId": "vyrn",
+                "position": "right",
+                "style": "typewriter",
+                "text": "ルリアもシエテも怪しいけど、オイラは潔白だぜ！",
+                "highlights": []
+            },
+            {
+                "id": "t6",
+                "charaId": "vyrn",
+                "position": "center",
+                "style": "typewriter",
+                "text": "チョコのくず？ そんなの、オイラの周りにはどこにも付いてねぇよ！",
+                "highlights": [
+                    {
+                        "text": "どこにも付いてねぇ",
+                        "choices": [
+                            {
+                                "text": "「一口も」なんておかしい！",
+                                "action": "update_testimony",
+                                "pre_update_scenario": "chapter1/ch3_doubt_vyrn.ks",
+                                "target": "t6",
+                                "new_text": "オイラは今日、林檎しか食べてねぇ！ チョコなんて一口も……！",
+                                "new_highlights": [
+                                    {
+                                        "text": "一口も",
+                                        "choices": [
+                                            {
+                                                "text": "その証拠これだ！",
+                                                "evidence_required": "chocolate_crumbs",
+                                                "pre_present_scenario": "chapter1/ch3_pre_vyrn1.ks",
+                                                "correct": true,
+                                                "success_scenario": "chapter1/ch3_success_vyrn.ks"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "text": "その証拠これだ！",
+                                "evidence_required": "chocolate_crumbs",
+                                "pre_present_scenario": "chapter1/ch3_pre_vyrn2.ks",
+                                "correct": true,
+                                "success_scenario": "chapter1/ch3_success_vyrn.ks"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

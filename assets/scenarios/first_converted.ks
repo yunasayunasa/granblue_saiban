@@ -6,7 +6,12 @@
     [chara_new name="siete" jname="シエテ"]
 
     ; プロローグ開始
+     [fadein]
+    [fadeout]
+    [fadein]
     [stopbgm]
+    #
+    [er layer="chara"]
     [playbgm storage="cafe" loop="true"]
     [bg storage="enzan" time="1000"]
     [wait time=1000]
@@ -52,9 +57,7 @@
     [link target="*narumia_route_start" text="ナルメア"]
     [link target="*siete_route_start" text="シエテ"]
     [link target="*hard_mode_start" text="誰も仲間にしない"]
-    [if exp="sf.hard_mode_cleared == true"]
-        [link target="*fenny_route_start" text="フェニー"]
-    [endif]
+    [link target="*fenny_route_start" text="フェニー"]
     [r]
     [s]
 
@@ -64,7 +67,7 @@
     #ナルメア
     よろしくね、団長ちゃん！
     [p]
-    [chara_hide name="narumia" time="200" wait="true"]
+    
     [jump storage="narumia_converted.ks"]
 
 *siete_route_start
@@ -72,15 +75,19 @@
     #シエテ
     やあ、団長ちゃん。俺と行くのかい？
     [p]
-    [chara_hide name="siete" time="200" wait="true"]
+   
+   
     [jump storage="siete_converted.ks"]
 
 *hard_mode_start
     [chara_show name="roger" storage="roger_normal" pos="center" time="500" wait="true"]
     #ロジャー
-    え！？誰もいらない！？[p] 
-    まぁ、君がそういうなら…[r]
-    …その先は地獄だよ？[p]
+    え！？誰もいらない！？
+    [p] 
+    まぁ、君がそういうなら…
+    [p]
+    …その先は地獄だよ？
+    [p]
     [chara_hide name="roger" time="500" wait="true"]
     [jump storage="hard_converted.ks"]
 
@@ -89,5 +96,6 @@
     #フェニー
     団長さんとお出かけ楽しみなんだよ！
     [p]
-    [chara_hide name="fenny" time="200" wait="true"]
+   
+   
     [jump storage="fenny_converted.ks"]

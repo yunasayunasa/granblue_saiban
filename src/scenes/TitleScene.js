@@ -19,8 +19,19 @@ export default class TitleScene extends BaseGameScene {
 
     onSetupComplete() {
         // ★ 3. onSetupCompleteで、このシーン独自の処理を行う
-        //    (例：BGMの再生)
         console.log('[TitleScene] Data-driven setup complete. Playing title music.');
+
+        // --- GameFlowManagerの状態を強制同期 ---
+        // エンディング等から戻ってきた際、ステートマシンが 'NovelOverlay' や 'InGame' 
+        // のまま止まっていることがあるため、強制的に 'Title' に戻して
+        // START_GAME イベントを受け取れるようにする。
+        const engineAPI = this.registry.get('engineAPI') || (window.EngineAPI);
+        const gameFlowManager = engineAPI ? engineAPI.gameFlowManager : null;
+        if (gameFlowManager) {
+            console.log(`[TitleScene] Synchronizing GameFlowManager state: ${gameFlowManager.currentState} -> Title`);
+            gameFlowManager.currentState = 'Title';
+        }
+
         const soundManager = this.registry.get('soundManager');
         if (soundManager) {
             soundManager.playBgm('bgm_action');

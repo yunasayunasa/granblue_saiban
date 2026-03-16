@@ -40,9 +40,10 @@ export default class TrialScene extends BaseGameScene {
         uiLayer.add(this.evidenceSelectOverlay);
         this.registerToCamera(this.evidenceSelectOverlay, 'UI');
 
-        // テスト用: 初期所持品の追加 (デバッグ)
-        this.evidenceManager.addEvidence('candy_wrapper');
-        this.evidenceManager.addEvidence('gum');
+        // 本番用: 初期所持品の追加 (ストーリーの進行に合わせて追加するのが理想だが、ここではテスト用に揃える)
+        this.evidenceManager.addEvidence('blue_hair');
+        this.evidenceManager.addEvidence('blue_feather');
+        this.evidenceManager.addEvidence('chocolate_crumbs');
 
         this.initSceneWithData();
 
@@ -118,10 +119,23 @@ export default class TrialScene extends BaseGameScene {
         console.log(`[TrialScene] Object setup complete. Initializing trial logic.`);
 
         // 議論開始イベントの待機
-        // 議論開始イベントの待機
         this.events.on('START_DEBATE', this.startDebate, this);
         this.events.on('PAUSE_TRIAL', () => this.setPause(true));
         this.events.on('RESUME_TRIAL', () => this.setPause(false));
+
+        // ★ 裁判クリア時の処理
+        this.events.on('TRIAL_COMPLETE', () => {
+            console.log('[TrialScene] TRIAL_COMPLETE received. Transitioning to TitleScene.');
+            // タイマーを止める
+            if (this.timerEvent) {
+                this.timerEvent.destroy();
+                this.timerEvent = null;
+            }
+            // 少し待ってからタイトルへ (シナリオ表示完了を待つ)
+            this.time.delayedCall(500, () => {
+                this.scene.start('TitleScene');
+            });
+        });
 
         // ★ リセット要求の処理
         this.events.on('RESTART_DEBATE_REQUEST', () => {

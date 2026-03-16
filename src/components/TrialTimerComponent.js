@@ -24,8 +24,40 @@ export default class TrialTimerComponent {
             this.textObject.setFontFamily('"Times New Roman", "MS PMincho", serif');
         }
 
+        // ★ StateManager 依存の宣言
+        this.dependencies = ['trial_timer'];
+
         if (this.scene.updatableComponents) {
             this.scene.updatableComponents.add(this);
+        }
+
+        // ★ StateManager からの通知を購読
+        this.stateManager = this.scene.registry.get('stateManager');
+        if (this.stateManager) {
+            this.listener = (key, value) => {
+                if (key === 'trial_timer') {
+                    this.currentTime = value;
+                    this.updateDisplay();
+                }
+            };
+            this.stateManager.on('f-variable-changed', this.listener);
+
+            // 初期値の反映
+            const initial = this.stateManager.getF('trial_timer');
+            if (initial !== undefined) {
+                this.currentTime = initial;
+                this.updateDisplay();
+            }
+        }
+    }
+
+    /**
+     * StateManagerからの通知を受け取る
+     */
+    updateValue(state) {
+        if (state.trial_timer !== undefined) {
+            this.currentTime = state.trial_timer;
+            this.updateDisplay();
         }
     }
 
@@ -42,35 +74,19 @@ export default class TrialTimerComponent {
     }
 
     update(time, delta) {
-        if (!this.isActive || this.isPaused || this.scene.isPaused) return;
-
-        // 残り時間を減らす (timeScaleの影響を受ける)
-        this.currentTime -= (delta * this.scene.time.timeScale) / 1000;
-
-        if (this.currentTime <= 0) {
-            this.currentTime = 0;
-            this.isActive = false;
-            this.scene.events.emit('TRIAL_TIMEOUT');
-        }
-
-        this.updateDisplay();
+        // タイマーの更新は TrialScene.js 側で行うため、ここでは何もしない。
+        // StateManager からの通知 (updateValue) に基づいて表示のみ更新する。
     }
 
     updateDisplay() {
         if (!this.textObject) return;
 
-        const minutes = Math.floor(this.currentTime / 60);
-        const seconds = Math.floor(this.currentTime % 60);
+        const displayTime = Math.max(0, Math.floor(this.currentTime));
+        const minutes = Math.floor(displayTime / 60);
+        const seconds = Math.floor(displayTime % 60);
         const displayStr = `LIMIT ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
         this.textObject.setText(displayStr);
-
-        // 残り時間が少ない場合に赤くする演出
-        if (this.currentTime < 30) {
-            this.textObject.setColor('#ff0000');
-        } else {
-            this.textObject.setColor('#ffffff');
-        }
     }
 
     setTime(seconds) {

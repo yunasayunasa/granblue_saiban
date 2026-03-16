@@ -58,6 +58,7 @@ export default class NovelOverlayScene extends Phaser.Scene {
         // NovelOverlaySceneが管理するオブジェクトは、UISceneの最前面UIよりは奥、
         // ゲームシーンよりは手前に表示されるようにdepthを設定する
         const OVERLAY_BASE_DEPTH = 5000;
+        this.layer.background = this.add.container(0, 0).setDepth(OVERLAY_BASE_DEPTH + 0);
         this.layer.cg = this.add.container(0, 0).setDepth(OVERLAY_BASE_DEPTH + 5);
         this.layer.character = this.add.container(0, 0).setDepth(OVERLAY_BASE_DEPTH + 10);
 
@@ -68,6 +69,7 @@ export default class NovelOverlayScene extends Phaser.Scene {
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         this.scenarioManager = new ScenarioManager(this, messageWindow, this.stateManager, this.soundManager);
+        this.uiScene.setActiveNovelManager(this.scenarioManager); // ★ 追加: UISceneに自分のマネージャーを登録
 
         for (const tagName in tagHandlers) { this.scenarioManager.registerTag(tagName, tagHandlers[tagName]); }
         this.scenarioManager.registerTag('overlay_end', handleOverlayEnd);
@@ -200,6 +202,10 @@ export default class NovelOverlayScene extends Phaser.Scene {
 
         if (this.scenarioManager) {
             this.scenarioManager.stop();
+            // ★ 追加: 自分がアクティブなら登録解除
+            if (this.uiScene && this.uiScene.activeNovelManager === this.scenarioManager) {
+                this.uiScene.setActiveNovelManager(null);
+            }
             this.scenarioManager = null;
         }
 

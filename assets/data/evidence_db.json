@@ -1,9 +1,9 @@
 {
   "evidence_list": [
     {
-      "id": "candy_wrapper",
-      "name": "アメの包み紙",
-      "description": "現場に落ちていたアメの包み紙。イチゴ味のようだ。",
+      "id": "blue_hair",
+      "name": "蒼い髪の毛",
+      "description": "現場に落ちていた蒼く澄んだ髪の毛。ルリアのものに間違いない。",
       "icon": "taru",
       "image": "taru"
     },
@@ -20,6 +20,20 @@
       "description": "魔法少女の武器。何らかの強い力でへし折られている。",
       "icon": "item/sword.png",
       "image": "item/sword.png"
+    },
+    {
+      "id": "blue_feather",
+      "name": "青い羽",
+      "description": "現場に落ちていた青いきらびやかな羽。心当たりのある人物がいるはずだ。",
+      "icon": "taru",
+      "image": "taru"
+    },
+    {
+      "id": "chocolate_crumbs",
+      "name": "チョコのくず",
+      "description": "床に点々と落ちていたチョコのくず。どこかへ続いているようだ。",
+      "icon": "taru",
+      "image": "taru"
     }
   ]
 }

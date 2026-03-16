@@ -25,6 +25,7 @@ export default class ScenarioManager {
         this.ifStack = [];
         this.callStack = [];
         this.lastSpeaker = null; // ★ 追加: 直前の話者を記憶
+        this.suspendedMode = null; // ★ 追加: 選択肢などで一時中断されたモードを記憶
     }
 
     registerTag(tagName, handler) {
@@ -41,6 +42,14 @@ export default class ScenarioManager {
         this.isWaitingChoice = false;
         this.isStopped = false;
         this.isEnd = false;
+
+        // ★ 選択肢後にモードを復元する
+        if (this.suspendedMode) {
+            const modeToRestore = this.suspendedMode;
+            this.suspendedMode = null;
+            this.setMode(modeToRestore);
+        }
+
         // ループが既に動いている場合は、重複して実行しないようにする
         if (this.isLoopRunning) return;
 
@@ -65,6 +74,7 @@ export default class ScenarioManager {
         while (!this.isEnd && !this.isWaitingClick && !this.isWaitingChoice && !this.isStopped) {
 
             if (this.currentLine >= this.scenario.length) {
+                console.log(`[ScenarioManager] Reached end of scenario: ${this.currentFile}`);
                 this.isEnd = true;
                 this.messageWindow.setText('（シナリオ終了）', false);
                 break;
@@ -144,7 +154,7 @@ export default class ScenarioManager {
                 console.error(`[ScenarioManager] Undefined Tag Error: [${tagName}] at Line ${this.currentLine}: "${line}"`);
                 console.error('Available tags:', Array.from(this.tagHandlers.keys()));
             }
-        }
+        } // Missing closing brace added here
         else if (trimedLine.length > 0) {
             // --- セリフまたは地の文 または 話者指定(#) ---
             const expandedLine = this.embedVariables(trimedLine);
@@ -153,7 +163,8 @@ export default class ScenarioManager {
             if (expandedLine.startsWith('#')) {
                 const namePart = expandedLine.substring(1).trim();
                 this.lastSpeaker = namePart || null;
-                // console.log(`[ScenarioManager] Speaker changed to: ${this.lastSpeaker}`);
+                // ★ 話者が変わった瞬間にハイライトを更新する
+                this.highlightSpeaker(this.lastSpeaker);
                 return;
             }
 
@@ -179,18 +190,12 @@ export default class ScenarioManager {
             await this.messageWindow.setText(wrappedLine, useTyping, speakerName);
         }
     }
-    // (constructor, next, parseなどの他の部分は、あなたの正常に動作しているコードのままでOKです)
-    // ★★★ loadScenarioメソッドだけを、以下のコードで完全に置き換えてください ★★★
-
-
-    // (constructor, next, parseなどの他の部分は、あなたの正常に動作しているコードのままでOKです)
-    // ★★★ loadScenarioメソッドだけを、以下のコードで完全に置き換えてください ★★★
 
     /**
-    * 指定されたシナリオをロードし、解析して実行準備を整える (最終版)
-    * @param {string} scenarioKey - 'scene2.ks' のようなファイル名
-    * @param {string|null} targetLabel - ジャンプ先のラベル (例: '*start')
-    */
+     * 指定されたシナリオをロードし、解析して実行準備を整える (最終版)
+     * @param {string} scenarioKey - 'scene2.ks' のようなファイル名
+     * @param {string|null} targetLabel - ジャンプ先のラベル (例: '*start')
+     */
     async loadScenario(scenarioKey, targetLabel = null) {
         // console.log(`%c[loadScenario] START: ${scenarioKey}`, "color: yellow; font-weight: bold;");
         let rawText;
@@ -380,11 +385,11 @@ export default class ScenarioManager {
         // TrialSegmentManagerが保持しているcharaImagesをチェック
         const trialManager = this.scene.children.getByName ? this.scene.children.getByName('trial_manager') : null;
         const managerComp = trialManager?.components?.TrialSegmentManager;
-        
+
         if (managerComp && managerComp.charaImages) {
             for (const [id, chara] of Object.entries(managerComp.charaImages)) {
                 if (!chara || !chara.active) continue;
-                
+
                 const def = this.characterDefs[id];
                 const jname = def ? def.jname : id;
 
@@ -430,6 +435,11 @@ export default class ScenarioManager {
         if (this.autoTimer) this.autoTimer.remove();
 
         if (this.mode === 'skip') {
+            // ★ もしクリック待ち状態なら、即座に次の行へ進める（レスポンス改善）
+            if (this.isWaitingClick) {
+                this.onClick();
+                return; // skipLoopはonClickの中から間接的に呼ばれる
+            }
             // ★★★ スキップループを開始 ★★★
             this.skipLoop();
         } else if (this.mode === 'auto') {
@@ -439,10 +449,17 @@ export default class ScenarioManager {
 
     // ★★★ スキップ専用のループメソッドを新設 ★★★
     skipLoop() {
-        // スキップモードでない、または待機状態ならループを止める
-        if (this.mode !== 'skip' || this.isWaitingChoice || this.isEnd) {
+        // 選択肢待ちなら、モードを一時中断して止める（選択肢後に自動再開させるため）
+        if (this.isWaitingChoice) {
+            this.suspendedMode = 'skip';
+            this.mode = 'normal';
+            return;
+        }
+
+        // スキップモードでない、または終了状態ならループを止める
+        if (this.mode !== 'skip' || this.isEnd) {
             // console.log("スキップを停止します。");
-            this.setMode('normal'); // 通常モードに戻す
+            this.mode = 'normal'; // 通常モードに戻す
             return;
         }
 
