@@ -157,10 +157,30 @@
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch2_success_siete.ks",
                                                 "next_trial_data": "scenes/trial_ch3.json"
+                                            },
+                                            {
+                                                "text": "特訓の内容を詳しく言え！",
+                                                "correct": false,
+                                                "failure_scenario": "chapter1/ch2_fail_siete_b.ks"
+                                            },
+                                            {
+                                                "text": "修練場はどこにあるんだ？",
+                                                "correct": false,
+                                                "failure_scenario": "chapter1/ch2_fail_siete_b.ks"
                                             }
                                         ]
                                     }
                                 ]
+                            },
+                            {
+                                "text": "夕方まで？　何時だ？",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_siete_a.ks"
+                            },
+                            {
+                                "text": "チョコは好きじゃないのか？",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_siete_c.ks"
                             }
                         ]
                     }
@@ -191,6 +211,16 @@
                                 "correct": true,
                                 "success_scenario": "chapter1/ch2_success_siete.ks",
                                 "next_trial_data": "scenes/trial_ch3.json"
+                            },
+                            {
+                                "text": "キッチンの場所を知らないはずがない！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_siete_b.ks"
+                            },
+                            {
+                                "text": "甘いものが嫌いなんじゃないか？",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_siete_c.ks"
                             }
                         ]
                     }

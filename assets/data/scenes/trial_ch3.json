@@ -224,6 +224,16 @@
                                                 "pre_present_scenario": "chapter1/ch3_pre_vyrn1.ks",
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch3_success_vyrn.ks"
+                                            },
+                                            {
+                                                "text": "林檎を食べた証拠を出せ！",
+                                                "correct": false,
+                                                "failure_scenario": "chapter1/ch3_fail_vyrn_a.ks"
+                                            },
+                                            {
+                                                "text": "グランがやったんじゃないか？",
+                                                "correct": false,
+                                                "failure_scenario": "chapter1/ch3_fail_vyrn_c.ks"
                                             }
                                         ]
                                     }
@@ -235,6 +245,16 @@
                                 "pre_present_scenario": "chapter1/ch3_pre_vyrn2.ks",
                                 "correct": true,
                                 "success_scenario": "chapter1/ch3_success_vyrn.ks"
+                            },
+                            {
+                                "text": "そんな言い訳は通らない！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_vyrn_b.ks"
+                            },
+                            {
+                                "text": "林檎に罪をなすりつけるな！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_vyrn_a.ks"
                             }
                         ]
                     }
