@@ -240,13 +240,6 @@
                                 ]
                             },
                             {
-                                "text": "その証拠これだ！",
-                                "evidence_required": "chocolate_crumbs",
-                                "pre_present_scenario": "chapter1/ch3_pre_vyrn2.ks",
-                                "correct": true,
-                                "success_scenario": "chapter1/ch3_success_vyrn.ks"
-                            },
-                            {
                                 "text": "そんな言い訳は通らない！",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch3_fail_vyrn_b.ks"

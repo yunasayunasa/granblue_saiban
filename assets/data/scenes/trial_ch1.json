@@ -187,14 +187,6 @@
                         "text": "近づいていません",
                         "choices": [
                             {
-                                "text": "その証拠これだ！",
-                                "evidence_required": "blue_hair",
-                                "pre_present_scenario": "chapter1/ch1_pre_present.ks",
-                                "correct": true,
-                                "success_scenario": "chapter1/ch1_success_ruria.ks",
-                                "next_trial_data": "scenes/trial_ch2.json"
-                            },
-                            {
                                 "text": "その証言はおかしい！",
                                 "action": "update_testimony",
                                 "pre_update_scenario": "chapter1/ch1_doubt_ruria.ks",
