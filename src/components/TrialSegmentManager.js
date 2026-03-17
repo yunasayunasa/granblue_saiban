@@ -324,18 +324,7 @@ export default class TrialSegmentManager {
         }
 
         const targetRotation = targetAngle * (Math.PI / 180);
-
-        // 既存のカメラ回転tweenを停止してから新しいtweenを開始
-        if (this._camRotateTween) {
-            this._camRotateTween.stop();
-        }
-        this._camRotateTween = this.scene.tweens.add({
-            targets: cam,
-            rotation: targetRotation,
-            duration: 300,
-            ease: 'Sine.easeOut',
-            onComplete: () => { this._camRotateTween = null; }
-        });
+        cam.setRotation(targetRotation);
     }
 
     createTestimonyObject(data) {
