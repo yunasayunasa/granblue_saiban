@@ -83,33 +83,16 @@ export default class TrialScene extends BaseGameScene {
         container.setSize(160, 70);
         container.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
-                // 議論中(isFlowing)でも見れるようにするが、ポーズはしておいたほうが無難
-                if (this.evidenceSelectOverlay) {
-                    if (this.evidenceSelectOverlay.visible) {
-                        this.evidenceSelectOverlay.hide();
-                        this.setPause(false);
-                    } else {
-                        this.setPause(true);
-                        this.evidenceSelectOverlay.show('view', () => {
-                            // viewモードなのでコールバックは基本使わないが、閉じた時の処理用
-                        });
-                        // Overlay側で閉じるボタンが押されたらここに戻る仕組みが必要だが、
-                        // 現状のOverlayはhide()するだけ。
-                        // Overlayのhideでポーズ解除が必要。
-                        // 簡易的に、Overlayのhideをフックするか、OverlayにonCloseを持たせる。
-                        // EvidenceSelectOverlayを少し修正して、onCloseコールバックを受け取れるようにするのが良いが、
-                        // ここでは一旦、OverlayのcloseBtnクリック時にシーンのresumeを呼ぶように改造するか、
-                        // またはEvidenceSelectOverlayからイベントを発火させる。
-                    }
+                if (!this.evidenceSelectOverlay) return;
+                if (this.evidenceSelectOverlay.visible) {
+                    // 表示中なら閉じる (hide内でsetPause(false)が呼ばれる)
+                    this.evidenceSelectOverlay.hide();
+                } else {
+                    // 開く前にポーズ
+                    this.setPause(true);
+                    this.evidenceSelectOverlay.show('view');
                 }
             });
-
-        // Overlayが閉じられたときにポーズ解除するイベントをリッスン
-        if (this.evidenceSelectOverlay) {
-            this.evidenceSelectOverlay.on('CLOSE_OVERLAY', () => {
-                this.setPause(false);
-            });
-        }
     }
 
     /**
@@ -124,17 +107,26 @@ export default class TrialScene extends BaseGameScene {
         this.events.on('RESUME_TRIAL', () => this.setPause(false));
 
         // ★ 裁判クリア時の処理
-        this.events.on('TRIAL_COMPLETE', () => {
-            console.log('[TrialScene] TRIAL_COMPLETE received. Transitioning to TitleScene.');
+        this.events.on('TRIAL_COMPLETE', async () => {
+            console.log('[TrialScene] TRIAL_COMPLETE received. Playing ending scenario.');
             // タイマーを止める
             if (this.timerEvent) {
                 this.timerEvent.destroy();
                 this.timerEvent = null;
             }
-            // 少し待ってからタイトルへ (シナリオ表示完了を待つ)
-            this.time.delayedCall(500, () => {
+            // エンディングシナリオを再生
+            const engineAPI = this.registry.get('engineAPI');
+            if (engineAPI) {
+                try {
+                    await engineAPI.runScenarioAsOverlay(this.scene.key, 'chapter1/ending.ks', true);
+                } catch (e) {
+                    console.warn('[TrialScene] Ending scenario error:', e);
+                }
+                // GameFlowManager経由でタイトルへ戻る
+                engineAPI.fireGameFlowEvent('RETURN_TO_TITLE');
+            } else {
                 this.scene.start('TitleScene');
-            });
+            }
         });
 
         // ★ リセット要求の処理
@@ -186,18 +178,14 @@ export default class TrialScene extends BaseGameScene {
 
     handleTimeUp() {
         console.log('[TrialScene] Time Up!');
-        this.events.emit('TIME_UP');
-
-        // GameFlowManagerを通じてゲームオーバーへ
-        const engineAPI = this.registry.get('engineAPI');
-        if (engineAPI) {
-            engineAPI.fireGameFlowEvent('GAME_OVER');
-        } else {
-            const systemScene = this.scene.get('SystemScene');
-            if (systemScene && systemScene.gameFlowManager) {
-                systemScene.gameFlowManager.handleEvent('GAME_OVER');
-            }
+        // タイマーを即停止
+        if (this.timerEvent) {
+            this.timerEvent.destroy();
+            this.timerEvent = null;
         }
+        // TrialSegmentManagerにタイムアウト処理を委譲
+        // Manager側でシナリオ再生→GAME_OVERイベント発行まで行う
+        this.events.emit('TRIAL_TIMEOUT');
     }
 
     setPause(pause) {
@@ -229,5 +217,28 @@ export default class TrialScene extends BaseGameScene {
     update(time, delta) {
         if (this.isPaused) return;
         super.update(time, delta);
+    }
+
+    shutdown() {
+        // タイマー停止
+        if (this.timerEvent) {
+            this.timerEvent.destroy();
+            this.timerEvent = null;
+        }
+        // イベントリスナー解除
+        this.events.off('START_DEBATE', this.startDebate, this);
+        this.events.off('PAUSE_TRIAL');
+        this.events.off('RESUME_TRIAL');
+        this.events.off('TRIAL_COMPLETE');
+        this.events.off('RESTART_DEBATE_REQUEST');
+        this.events.off('TRIAL_TIMEOUT');
+
+        // EvidenceSelectOverlay破棄
+        if (this.evidenceSelectOverlay) {
+            this.evidenceSelectOverlay.destroy();
+            this.evidenceSelectOverlay = null;
+        }
+
+        super.shutdown && super.shutdown();
     }
 }

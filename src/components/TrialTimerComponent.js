@@ -24,26 +24,17 @@ export default class TrialTimerComponent {
             this.textObject.setFontFamily('"Times New Roman", "MS PMincho", serif');
         }
 
-        // ★ StateManager 依存の宣言
+        // ★ StateManager 依存の宣言 (UIScene経由でupdateValueが呼ばれる)
         this.dependencies = ['trial_timer'];
 
         if (this.scene.updatableComponents) {
             this.scene.updatableComponents.add(this);
         }
 
-        // ★ StateManager からの通知を購読
-        this.stateManager = this.scene.registry.get('stateManager');
-        if (this.stateManager) {
-            this.listener = (key, value) => {
-                if (key === 'trial_timer') {
-                    this.currentTime = value;
-                    this.updateDisplay();
-                }
-            };
-            this.stateManager.on('f-variable-changed', this.listener);
-
-            // 初期値の反映
-            const initial = this.stateManager.getF('trial_timer');
+        // 初期値の反映 (直接読み取りのみ、購読はしない)
+        const stateManager = this.scene.registry.get('stateManager');
+        if (stateManager) {
+            const initial = stateManager.getF('trial_timer');
             if (initial !== undefined) {
                 this.currentTime = initial;
                 this.updateDisplay();
@@ -99,5 +90,6 @@ export default class TrialTimerComponent {
         if (this.scene.updatableComponents) {
             this.scene.updatableComponents.delete(this);
         }
+        this.textObject = null;
     }
 }

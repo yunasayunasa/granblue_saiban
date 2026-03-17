@@ -52,7 +52,10 @@
     "ronpa_cutin": "assets/images/ronpa_cutin.png",
     "matta_cutin": "assets/images/matta_cutin.png",
     "igiari_cutin": "assets/images/igiari_cutin.png",
-    "fast_forward": "assets/images/fast_forward.png"
+    "fast_forward": "assets/images/fast_forward.png",
+    "evidence_badge": "assets/images/evidence/evidence_badge.png",
+    "candy_wrapper": "assets/images/evidence/candy_wrapper.png",
+    "gum": "assets/images/evidence/gum.png"
   },
   "spritesheets": {
     "walk": {
