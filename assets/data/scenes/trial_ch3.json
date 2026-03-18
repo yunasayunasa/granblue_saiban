@@ -188,7 +188,28 @@
                 "position": "left",
                 "style": "typewriter",
                 "text": "おいらはずっとお前といっしょにいたろ？{se:laugh}",
-                "highlights": []
+                "highlights": [
+                    {
+                        "text": "ずっといっしょ",
+                        "choices": [
+                            {
+                                "text": "それは嘘だ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_t4_lie.ks"
+                            },
+                            {
+                                "text": "一人になった瞬間があったはずだ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_t4_alone.ks"
+                            },
+                            {
+                                "text": "本当にずっと一緒だったのか？",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_t4_really.ks"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "t5",
@@ -196,7 +217,29 @@
                 "position": "right",
                 "style": "typewriter",
                 "text": "ルリアもシエテも怪しいけど、オイラは潔白だぜ！",
-                "highlights": []
+                "highlights": [
+                    {
+                        "text": "潔白",
+                        "choices": [
+                            {
+                                "text": "その証拠これだ！",
+                                "evidence_required": "blue_hair",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_t5_evidence.ks"
+                            },
+                            {
+                                "text": "本当に潔白と言い切れるか！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_t5_innocent.ks"
+                            },
+                            {
+                                "text": "怪しいのはお前だ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_t5_suspect.ks"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "t6",
@@ -224,6 +267,16 @@
                                                 "pre_present_scenario": "chapter1/ch3_pre_vyrn1.ks",
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch3_success_vyrn.ks"
+                                            },
+                                            {
+                                                "text": "林檎を食べたのはいつだ？",
+                                                "correct": false,
+                                                "failure_scenario": "chapter1/ch3_fail_t6b_apple.ks"
+                                            },
+                                            {
+                                                "text": "一口も食べていないはずがない！",
+                                                "correct": false,
+                                                "failure_scenario": "chapter1/ch3_fail_t6b_onemore.ks"
                                             }
                                         ]
                                     }
@@ -235,6 +288,16 @@
                                 "pre_present_scenario": "chapter1/ch3_pre_vyrn2.ks",
                                 "correct": true,
                                 "success_scenario": "chapter1/ch3_success_vyrn.ks"
+                            },
+                            {
+                                "text": "口の周りを見てみろ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_t6_mouth.ks"
+                            },
+                            {
+                                "text": "フェニーが証拠を持っているはずだ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch3_fail_t6_fenny.ks"
                             }
                         ]
                     }

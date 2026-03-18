@@ -157,10 +157,30 @@
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch2_success_siete.ks",
                                                 "next_trial_data": "scenes/trial_ch3.json"
+                                            },
+                                            {
+                                                "text": "ウーノは別の任務中のはずだ！",
+                                                "correct": false,
+                                                "failure_scenario": "chapter1/ch2_fail_t1b_uno.ks"
+                                            },
+                                            {
+                                                "text": "ソーンは遠征に出ていた！",
+                                                "correct": false,
+                                                "failure_scenario": "chapter1/ch2_fail_t1b_thorn.ks"
                                             }
                                         ]
                                     }
                                 ]
+                            },
+                            {
+                                "text": "修練場の場所はどこだ？",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_t1_place.ks"
+                            },
+                            {
+                                "text": "特訓の内容を話せ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_t1_content.ks"
                             }
                         ]
                     }
@@ -172,7 +192,28 @@
                 "position": "right",
                 "style": "typewriter",
                 "text": "夕方まで汗を流していたよ。爽やかだろ？{cam:shake}",
-                "highlights": []
+                "highlights": [
+                    {
+                        "text": "夕方まで",
+                        "choices": [
+                            {
+                                "text": "夕方より前に戻っていたはずだ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_t2_time.ks"
+                            },
+                            {
+                                "text": "一人になった時間があったはずだ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_t2_alone.ks"
+                            },
+                            {
+                                "text": "目撃者はいるのか？",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_t2_witness.ks"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "t3",
@@ -191,6 +232,16 @@
                                 "correct": true,
                                 "success_scenario": "chapter1/ch2_success_siete.ks",
                                 "next_trial_data": "scenes/trial_ch3.json"
+                            },
+                            {
+                                "text": "キッチンを知らないはずがない！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_t3_kitchen.ks"
+                            },
+                            {
+                                "text": "怪しいのはお前の方だ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_t3_suspect.ks"
                             }
                         ]
                     }

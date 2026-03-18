@@ -1,16 +1,16 @@
 # 作業引き継ぎ書 (Work Handover)
 
 ## 現在のステータス
-**日付:** 2026-02-07
-**担当:** Antigravity (AI Assistant)
-**状態:** 裁判パート（TrialScene）の機能拡張 着手中
+**日付:** 2026-03-18
+**担当:** Claude (claude-sonnet-4-6)
+**状態:** チャプター2・3の選択肢拡張 & エンディング処理 実装完了
 
 ## 目的
 ダンガンロンパ風の裁判パートにおいて、**「証拠品提示システム」**の実装と、**「カットイン演出」**などの視覚的強化を行い、ゲームプレイの完成度を高めること。
 ユーザーフィードバックに基づき、HP制の廃止とアセットの指定を行いました。
 
 ## 実装・変更内容
-### 新機能
+### 新機能（2026-02-07以前）
 1.  **証拠品システム (Evidence System)**
     *   いつでも閲覧可能な証拠品ファイルを実装。
     *   データソース: `assets/data/evidence_db.json` (ID管理)。
@@ -21,23 +21,35 @@
     *   **カットイン演出 (論破)**: 画像 `yuna_normal` を使用したカットイン。
     *   **中間シナリオ**: リライト前に短い会話を挟む機能。
 
+### 新機能（2026-03-18）
+3.  **チャプター2・3の外れ選択肢拡張**
+    *   各ハイライトに外れ選択肢を2〜3つ追加（Ch2: 9種、Ch3: 10種）。
+    *   t2（夕方まで）、t4（ずっといっしょ）、t5（潔白）に新規ハイライトを追加。
+    *   各外れ選択肢ごとに専用シナリオファイルを作成（計19本）。
+4.  **エンディング処理**
+    *   チャプター3クリア後（`TRIAL_COMPLETE`）にTrialSceneをシャットダウン。
+    *   GameSceneに `{ scenario: 'chapter1/ending.ks' }` を渡して遷移 → ノベルエンジンでエンディングを再生。
+
 ### 技術的な変更点
 *   `TrialSegmentManager.js`: 証拠品判定ロジック、中間シナリオ再生機能の追加。
-*   `trial_demo.json`: データ構造の拡張（`evidence_required`, `pre_update_scenario`）。
-*   新規コンポーネント: `EvidenceManager.js`, `EvidenceSelectOverlay.js`, `CutInEffect.js` 等。
+*   `trial_ch2.json`: 外れハイライト・選択肢・failure_scenario を追加。
+*   `trial_ch3.json`: 外れハイライト・選択肢・failure_scenario を追加。
+*   `TrialScene.js`: TRIAL_COMPLETE ハンドラを `this.scene.start('GameScene', ...)` に変更。
+*   新規シナリオ: `assets/scenarios/chapter1/ch2_fail_t1_place.ks` ほか計19本。
 
 ## 残タスク
 - [x] 証拠品システム (UI, データ管理)
 - [x] 議論開始・ループ演出 (仮素材)
 - [x] カットイン演出 (仮素材)
 - [x] `TrialSegmentManager` 改修 (証拠品対応, 中間シナリオ対応)
-- [x] `trial_demo.json` の更新 (証拠品データ追加)
+- [x] `trial_ch2.json` / `trial_ch3.json` の外れ選択肢・ハイライト拡張
+- [x] 各外れ選択肢への専用シナリオ追加
+- [x] エンディング遷移（TrialScene → GameScene）
 - [ ] エフェクト・UIのブラッシュアップ
 - [ ] 本番用画像素材への差し替えと動作確認
 
-## ワークフロー
-1.  **データ作成**: `evidence_db.json` を定義する。
-2.  **UI実装**: `EvidenceSelectOverlay` を作成し、単体で表示確認する。
-3.  **データ統合**: `trial_demo.json` にデータを追加し、マネージャーから読み込めるようにする。
-4.  **ロジック実装**: 議論中の「つきつける」フローを実装する。
-5.  **演出追加**: 指定された仮画像を使用して演出を実装する。
+## 注意事項
+- HP制は廃止済み（再実装しないこと）
+- 仮素材として `cg_01`（議論演出）、`yuna_normal`（論破カットイン）を使用中
+- t5「潔白」の選択肢「その証拠これだ！」は `evidence_required: "blue_hair"` で意図的に外れ扱い
+- エンディングシナリオ: `assets/scenarios/chapter1/ending.ks`

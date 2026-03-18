@@ -125,16 +125,14 @@ export default class TrialScene extends BaseGameScene {
 
         // ★ 裁判クリア時の処理
         this.events.on('TRIAL_COMPLETE', () => {
-            console.log('[TrialScene] TRIAL_COMPLETE received. Transitioning to TitleScene.');
+            console.log('[TrialScene] TRIAL_COMPLETE received. Shutting down TrialScene and starting ending in GameScene.');
             // タイマーを止める
             if (this.timerEvent) {
                 this.timerEvent.destroy();
                 this.timerEvent = null;
             }
-            // 少し待ってからタイトルへ (シナリオ表示完了を待つ)
-            this.time.delayedCall(500, () => {
-                this.scene.start('TitleScene');
-            });
+            // TrialScene をシャットダウンし、GameScene でエンディングシナリオを再生
+            this.scene.start('GameScene', { scenario: 'chapter1/ending.ks' });
         });
 
         // ★ リセット要求の処理
