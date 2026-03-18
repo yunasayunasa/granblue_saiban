@@ -59,6 +59,7 @@ import handleDelay from './scenario/delay.js';
 
 // --- UI・インタラクション系 ---
 import handleCm from './scenario/cm.js';
+import handleClearScreen from './scenario/clearscreen.js';
 import handleEr from './scenario/er.js';
 import handleLink from './scenario/link.js';
 import handleR from './scenario/r.js';
@@ -127,6 +128,7 @@ export const tagHandlers = {
 
   // UI・インタラクション系
   'cm': handleCm,
+  'clearscreen': handleClearScreen,
   'er': handleEr,
   'link': handleLink,
   'r': handleR,
