@@ -222,6 +222,7 @@
     ～シエテEND～
     [l]
     [chara_hide name="siete" time="500" wait="true"]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -260,6 +261,7 @@
     ～ソイヤッ！END～
     [l]
     [chara_hide name="siete" time="500" wait="true"]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -398,6 +400,7 @@
     ～ウィルナスEND～
     [l]
     [chara_hide name="wilnas" time="500" wait="true"]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -436,6 +439,7 @@
     ～ルオーEND～
     [l]
     [chara_hide name="luoh" time="500" wait="true"]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -482,6 +486,7 @@
     ～ワムデュスEND～
     [l]
     [chara_hide name="wamdus" time="500" wait="true"]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -523,6 +528,7 @@
     ～ガレヲンEND～
     [l]
     [chara_hide name="galleon" time="500" wait="true"]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 ```

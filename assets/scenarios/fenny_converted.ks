@@ -103,6 +103,7 @@
     [p]
     ～バッドエンド～
     [l]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -246,6 +247,7 @@
     ～ハウヘトEND～
     [p]
    [er]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 

@@ -85,6 +85,7 @@
     BAD END 
     [l]
     [er]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -120,6 +121,7 @@
     BAD END 
     [l]
     [er]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -145,6 +147,7 @@
     [chara_hide name="roger" time="300" wait="true"]
     BAD END
     [l]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -186,6 +189,7 @@
     [p]
     BAD END 
     [l]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -230,6 +234,7 @@
     [s]
 
 *start_return_title
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -570,5 +575,6 @@
 
     ゲームブック[br]【演算世界とチヨコレイト】[br]〜完〜
     [p]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]

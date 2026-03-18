@@ -12,4 +12,5 @@
 [p]
 次に待つのは、どんな事件だろうか……？
 [p]
+[clearscreen time="1500"]
 [fire_game_flow_event event="RETURN_TO_TITLE"]

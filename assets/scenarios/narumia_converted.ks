@@ -67,6 +67,7 @@
     ～ナルメアEND～
     [l]
     [chara_hide name="narumia" time="500" wait="true"]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -162,6 +163,7 @@
     ～サンダルフォンEND～
     [l]
     [chara_hide name="sandalphon" time="500" wait="true"]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
 
@@ -322,5 +324,6 @@
     ???「...どうしよう。うち、完っ全に出遅れてる...！」
     [p]
     [er]
+    [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]
