@@ -579,8 +579,8 @@ export default class TrialSegmentManager {
         }
 
         // --- 証拠品提示が必要な場合 (evidence_required) ---
-        // 正解選択肢でかつ証拠品が必要な場合
-        if (choice.evidence_required) {
+        // correct:false のハズレ選択肢は証拠品画面を開かず、通常の不正解フローへ流す
+        if (choice.evidence_required && choice.correct !== false) {
             console.log('[TrialManager] Evidence required:', choice.evidence_required);
             this._showEvidenceOverlay(choice);
             return;

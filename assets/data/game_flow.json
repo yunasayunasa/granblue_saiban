@@ -38,6 +38,10 @@
         {
           "event": "RUN_NOVEL_OVERLAY",
           "to": "NovelOverlay"
+        },
+        {
+          "event": "RETURN_TO_TITLE",
+          "to": "Title"
         }
       ]
     },

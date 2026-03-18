@@ -54,6 +54,7 @@ export default class TrialTimerComponent {
 
     start() {
         this.isActive = true;
+        this._elapsed = 0;
     }
 
     pause() {
@@ -64,9 +65,29 @@ export default class TrialTimerComponent {
         this.isPaused = false;
     }
 
+    onPause() {
+        this.isPaused = true;
+    }
+
+    onResume() {
+        this.isPaused = false;
+    }
+
     update(time, delta) {
-        // タイマーの更新は TrialScene.js 側で行うため、ここでは何もしない。
-        // StateManager からの通知 (updateValue) に基づいて表示のみ更新する。
+        if (!this.isActive || this.isPaused) return;
+
+        this._elapsed = (this._elapsed || 0) + delta;
+        if (this._elapsed >= 1000) {
+            this._elapsed -= 1000;
+            this.currentTime = Math.max(0, this.currentTime - 1);
+            this.updateDisplay();
+
+            // StateManagerにも同期して TrialScene 側のタイムアウト判定に使わせる
+            const stateManager = this.scene.registry.get('stateManager');
+            if (stateManager) {
+                stateManager.setF('trial_timer', this.currentTime);
+            }
+        }
     }
 
     updateDisplay() {

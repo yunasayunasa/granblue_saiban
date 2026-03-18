@@ -12,4 +12,4 @@
 [p]
 次に待つのは、どんな事件だろうか……？
 [p]
-[overlay_end]
+[fire_game_flow_event event="RETURN_TO_TITLE"]
