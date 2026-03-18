@@ -56,7 +56,7 @@
             "type": "image",
             "x": 640,
             "y": 450,
-            "texture": "gran_normal",
+            "texture": "vyrn_normal",
             "visible": false,
             "layer": "Gameplay"
         },
