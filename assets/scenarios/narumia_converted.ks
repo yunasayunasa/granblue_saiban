@@ -17,16 +17,13 @@
     #
     君はナルメアと共にグランサイファー船内にある[br]カフェへと辿り着いた。
     [p]
-
-    [chara_show name="sandalphon" storage="sandalphon_normal" pos="center" time="500" wait="true"]
+ [chara_show name="narumia" storage="narumia_normal" pos="left" time="500" wait="false"]
+    [chara_show name="sandalphon" storage="sandalphon_normal" pos="right" time="500" wait="true"]
 
     #サンダルフォン
     注文は？
     [p]
 
-    [chara_hide name="sandalphon" time="200" wait="true"]
-
-    [chara_show name="narumia" storage="narumia_normal" pos="center"]
     #ナルメア
     団長ちゃん！[br]この【熱々！ホットチョコレート】なんて[br]いいんじゃないかな？
     [p]
@@ -43,6 +40,8 @@
 
 *order_hot_chocolate
     [playbgm storage="night_bgm" loop="true"]
+    [chara_hide name="sandalphon"]
+    [chara_show name="narumia" storage="narumia_normal" pos="center" time="500" wait="true"]
     君はホットチョコレートを注文した。
     [p]
 
@@ -60,6 +59,10 @@
 
     #
     君は無事チョコを貰うことができた。
+    [p]
+    団欒していると、仲間達が次々と集まり、[br]チョコを渡してくれた。
+    [p]
+    君は、演算せずとも既にチョコがもらえる世界にいたのだ。
     [p]
     ～ナルメアEND～
     [l]
@@ -133,7 +136,7 @@
     [playbgm storage="night_bgm" loop="true"]
     君は美味しいと答えた。
     [p]
-
+[chara_hide name="narumia"]
     [chara_show name="sandalphon" storage="sandalphon_normal" pos="center" time="300" wait="true"]
     #サンダルフォン
     口にあったのならよかった。
@@ -168,27 +171,29 @@
     #
     「「「団長さん、ここにいたんだ。[br]探したんだよ？」」」
     [p]
-
+  [chara_show name="diantha" storage="diantha_normal" pos="left"]
+[chara_show name="asuria" storage="asuria_normal" pos="right"]
+[chara_show name="nier" storage="nier_normal" pos="center"]
     君の前に3人の見目麗しい女性が現れた。[br]君を探していたようだ。
     [p]
 
     何やら殺気立っている様子だ。
-    [l]
+    [p]
 
     ; ディアンサのセリフ
-    [chara_show name="diantha" storage="diantha_normal" pos="left"]
+  
     #ディアンサ
     団長さん！はい！チョコレート！[br]受け取って！
     [p]
 
     ; アンスリアのセリフ
-    [chara_show name="asuria" storage="asuria_normal" pos="right"]
+    
     #アンスリア
     チョコ、作ってきたの、団長さんの為に。[br]受け取って欲しいな...？
     [p]
 
     ; ニーアのセリフ
-    [chara_show name="nier" storage="nier_normal" pos="center"]
+    
     #ニーア
     団長さん...？[br]受け取ってくれるよね...？[br]愛して...くれるよね...？
     [p]
@@ -211,6 +216,8 @@
     [stopbgm]
 
     [chara_show name="nier" storage="nier_yandere" pos="center" time="300" wait="true"]
+    [chara_hide name="diantha"]
+     [chara_hide name="asuria"]
     #ニーア
     どうして...？どうして受け取ってくれないの...？[br]愛してくれないの...？私のことを捨てるの...？[br]あの人達みたいに...
     [p]
@@ -230,6 +237,9 @@
     [p]
 
     デス、お願い。
+    [fadein color=FF0000 time=100]
+    [vibrate time=500]
+
     [l]
     [p]
 
@@ -238,11 +248,12 @@
     [p]
 
     ; ニーア再登場 (暗い背景に)
+    [fadein]
     #ニーア
     [chara_show name="nier" storage="nier_yandere" pos="center" time="300" wait="true"]
     ずっと、ずっと一緒だよ...。
     [p]
-
+[chara_hide name="nier"]
     [chara_show name="roger" storage="roger_normal" pos="center" time="500" wait="true"]
     #ロジャー
     うわあああああ！まずい！
@@ -255,6 +266,8 @@
     BAD END
     [l]
     [p]
+    [er]
+    #
     [jump target="*three_girls_appear_common"]
 
 *receive_nier_good_end
@@ -270,6 +283,7 @@
 
     ; ディアンサのセリフ
     [chara_show name="diantha" storage="diantha_normal" pos="center" time="300" wait="true"]
+    [chara_jump name="diantha"]
     #ディアンサ
     あー！ずるい！ニーアさんだけじゃなくて、[br]私のも受け取ってよ！
     [p]
@@ -277,6 +291,7 @@
 
     ; アンスリアのセリフ
     [chara_show name="asuria" storage="asuria_normal" pos="center" time="300" wait="true"]
+    [shake name="asuria"]
     #アンスリア
     わ、私のも受け取って！[br]それで、中に手紙が入ってるの...！[br]そこで待ってるから！2人っきりで...
     [p]
@@ -293,6 +308,7 @@
     [chara_show name="sandalphon" storage="sandalphon_normal" pos="center" time="300" wait="true"]
     #サンダルフォン
     お前達、静かにしろ！
+    [vibrate]
     [p]
     [chara_hide name="sandalphon" time="200" wait="true"]
 
@@ -304,6 +320,7 @@
     [p]
 
     ???「...どうしよう。うち、完っ全に出遅れてる...！」
-    [l]
+    [p]
+    [er]
     [jump storage="TitleScene"]
     [s]

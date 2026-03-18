@@ -98,6 +98,10 @@
         {
           "event": "TRIAL_CLEAR",
           "to": "InGame"
+        },
+        {
+          "event": "RETURN_TO_TITLE",
+          "to": "Title"
         }
       ]
     },

@@ -114,19 +114,18 @@ export default class TrialSegmentManager {
                 this.progressIndicator = indicatorObj.components.ProgressIndicatorComponent;
             }
 
-            // 早送りボタンの初期化
-            const ffButton = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('fast_forward_button') : this.scene.children.getByName('fast_forward_button');
-            if (ffButton) {
-                // 画像(ff_bg)が0,0に配置されているため、Circleも0,0でOK
-                ffButton.setInteractive(new Phaser.Geom.Circle(0, 0, 40), Phaser.Geom.Circle.Contains);
-                ffButton.input.useHandCursor = true;
-                ffButton.isDown = false;
-                ffButton.on('pointerdown', () => {
-                    ffButton.isDown = true;
+            // 早送りボタンの初期化 (参照をキャッシュして毎フレーム検索を回避)
+            this.ffButton = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('fast_forward_button') : this.scene.children.getByName('fast_forward_button');
+            if (this.ffButton) {
+                this.ffButton.setInteractive(new Phaser.Geom.Circle(0, 0, 40), Phaser.Geom.Circle.Contains);
+                this.ffButton.input.useHandCursor = true;
+                this.ffButton.isDown = false;
+                this.ffButton.on('pointerdown', () => {
+                    this.ffButton.isDown = true;
                     console.log('[TrialManager] FastForward active');
                 });
-                ffButton.on('pointerup', () => { ffButton.isDown = false; });
-                ffButton.on('pointerout', () => { ffButton.isDown = false; });
+                this.ffButton.on('pointerup', () => { this.ffButton.isDown = false; });
+                this.ffButton.on('pointerout', () => { this.ffButton.isDown = false; });
                 console.log('[TrialManager] FastForward button initialized.');
             }
 
@@ -257,13 +256,14 @@ export default class TrialSegmentManager {
 
     // キャラ画像を一括検索する内部メソッド
     _findCharacterImages() {
-        // 固定の3枠（左・中・右）ではなく、ID（roger, fenny, ruriaなど）で検索・キャッシュする
-        // TrialScene.jsonで定義した名前に基づく
-        const charIds = ['roger', 'fenny', 'ruria', 'siete', 'vyrn'];
+        // シーン上に存在する全キャラIDを対象にキャッシュ
+        const charIds = ['roger', 'fenny', 'ruria', 'siete', 'vyrn', 'gran', 'kaito', 'lowain', 'luoh', 'sandalphon'];
 
         charIds.forEach(id => {
             if (!this.charaImages[id]) {
-                const img = this.scene.children.getByName(id);
+                const img = this.scene.findGameObjectByName
+                    ? this.scene.findGameObjectByName(id)
+                    : this.scene.children.getByName(id);
                 if (img) {
                     this.charaImages[id] = img;
                     console.log(`[TrialManager] Character cached: ${id}`);
@@ -293,9 +293,9 @@ export default class TrialSegmentManager {
 
                     // ポジション指定があれば座標を上書き
                     const posStr = currentTestimony && currentTestimony.position;
-                    if (posStr === 'left') target.setX(300);
-                    else if (posStr === 'right') target.setX(980);
-                    else if (posStr === 'center') target.setX(640);
+                    if (posStr === 'left') img.setX(300);
+                    else if (posStr === 'right') img.setX(980);
+                    else if (posStr === 'center') img.setX(640);
 
                     console.log(`[TrialSegmentManager] Showing character: ${id} at X: ${img.x}`);
 
@@ -315,26 +315,16 @@ export default class TrialSegmentManager {
         const cam = this.scene.cameras.main;
         let targetAngle = 0;
 
-        // 0:left -> カメラは左(-15度) ... ではなく、
-        // 要望: "キャラが右の時、カメラを全体的に15度右回転"
-        // "キャラが左なら...カメラは左に15度"
-        // Phaserのrotationはラジアン、angleは度。
-
-        if (pos === 0) { // Left Character
-            targetAngle = -5; // 左に傾ける (少し控えめに5度から調整)
-        } else if (pos === 1) { // Right Character
-            targetAngle = 5; // 右に傾ける
-        } else { // Center
+        if (pos === 0) {       // 左キャラ → 左に傾ける
+            targetAngle = -5;
+        } else if (pos === 1) { // 右キャラ → 右に傾ける
+            targetAngle = 5;
+        } else {               // 中央 or リセット(pos=-1)
             targetAngle = 0;
         }
 
-        // ユーザー要望の15度は画面が大きく傾きすぎる可能性があるため、まずは5度程度で様子を見る。
-        // また、rotateTo は Phaser Camera にはないため、tweenで rotation を操作する。
-        // rotation = angle * (Math.PI / 180)
-
         const targetRotation = targetAngle * (Math.PI / 180);
         cam.setRotation(targetRotation);
-        console.log(`[TrialSegmentManager] MainCamera rotation set to: ${targetRotation} (rad) / ${targetAngle} (deg)`);
     }
 
     createTestimonyObject(data) {
@@ -902,11 +892,13 @@ export default class TrialSegmentManager {
             const nextData = this.scene.cache.json.get(key);
             if (nextData && nextData.trial_data) {
                 this.cleanupCurrentSegment();
+                // キャラキャッシュをリセットして再検索させる
+                this.charaImages = {};
+                this._findCharacterImages();
                 this.segmentData = nextData.trial_data;
                 this.currentTestimonyIndex = 0;
-                this.startDebateLoop(); // 新しいデータでループ開始
                 this.isInteracting = false;
-                this.scene.events.emit('RESUME_TRIAL');
+                this.startDebateLoop();
             } else {
                 console.error('[TrialManager] Failed to load valid trial data.');
                 this.isInteracting = false;
@@ -954,28 +946,26 @@ export default class TrialSegmentManager {
         this.isFlowing = false;
         this.cleanupCurrentSegment();
 
-        const timeoutScenario = this.segmentData.timeoutScenario || "chapter1/timeout_bad_end.ks";
+        const timeoutScenario = this.segmentData && this.segmentData.timeoutScenario
+            ? this.segmentData.timeoutScenario
+            : "chapter1/timeout_bad_end.ks";
         console.log(`[TrialManager] Playing timeout scenario: ${timeoutScenario}`);
 
         try {
             await EngineAPI.runScenarioAsOverlay(this.scene.scene.key, timeoutScenario, true);
-            // シナリオ終了後、通常はゲームオーバーかリトライを選択させるが、
-            // ここでは簡易的に最初からやり直す
-            this.restartDebate();
         } catch (e) {
             console.error('[TrialManager] Timeout scenario error:', e);
-            this.restartDebate();
         }
+
+        // シナリオ完了後、GameFlowManager経由でゲームオーバーへ
+        EngineAPI.fireGameFlowEvent('GAME_OVER');
     }
 
     update(time, delta) {
         // --- 早送りロジック ---
-        // 1. Shiftキーが押されているか
-        // 2. 画面上の「早送りボタン」(名前: fast_forward_button) が押されているか
+        // Shiftキーまたはキャッシュ済み早送りボタンで判定
         let isFF = this.fastForwardKey.isDown;
-
-        const ffButton = this.scene.findGameObjectByName ? this.scene.findGameObjectByName('fast_forward_button') : this.scene.children.getByName('fast_forward_button');
-        if (ffButton && ffButton.isDown) { // isDown は自前で管理する必要があるかもしれない
+        if (this.ffButton && this.ffButton.isDown) {
             isFF = true;
         }
 
@@ -996,5 +986,25 @@ export default class TrialSegmentManager {
             }
             return true;
         });
+    }
+
+    destroy() {
+        // タイマー停止
+        if (this.spawnTimer) {
+            this.spawnTimer.remove();
+            this.spawnTimer = null;
+        }
+        // イベントリスナー解除
+        this.scene.events.off('RESTART_DEBATE_REQUEST');
+        this.scene.events.off('RESUME_TRIAL');
+        this.scene.events.off('TESTIMONY_FINISHED');
+        this.scene.events.off('TRIAL_TIMEOUT');
+        // updatableComponentsから除外
+        if (this.scene.updatableComponents) {
+            this.scene.updatableComponents.delete(this);
+        }
+        // 残存証言オブジェクト破棄
+        this.activeTestimonies.forEach(obj => { if (obj && obj.active) obj.destroy(); });
+        this.activeTestimonies = [];
     }
 }
