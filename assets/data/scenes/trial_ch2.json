@@ -12,7 +12,7 @@
             "type": "image",
             "x": 640,
             "y": 360,
-            "texture": "bg_school",
+            "texture": "bg_shipdeck",
             "layer": "Background"
         },
         {

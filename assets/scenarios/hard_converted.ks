@@ -25,7 +25,7 @@
     [chara_new name="nier" jname="ニーア"]
     [chara_new name="death" jname="デス"]
 
-    [bg storage="bgtest" time="1000"]
+    [bg storage="bg_auguste" time="1000"]
     [playbgm storage="cafe" loop="true"]
     #
     君はアウギュステに降り立った。[br]街はバレンタイン一色に染まり、右を見ても左を見ても、[br]チョコを共に送り合う恋人達で溢れていた。
@@ -44,8 +44,8 @@
     [r]
     [s]
 
-*return_to_ship_badend 
-    [bg storage="bgtest2" time="500"]
+*return_to_ship_badend
+    [bg storage="bg_inship" time="500"]
     君は船に戻った。
     [p]
     ムードに気圧され、圧倒された。
@@ -173,7 +173,8 @@
     [r]
     [s]
 
-*failed_battle_badend 
+*failed_battle_badend
+    [bg storage="bg_inship" time="500"]
 [fadein]
 [fadeout]
     [stopbgm]
@@ -251,7 +252,7 @@
     [stopbgm]
     [er]
     [playbgm storage="cafe" loop="true"]
-    [bg storage="enzan" time="1000"]
+    [bg storage="bg_enzan_world" time="1000"]
     [wait time=1000]
 
     君は、どこか見覚えのある空間にいる。そうだ、確かこの後彼が...

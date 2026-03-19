@@ -12,7 +12,7 @@
     [chara_new name="oigen" jname="三羽烏"]
 
     ; 背景を甲板に変更
-    [bg storage="bgtest" time="1000"]
+    [bg storage="bg_shipdeck" time="1000"]
     [playbgm storage="cafe" loop="true"]
 
     [chara_show name="siete" storage="siete_normal" pos="center"]

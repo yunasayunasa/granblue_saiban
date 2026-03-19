@@ -13,7 +13,7 @@
     #
     [er layer="chara"]
     [playbgm storage="cafe" loop="true"]
-    [bg storage="enzan" time="1000"]
+    [bg storage="bg_enzan_world" time="1000"]
     [wait time=1000]
 
     君は、見たこともない空間にいる。[br]幻想的な一面の花畑、[br]とても現実とは思えない。

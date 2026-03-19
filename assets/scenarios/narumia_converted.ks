@@ -11,7 +11,7 @@
     [chara_new name="death" jname="デス"]
 
     ; 背景をカフェに変更
-    [bg storage="bgtest" time="1000"]
+    [bg storage="bg_sandalphon_cafe" time="1000"]
     [playbgm storage="cafe" loop="true"]
 
     #

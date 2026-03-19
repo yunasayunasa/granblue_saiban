@@ -9,7 +9,7 @@
     [chara_new name="hauhet" jname="ハウヘト"]
 
     ; フェニーは表示されている状態
-    [bg storage="bgtest" time="1000"] 
+    [bg storage="bg_town" time="1000"]
     [playbgm storage="cafe" loop="true"]
     #
     君は、フェニーと共にとりま突発でポートブリーズに向かうことにした。
@@ -30,7 +30,7 @@
 ; ----- 材料ルート -----
 *buy_ingredients_route
     [chara_hide name="fenny" time="200" wait="true"]
-    [bg storage="bgtest2" time="1000"] 
+    [bg storage="bg_market" time="1000"]
     [chara_show name="sabrina" storage="sabrina_normal" pos="center"] 
     #サブリナ
     お、フェニー！団長と買い物？
@@ -109,7 +109,7 @@
 
 *ingredients_deceive
     [chara_hide name="sabrina" time="200" wait="true"]
-    [bg storage="bgtest3" time="1000"] 
+    [bg storage="bg_sandalphon_cafe" time="1000"]
     なんとかサブリナをごまかし、退散することができた君たちは、カフェのキッチンでチョコの制作に取り掛かった。
     [p]
 
@@ -183,7 +183,7 @@
 ; ----- 器材ルート -----
 *buy_equipment_route
     [chara_hide name="fenny" time="200" wait="true"]
-    [bg storage="bgtest4" time="1000"]
+    [bg storage="bg_market" time="1000"]
     君は先に器材を買いに行くことにした。
     [p]
 
@@ -253,7 +253,7 @@
 
 *equipment_decline
   [chara_hide name="hauhet" time="200" wait="true"]
-    [bg storage="bgtest3" time="1000"] 
+    [bg storage="bg_sandalphon_cafe" time="1000"]
     なんとかハウヘトの蘊蓄講座から抜け出し、退散することができた君たちは、カフェのキッチンでチョコの制作に取り掛かった。
     [p]
 
