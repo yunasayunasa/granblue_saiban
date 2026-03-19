@@ -60,8 +60,8 @@
     [jump storage="first_converted.ks" target="*start"]
     [s]
 
-*shopping_mindlessly_badend 
-    [bg storage="bgtest3" time="500"]
+*shopping_mindlessly_badend
+    [bg storage="bg_market" time="500"]
     君は無心で買い物へ出かけた。
 
     [p]

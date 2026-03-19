@@ -106,6 +106,7 @@
     [s]
 
 *spar_block_sword_badend
+    [bg storage="bg_inship" time="500"]
     BAD END
     [p]
 
