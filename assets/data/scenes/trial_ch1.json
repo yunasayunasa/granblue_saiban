@@ -162,13 +162,18 @@
                 "charaId": "ruria",
                 "position": "left",
                 "style": "typewriter",
-                "text": "私は、今日はずっと自分の部屋にいたんです！",
+                "text": "今日はずっとお部屋にこもっていました。本当ですよぉ……？",
                 "highlights": [
                     {
-                        "text": "部屋にいた",
+                        "text": "ずっとお部屋にこもっていました",
                         "choices": [
                             {
-                                "text": "わかった！それはおかしい！",
+                                "text": "それは嘘だ！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch1_fail_ruria.ks"
+                            },
+                            {
+                                "text": "ビィが見かけていたはずだ！",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch1_fail_ruria.ks"
                             }
@@ -181,23 +186,23 @@
                 "charaId": "ruria",
                 "position": "right",
                 "style": "typewriter",
-                "text": "キッチンの方には、一歩も近づいていません。{se:glass}",
+                "text": "キッチンには……一歩も、近づいていませんでした。{se:glass}",
                 "highlights": [
                     {
-                        "text": "近づいていません",
+                        "text": "一歩も、近づいていませんでした",
                         "choices": [
                             {
-                                "text": "その証言はおかしい！",
+                                "text": "本当に一歩も？",
                                 "action": "update_testimony",
                                 "pre_update_scenario": "chapter1/ch1_doubt_ruria.ks",
                                 "target": "t2",
-                                "new_text": "甘い匂いに誘われて少しだけ入り口まで行ったんです。",
+                                "new_text": "……甘い匂いに誘われて、少しだけ入り口まで行ったんです。",
                                 "new_highlights": [
                                     {
-                                        "text": "入り口まで",
+                                        "text": "入り口まで行ったんです",
                                         "choices": [
                                             {
-                                                "text": "その証拠これだ！",
+                                                "text": "ではこれを見てもらおう！",
                                                 "evidence_required": "blue_hair",
                                                 "pre_present_scenario": "chapter1/ch1_pre_present.ks",
                                                 "correct": true,
@@ -217,7 +222,7 @@
                 "charaId": "ruria",
                 "position": "center",
                 "style": "typewriter",
-                "text": "ビィさんとも遊んでないし、本当にお部屋にいたんですよぉ。",
+                "text": "ビィとも遊んでないし……ただ、あの甘い匂いが、どうしても気になってしまって……。",
                 "highlights": []
             }
         ]
