@@ -323,6 +323,11 @@ export default class BaseGameScene extends Phaser.Scene {
             if (data.physics.fixedRotation !== undefined) gameObject.setFixedRotation(data.physics.fixedRotation);
             if (data.physics.ignoreGravity !== undefined) gameObject.setData('ignoreGravity', data.physics.ignoreGravity);
             if (data.physics.collisionFilter) gameObject.setCollisionCategory(data.physics.collisionFilter.category).setCollidesWith(data.physics.collisionFilter.mask);
+        } else if (data.fillScreen && (gameObject instanceof Phaser.GameObjects.Image || gameObject instanceof Phaser.GameObjects.Sprite)) {
+            // fillScreen: true の場合、画面サイズに合わせて表示サイズを設定する。
+            // overscan (1.0以上) を指定するとカメラシェイク時に端が見えないよう余白を持たせられる。
+            const overscan = data.overscan ?? 1.0;
+            gameObject.setDisplaySize(this.scale.width * overscan, this.scale.height * overscan);
         } else {
             gameObject.setScale(data.scaleX ?? 1, data.scaleY ?? 1);
         }

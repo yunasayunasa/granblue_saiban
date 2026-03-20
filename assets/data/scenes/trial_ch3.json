@@ -13,7 +13,9 @@
             "x": 640,
             "y": 360,
             "texture": "bg_sandalphon_cafe",
-            "layer": "Background"
+            "layer": "Background",
+            "fillScreen": true,
+            "overscan": 1.2
         },
         {
             "name": "trial_manager",
@@ -187,10 +189,10 @@
                 "charaId": "vyrn",
                 "position": "left",
                 "style": "typewriter",
-                "text": "おいらはずっとお前といっしょにいたろ？{se:laugh}",
+                "text": "おいら、ずっと団長のそばにいたじゃないか。な、団長？{se:laugh}",
                 "highlights": [
                     {
-                        "text": "ずっとお前といっしょ",
+                        "text": "ずっと団長のそばに",
                         "choices": [
                             {
                                 "text": "それは嘘だ！",
@@ -216,7 +218,7 @@
                 "charaId": "vyrn",
                 "position": "right",
                 "style": "typewriter",
-                "text": "ルリアもシエテも怪しいけど、オイラは潔白だぜ！",
+                "text": "ルリアにシエテ……あいつらだって怪しいじゃないか！ おいらは何もやってないぞ！",
                 "highlights": [
                     {
                         "text": "潔白",

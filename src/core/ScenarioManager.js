@@ -187,6 +187,10 @@ export default class ScenarioManager {
             const wrappedLine = this.manualWrap(dialogue);
             const useTyping = (this.mode !== 'skip');
 
+            // clearscreen 後など setVisible(false) の状態で来た場合に自動で表示する
+            if (!this.messageWindow.visible) {
+                this.messageWindow.setVisible(true);
+            }
             await this.messageWindow.setText(wrappedLine, useTyping, speakerName);
         }
     }

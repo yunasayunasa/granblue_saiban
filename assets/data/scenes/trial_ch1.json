@@ -13,7 +13,9 @@
             "x": 640,
             "y": 360,
             "texture": "bg_sandalphon_cafe",
-            "layer": "Background"
+            "layer": "Background",
+            "fillScreen": true,
+            "overscan": 1.2
         },
         {
             "name": "trial_manager",

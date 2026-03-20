@@ -13,7 +13,9 @@
             "x": 640,
             "y": 360,
             "texture": "bg_shipdeck",
-            "layer": "Background"
+            "layer": "Background",
+            "fillScreen": true,
+            "overscan": 1.2
         },
         {
             "name": "trial_manager",
@@ -127,7 +129,7 @@
     ],
     "trial_data": {
         "timeLimit": 300,
-        "timeoutScenario": "chapter1/trial_test_failure.ks",
+        "timeoutScenario": "chapter1/timeout_bad_end.ks",
         "loop_scenario": "chapter1/loop_end.ks",
         "testimonies": [
             {
@@ -135,17 +137,17 @@
                 "charaId": "siete",
                 "position": "left",
                 "style": "typewriter",
-                "text": "やあ団長。俺は遠くの修練場で、十天衆のみんなと特訓してたんだ。",
+                "text": "やあ団長。今日は俺、一日中修練場にいたんだよね。十天衆のみんなと特訓してたから。",
                 "highlights": [
                     {
-                        "text": "みんなと特訓",
+                        "text": "十天衆のみんなと特訓",
                         "choices": [
                             {
                                 "text": "十天衆がそろうなんてありえない！",
                                 "action": "update_testimony",
                                 "pre_update_scenario": "chapter1/ch2_doubt_siete.ks",
                                 "target": "t1",
-                                "new_text": "シスやウーノ、ソーンとかさ、みんなで修練場に集まってたんだ。",
+                                "new_text": "シスやウーノ、ソーンとかさ……みんなで修練場に集まってたんだよ。",
                                 "new_highlights": [
                                     {
                                         "text": "みんなで",
@@ -173,12 +175,12 @@
                                 ]
                             },
                             {
-                                "text": "修練場の場所はどこだ？",
+                                "text": "それはいつの話だ？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t1_place.ks"
                             },
                             {
-                                "text": "特訓の内容を話せ！",
+                                "text": "本当に一日中いたのか？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t1_content.ks"
                             }
@@ -191,23 +193,23 @@
                 "charaId": "siete",
                 "position": "right",
                 "style": "typewriter",
-                "text": "夕方まで汗を流していたよ。爽やかだろ？{cam:shake}",
+                "text": "夕方まで、ずっと汗を流してたよ。気持ちよかったね。{cam:shake}",
                 "highlights": [
                     {
                         "text": "夕方まで",
                         "choices": [
                             {
-                                "text": "夕方より前に戻っていたはずだ！",
+                                "text": "それはいつの話だ？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t2_time.ks"
                             },
                             {
-                                "text": "一人になった時間があったはずだ！",
+                                "text": "本当にずっと一緒だったのか？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t2_alone.ks"
                             },
                             {
-                                "text": "目撃者はいるのか？",
+                                "text": "ならなぜ剣拓の欠片が現場に？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t2_witness.ks"
                             }
@@ -220,13 +222,13 @@
                 "charaId": "siete",
                 "position": "center",
                 "style": "typewriter",
-                "text": "チョコなんて見てないし、キッチンの場所すら怪しいくらいさ。",
+                "text": "チョコなんて見てないよ。……キッチンがどこにあるかも、よく知らないしね。",
                 "highlights": [
                     {
                         "text": "見てない",
                         "choices": [
                             {
-                                "text": "その証拠これだ！",
+                                "text": "ではこれを見てもらおう！",
                                 "evidence_required": "blue_feather",
                                 "pre_present_scenario": "chapter1/ch1_pre_present.ks",
                                 "correct": true,
@@ -234,14 +236,9 @@
                                 "next_trial_data": "scenes/trial_ch3.json"
                             },
                             {
-                                "text": "キッチンを知らないはずがない！",
+                                "text": "キッチンを知らないはずはない！",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t3_kitchen.ks"
-                            },
-                            {
-                                "text": "怪しいのはお前の方だ！",
-                                "correct": false,
-                                "failure_scenario": "chapter1/ch2_fail_t3_suspect.ks"
                             }
                         ]
                     }

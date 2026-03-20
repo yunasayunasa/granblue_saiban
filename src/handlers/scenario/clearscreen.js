@@ -37,8 +37,11 @@ export default async function handleClearScreen(manager, params) {
     scene.characters = {};
 
     // --- 3. メッセージウィンドウをリセット・非表示 ---
+    // setAlpha(0) ではなく setVisible(false) で隠す。
+    // アルファは 1 に戻しておかないと、次回ゲーム開始時にウィンドウが透明のままになる。
     if (manager.messageWindow) {
         manager.messageWindow.reset();
-        manager.messageWindow.setAlpha(0);
+        manager.messageWindow.setAlpha(1);
+        manager.messageWindow.setVisible(false);
     }
 }
