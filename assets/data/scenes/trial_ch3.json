@@ -285,13 +285,6 @@
                                 ]
                             },
                             {
-                                "text": "その証拠これだ！",
-                                "evidence_required": "chocolate_crumbs",
-                                "pre_present_scenario": "chapter1/ch3_pre_vyrn2.ks",
-                                "correct": true,
-                                "success_scenario": "chapter1/ch3_success_vyrn.ks"
-                            },
-                            {
                                 "text": "口の周りを見てみろ！",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch3_fail_t6_mouth.ks"

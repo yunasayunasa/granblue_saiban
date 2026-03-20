@@ -228,17 +228,14 @@
                         "text": "見てない",
                         "choices": [
                             {
-                                "text": "ではこれを見てもらおう！",
-                                "evidence_required": "blue_feather",
-                                "pre_present_scenario": "chapter1/ch1_pre_present.ks",
-                                "correct": true,
-                                "success_scenario": "chapter1/ch2_success_siete.ks",
-                                "next_trial_data": "scenes/trial_ch3.json"
-                            },
-                            {
                                 "text": "キッチンを知らないはずはない！",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t3_kitchen.ks"
+                            },
+                            {
+                                "text": "ではこれを見てもらおう！",
+                                "correct": false,
+                                "failure_scenario": "chapter1/ch2_fail_t3_present.ks"
                             }
                         ]
                     }
