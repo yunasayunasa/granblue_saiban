@@ -1,6 +1,9 @@
 /**
  * 議論開始演出 (DebateStartEffect)
- * 画像 (cg_01) を使用して「ノンストップ議論 開始」的なバナーを表示する。
+ * 画像アセット不要。Phaserのグラフィックスのみで構成。
+ *
+ * START: 上下から帯が閉じてテキストが出現 → フラッシュで消える
+ * LOOP:  同様の演出だがアクセントカラーが変わる
  */
 export default class DebateStartEffect extends Phaser.GameObjects.Container {
     constructor(scene) {
@@ -8,91 +11,106 @@ export default class DebateStartEffect extends Phaser.GameObjects.Container {
         this.scene = scene;
         this.visible = false;
         this.depth = 3500;
-
-        this._createGraphics();
         this.scene.add.existing(this);
     }
 
-    _createGraphics() {
-        const width = this.scene.scale.width;
-        const height = this.scene.scale.height;
+    play(text = 'START', onComplete) {
+        const W = this.scene.scale.width;
+        const H = this.scene.scale.height;
 
-        // 画像 (仮: cg_01)
-        if (this.scene.textures.exists('cg_01')) {
-            this.bgImage = this.scene.add.image(width/2, height/2, 'cg_01');
-            // 画面幅に合わせる、あるいは帯状にする
-            this.bgImage.setDisplaySize(width, height / 3); 
-        } else {
-            // フォールバック: 赤い帯
-            this.bgImage = this.scene.add.rectangle(width/2, height/2, width, 300, 0xaa0000);
-        }
-        this.add(this.bgImage);
+        const isLoop = (text === 'LOOP');
+        // START: クリムゾン / LOOP: ダークオレンジ
+        const bandColor  = isLoop ? 0xcc5500 : 0xaa0000;
+        const labelJP    = isLoop ? '議　論　ループ' : '議　論　開　始';
+        const labelEN    = isLoop ? 'BREAKDOWN' : 'DEBATE START';
 
-        // テキスト
-        this.text = this.scene.add.text(width/2, height/2, "NON-STOP DEBATE", {
-            fontSize: '80px', fontStyle: 'bold', color: '#ffffff', stroke: '#000000', strokeThickness: 8
-        }).setOrigin(0.5);
-        this.add(this.text);
-
-        this.subText = this.scene.add.text(width/2, height/2 + 60, "START", {
-            fontSize: '60px', fontStyle: 'bold', color: '#ffff00', stroke: '#000000', strokeThickness: 5
-        }).setOrigin(0.5);
-        this.add(this.subText);
-    }
-
-    play(text = "START", onComplete) {
         this.setVisible(true);
-        this.subText.setText(text);
+        this.alpha = 1;
 
-        const width = this.scene.scale.width;
+        // --- 暗転オーバーレイ ---
+        const overlay = this.scene.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0)
+            .setScrollFactor(0).setDepth(3498);
+        this.add(overlay);
 
-        // 初期状態
-        this.bgImage.scaleY = 0;
-        this.text.alpha = 0;
-        this.subText.alpha = 0;
-        this.subText.scale = 2;
-        this.alpha = 1; // フェードアウトからの復帰用
+        // --- 帯（上下2枚） ---
+        const bandH = 130;
+        const bandY = H / 2;
+        const topBand = this.scene.add.rectangle(W / 2, bandY - bandH, W, bandH, bandColor)
+            .setScrollFactor(0).setDepth(3499);
+        const botBand = this.scene.add.rectangle(W / 2, bandY + bandH, W, bandH, bandColor)
+            .setScrollFactor(0).setDepth(3499);
+        this.add(topBand);
+        this.add(botBand);
 
-        // 1. 帯が開く (0ms)
+        // --- テキスト ---
+        const mainText = this.scene.add.text(W / 2, H / 2, labelJP, {
+            fontSize: '52px',
+            fontStyle: 'bold',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 6,
+            fontFamily: 'serif'
+        }).setOrigin(0.5).setAlpha(0).setScrollFactor(0).setDepth(3500);
+
+        const subText = this.scene.add.text(W / 2, H / 2 + 48, labelEN, {
+            fontSize: '28px',
+            fontStyle: 'bold',
+            color: '#ffddaa',
+            stroke: '#000000',
+            strokeThickness: 4,
+            fontFamily: 'sans-serif',
+            letterSpacing: 6
+        }).setOrigin(0.5).setAlpha(0).setScale(2).setScrollFactor(0).setDepth(3500);
+
+        this.add(mainText);
+        this.add(subText);
+
+        // SE
+        if (this.scene.cache.audio.has('smash')) {
+            this.scene.sound.play('smash', { volume: 0.8 });
+        }
+
+        // === アニメーション ===
+        // 1. 暗転 (0ms)
+        this.scene.tweens.add({ targets: overlay, alpha: 0.75, duration: 120 });
+
+        // 2. 帯がスライドイン (0ms)
         this.scene.tweens.add({
-            targets: this.bgImage,
-            scaleY: 1,
-            duration: 300,
-            ease: 'Back.out'
+            targets: topBand, y: bandY - bandH / 2,
+            duration: 180, ease: 'Power2.easeOut'
         });
-
-        // 2. テキストイン (200ms)
         this.scene.tweens.add({
-            targets: this.text,
-            alpha: 1,
-            x: width/2,
-            duration: 300,
-            delay: 200
-        });
-
-        // 3. STARTスタンプ (400ms)
-        this.scene.tweens.add({
-            targets: this.subText,
-            alpha: 1,
-            scale: 1,
-            duration: 400,
-            ease: 'Bounce.out',
-            delay: 400
-        });
-
-        // 4. フェードアウト (1800ms - 待ち時間含む)
-        // 元のタイムラインでは offset:800 で 1000ms 待機 -> 1300?? 
-        // 意図としては、全部出切ってから少し待って消える。
-        // スタンプ完了が 400+400=800ms。そこから1秒待つなら1800msあたりでフェードアウト開始。
-        this.scene.tweens.add({
-            targets: this,
-            alpha: 0,
-            duration: 300,
-            delay: 1800,
+            targets: botBand, y: bandY + bandH / 2,
+            duration: 180, ease: 'Power2.easeOut',
             onComplete: () => {
-                this.setVisible(false);
-                this.alpha = 1; 
-                if (onComplete) onComplete();
+                // カメラシェイク
+                this.scene.cameras.main.shake(250, 0.015);
+
+                // 3. テキストイン (180ms)
+                this.scene.tweens.add({
+                    targets: mainText, alpha: 1, duration: 150
+                });
+                this.scene.tweens.add({
+                    targets: subText, alpha: 1, scale: 1,
+                    duration: 250, ease: 'Back.easeOut'
+                });
+
+                // 4. 全体フェードアウト (900ms後)
+                this.scene.time.delayedCall(900, () => {
+                    this.scene.cameras.main.flash(120, 255, 255, 255);
+                    this.scene.tweens.add({
+                        targets: [overlay, topBand, botBand, mainText, subText],
+                        alpha: 0,
+                        duration: 200,
+                        onComplete: () => {
+                            [overlay, topBand, botBand, mainText, subText]
+                                .forEach(obj => obj.destroy());
+                            this.removeAll(false);
+                            this.setVisible(false);
+                            if (onComplete) onComplete();
+                        }
+                    });
+                });
             }
         });
     }
