@@ -1,6 +1,6 @@
 [cm]
 [playbgm storage="night_bgm" loop="true"]
-[shake time="600" power="20"]
+[vibrate time="600"]
 #システム
 時間切れだ……。
 [p]

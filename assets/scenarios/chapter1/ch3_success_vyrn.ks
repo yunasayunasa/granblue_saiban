@@ -3,6 +3,7 @@
 [playse storage="correct"]
 [playbgm storage="gyakuten_bgm" loop="true"]
 #ロジャー
+[focus time="500"]
 「チェックメイトだ、ビィ！」
 [p]
 #
@@ -14,6 +15,8 @@
 「えっ！？ ……はっ！！？」
 [p]
 [playse storage="shock"]
+[vibrate time="400"]
+[focus time="500"]
 #ビィ
 「ア、アブネェ……！ おいらとしたことが、証拠隠滅しきれてなかったかぁ～！」
 [p]

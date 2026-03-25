@@ -24,6 +24,7 @@
     [chara_new name="anthuria" jname="アンスリア"]
     [chara_new name="nier" jname="ニーア"]
     [chara_new name="death" jname="デス"]
+    [chara_new name="korwa" jname="コルワ"]
 
     [bg storage="bg_auguste" time="1000"]
     [playbgm storage="cafe" loop="true"]
@@ -111,12 +112,15 @@
 
 *thugs_appear_badend_hard 
     [chara_show name="thug" storage="thug_normal" pos="center"]
+    [vibrate time="200"]
     #荒くれ者
+    [chara_zoom name="thug" scale="1.3" restore="true" restore_time="150"]
     こんなとこで剣なんか振ってんじゃねえよ！あぶねえだろうが！
     [p]
     #
     ...正論を振りかざされ、君は心が折れた。
     [p]
+    [shake name="thug" time="400" power="8"]
     [chara_hide name="thug" time="300" wait="true"]
     BAD END 
     [l]
@@ -127,6 +131,7 @@
 
 *lowain_appear_badend_hard 
     [chara_show name="lowain" storage="lowain_normal" pos="center"]
+    [chara_jump name="lowain"]
     #ローアイン
     ローアイン:あれ？ﾀﾞﾝﾁｮ？こんなとこで剣なんか振っちゃってDoしたん？
     [p]
@@ -161,6 +166,7 @@
     [p]
     無心で素振りをしていて、囲まれたことには気づいていなかったのだ
     [p]
+    [vibrate time="300"]
     カキフライ、ンニ、カツウォヌス、前から後ろから、左右から、海の生物が襲いかかる。
     [p]
     どれから対処すべきか...
@@ -175,9 +181,8 @@
 
 *failed_battle_badend
     [bg storage="bg_inship" time="500"]
-[fadein]
-[fadeout]
-    [stopbgm]
+    [fadeout]
+    [stopbgm time="600"]
     [er]
     [chara_show name="ruria" time="300" wait="true"]
     #ルリア
@@ -201,11 +206,15 @@
     [chara_show name="same" storage="same" pos="left"]
     [chara_show name="koa" storage="koa" pos="right"]
     #サメ
+    [chara_zoom name="same" scale="1.4" restore="true" restore_time="150"]
     SYAAAAAAAAAAAAAAAK!!!!!
     [p]
+    [slash count="2" time="250"]
     #アルバコア
+    [chara_zoom name="koa" scale="1.4" restore="true" restore_time="150"]
     KOAAAAAAAAAAAAAAAAA!!!!!!!!!
     [p]
+    [slash count="2" time="250"]
     サメ、アルバコア、さらに増援。君は選択を迫られる...
     [p]
     [l]
@@ -219,6 +228,8 @@
     [s]
 
 *final_battle_badend
+    [chara_hide name="same" time="200" wait="true"]
+    [chara_hide name="koa" time="200" wait="true"]
     [chara_show name="zombie" storage="zombie" pos="center"]
     #ゾンビィ
     「ドライブイン！とっ！りっ！」
@@ -228,7 +239,7 @@
     [p]
     無理だ。1人では━ [br]君は押し迫る海の生物達の中に消えていった...。
     [p]
-    [stopbgm] 
+    [stopbgm time="1000"]
     [link target="*pseudo_prologue_start" text="再演算する"] 
     [link target="*start_return_title" text="あきらめる"]
     [r]
@@ -381,29 +392,35 @@
     #カキフライ
     [shake name="kaki"]
     ！？
-    [chara_hide name="kaki"]
-[chara_show name="siete" storage="siete" pos="left"]
+    [slash count="1" time="200" wait="false"]
+    [chara_vanish name="kaki" time="400"]
+[chara_show name="siete" storage="siete_normal" pos="left"]
 #シエテ
 後ろは任せて！
 [p]
   [shake name="nni"]
   #ンニ
   ！！！？？
-   [chara_hide name="nni"]
-  [chara_hide name="katuo"]
+  [slash count="1" time="200" wait="false"]
+  [chara_vanish name="nni" time="400"]
+  [chara_hide name="katuo" time="200" wait="false"]
   [chara_show name="narumia" pos="right" time="500" wait="true"]
     #ナルメア
     うん！団長ちゃんは正面に集中して！
     [p]
  [chara_hide name="narumia" time="200" wait="true"]
     #
-    [chara_show name="same" pos="center" time="500" wait="true"]
+    [chara_show name="same" storage="same" pos="center" time="500" wait="true"]
+    [chara_zoom name="same" scale="1.3" restore="true" restore_time="100"]
     サメ「━━━！」
     [p]
-     [chara_hide name="same" time="300" wait="true"]
-     [chara_show name="koa" pos"center" time="500" wait="true"]
+    [slash count="2" time="200" wait="false"]
+    [chara_vanish name="same" time="500"]
+     [chara_show name="koa" storage="koa" pos="center" time="500" wait="true"]
+    [chara_zoom name="koa" scale="1.3" restore="true" restore_time="100"]
     アルバコア「━━━━！！！」[p]
-     [chara_hide name="koa" time="300" wait="true"]
+    [slash count="2" time="200" wait="false"]
+    [chara_vanish name="koa" time="500"]
     増援。君は選択を迫られる...
  [link target="*final_battle_trueend" text="ンナギ"]
     [link target="*final_battle_trueend" text="ンニ"]
@@ -414,17 +431,20 @@
 
 *final_battle_trueend
     [chara_show name="zombie" storage="zombie" pos="center"]
+    [focus time="400"]
     #ゾンビィ
     「おっはよーございまーすっ！」
     [p]
-    
+
     クァニ、灼弩火罹、ゾンビィ、更に増えるトンチキ生物達。
     [p]
+    [vibrate time="300"]
      [chara_hide name="zombie" storage="zombie" pos="center"]
-    無理だ。1人では━ 
+    無理だ。1人では━
     [p]
 
     ━でも、今は！
+    [focus color="ffffff" time="600"]
   ; --- カットイン演出 (手動展開) ---
     [chara_show name="roger" pos="center" time="50"]
     [wait time="50"]
@@ -472,12 +492,15 @@
     [wait time="500"]
 
     [playse storage="smash" stop="false"]
+    [slash count="5" time="150" wait="false"]
     「1人じゃない！」
     [p]
+    [vibrate time="400"]
     [chara_hide name="ruria" time="200" wait="true"]
 
     ; 仲間たちの加勢
     [chara_show name="oigen" pos="center" time="300"]
+    [focus time="350"]
     #三羽烏
     「「「ソイヤッ！」」」
     [p]
@@ -490,6 +513,7 @@
     #ウィルナス
     「殲滅、殲滅！」
     [p]
+    [slash count="3" time="200" wait="false"]
     [chara_hide name="wilnas" time="200" wait="true"]
 
     [chara_show name="wamdus" pos="center" time="300"]
@@ -500,9 +524,11 @@
 ンニが、ンナギが、ゾンビが、
 [p]
     [chara_show name="sandalphon" pos="center" time="300"]
+    [chara_zoom name="sandalphon" scale="1.3" restore="true" restore_time="100"]
     #サンダルフォン
     「アイン•ソフ•オウル！」
     [p]
+    [vibrate time="400"]
     [chara_hide name="sandalphon" time="200" wait="true"]
     #
     殆どの海の生物達が彼らの前に倒れた。
@@ -512,8 +538,11 @@
 
     #
     [chara_show name="chocokoa" storage="chocokoa" pos="center"]
+    [focus color="ff9900" time="400"]
+    [chara_zoom name="chocokoa" scale="1.5" restore="true" restore_time="200"]
     チョコ•アルバコア「チョコオオオオオオオオオオオオ━━━！！」
     [p]
+    [vibrate time="300"]
     [chara_hide name="chocokoa" time="300" wait="true"]
 
     [chara_show name="ruria" pos="center" time="500"]
@@ -530,7 +559,7 @@
     [r]
     [s]
 *shin_ending
-    [playbgm storage="night_bgm" loop="true"]
+    [playbgm storage="ending_bgm" loop="true"]
     [chara_show name="ruria" storage="ruria_normal" pos="center" time="1000" wait="true"]
     #ルリア
     チョコを司る星晶獣なんて、びっくりです〜！あむっ！
@@ -557,16 +586,15 @@
 #
     ～HAPPY END～
     [p]
-    [chara_hide name="ruria" time="500" wait="true"]
-    ; ロジャーとコルワのセリフ (立ち絵を表示するか、名前表示のみか)
-     [chara_show name="roger" pos="left" ]
-    
-    
+    ; ロジャーとコルワのセリフ
+     [chara_show name="roger" storage="roger_normal" pos="left" ]
+
+
     #ロジャー
     うんうん、やっぱり最後は！
     [p]
-    
-     [chara_show name="korwa" pos="right"]
+
+     [chara_show name="korwa" storage="korwa_normal" pos="right"]
      #コルワ
     ハッピーエンドよね！
     [p]
@@ -576,6 +604,8 @@
 
     ゲームブック[br]【演算世界とチヨコレイト】[br]〜完〜
     [p]
+    [chara_hide name="roger" time="300" wait="true"]
+    [chara_hide name="korwa" time="300" wait="true"]
     [clearscreen time="1500"]
     [jump storage="TitleScene"]
     [s]

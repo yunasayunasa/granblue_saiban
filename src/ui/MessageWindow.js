@@ -49,6 +49,17 @@ export default class MessageWindow extends Container {
             }
         );
 
+        // --- 話者名テキスト ---
+        const speakerX = this.windowImage.x - (this.windowImage.width / 2) + padding;
+        const speakerY = this.windowImage.y - (this.windowImage.height / 2) - 36;
+        this.speakerText = scene.add.text(speakerX, speakerY, '', {
+            fontFamily: '"Noto Sans JP", sans-serif',
+            fontSize: '26px',
+            fill: '#ffe066',
+            stroke: '#000000',
+            strokeThickness: 4
+        });
+
         // --- クリック待ちアイコン (変更なし) ---
         const iconX = (this.windowImage.width / 2) - 60;
         const iconY = (this.windowImage.height / 2) - 50;
@@ -71,8 +82,8 @@ export default class MessageWindow extends Container {
             this.configManager.on('change:textSpeed', this.updateTextSpeed, this);
         }
 
-        // --- 全ての要素をコンテナに追加 (変更なし) ---
-        this.add([this.windowImage, this.textObject, this.nextArrow]);
+        // --- 全ての要素をコンテナに追加 ---
+        this.add([this.windowImage, this.speakerText, this.textObject, this.nextArrow]);
 
         // ★★★ 3. UISceneがadd.existing(this)を呼ぶので、シーンへの追加は不要 ★★★
     }
@@ -113,6 +124,9 @@ export default class MessageWindow extends Container {
             this.currentText = text;
             this.currentSpeaker = speaker;
             this.fullText = text;
+
+            // 話者名を更新（null・空文字は非表示）
+            this.speakerText.setText(speaker || '');
 
             if (this.charByCharTimer) {
                 this.charByCharTimer.remove();
@@ -171,6 +185,7 @@ export default class MessageWindow extends Container {
 
     reset() {
         this.textObject.setText('');
+        this.speakerText.setText('');
         this.currentText = '';
         this.currentSpeaker = null;
         this.isTyping = false;

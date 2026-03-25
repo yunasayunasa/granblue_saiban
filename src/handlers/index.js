@@ -28,6 +28,10 @@ import handleCharaJump from './scenario/chara_jump.js';
 import handleStopAnim from './scenario/stop_anim.js';
 import handleFadeout from './scenario/fadeout.js';
 import handleFadein from './scenario/fadein.js';
+import handleSlash from './scenario/slash.js';
+import handleFocus from './scenario/focus.js';
+import handleCharaZoom from './scenario/chara_zoom.js';
+import handleCharaVanish from './scenario/chara_vanish.js';
 /*import handlePuppetMove from './scenario/puppet_move.js';
 import handlePuppetIdleStart from './scenario/puppet_idle_start.js';
 import handlePuppetIdleStop from './scenario/puppet_idle_stop.js';*/
@@ -105,6 +109,10 @@ export const tagHandlers = {
   // 'video': handleVideo,
   //'stopvideo': handleStopVideo,
   'vignette': vignette,
+  'slash': handleSlash,
+  'focus': handleFocus,
+  'chara_zoom': handleCharaZoom,
+  'chara_vanish': handleCharaVanish,
 
   // 音声系
   'playse': handlePlaySe,

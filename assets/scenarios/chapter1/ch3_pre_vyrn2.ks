@@ -9,4 +9,5 @@
 #ロジャー
 観念するんだな、ビィ！
 [p]
+[focus time="500"]
 [overlay_end]

@@ -58,6 +58,7 @@
 
     [quake time="500" count="3" hmax="15" vmax="15" wait="false"]
     [playse storage="smash" stop="false"]
+    [focus time="400"]
 
     #三羽烏
     「「「ソイヤアアアアアアアアアッッッッ！！！！！」」」
@@ -90,10 +91,13 @@
     [p]
     まずはコレでどうかな！
     [p]
+    [chara_zoom name="siete" scale="1.3" restore="true" restore_time="150"]
 
     #
     シエテが右上段から斬り掛かる。
     [p]
+    [slash count="2" time="250"]
+    [vibrate time="150"]
 
     君は...
     [l]
@@ -126,6 +130,7 @@
     #
     君は左に避けた。
     [p]
+    [slash count="1" time="200"]
     すかさず打ち込むが、
     [p]
     シエテには容易に防がれる。
@@ -136,6 +141,7 @@
     [p]
     かかって来なさい！
     [p]
+    [chara_zoom name="siete" scale="1.3" restore="true" restore_time="200"]
 
     #
     君は...
@@ -164,21 +170,25 @@
 
     [chara_show name="siete" storage="siete_stance" pos="center"]
     [quake time="1000" count="5" hmax="5" vmax="5" wait="false"]
+    [focus color="3366ff" time="700"]
 
     #
     天星剣王の髪が蒼く染まる。
     [p]
     途方もない剣気が集まるのが分かる。
     [p]
+    [chara_zoom name="siete" scale="1.4" restore="false"]
 
     体の震えが告げている。
     [p]
     まともに受ければ、死だと。
     [p]
+    [vibrate time="300"]
 
     [chara_show name="siete" storage="siete_granchariot" pos="center"]
     [p]
     [playse storage="smash" stop="false"]
+    [slash count="4" time="200"]
     [quake time="800" count="10" hmax="30" vmax="30" wait="false"]
 
     #
@@ -200,7 +210,7 @@
     #シエテ
     グランシャリ...
     [p]
-    [playbgm storage="night_bgm" loop="true"]
+    [playbgm storage="ending_bgm" loop="true"]
     #シエテ
     え？俺に？[br]くれるのかい？ありがとう、団長ちゃん！[br]とても嬉しいよ！
     [p]
@@ -229,6 +239,8 @@
 
 
 *soiya_with_them
+    [playbgm storage="ending_bgm" loop="true"]
+    [chara_show name="siete" storage="siete_normal" pos="center" time="300" wait="true"]
     #
     君は彼らと共にソイヤッ！する事にした。
     [p]
@@ -238,6 +250,7 @@
     [p]
     ソイヤッ！ソイヤッ！
     [p]
+    [focus time="500"]
     ソイヤソイヤソイヤソイヤッ！
     [p]
     [chara_hide name="oigen" time="100" wait="true"]
@@ -249,6 +262,7 @@
     [p]
 
     #シエテ
+    [shake name="siete" time="400" power="8"]
     えぇ...？何...これ...？
     [p]
     え？コレで終わり！？
@@ -297,6 +311,7 @@
     [p]
     [chara_hide name="siete" time="200" wait="true"]
     [chara_show name="wilnas" storage="wilnas_normal" pos="left"]
+    [chara_jump name="wilnas"]
     #ウィルナス
     重畳！重畳！
 ここにいやがりやがったか！
@@ -368,15 +383,17 @@
     #
     君はウィルナスから受け取った
     [p]
-    [playbgm storage="night_bgm" loop="true"]
+    [playbgm storage="ending_bgm" loop="true"]
+    [chara_show name="wilnas" storage="wilnas_normal" pos="center" time="300" wait="true"]
 
+    [chara_jump name="wilnas"]
     #ウィルナス
     喝采！喝采！
     [p]
     さぁくらいやがるといい！
     [p]
-    [chara_hide name="wilnas" time="200"]
-    [chara_show name="luoh" storage="luoh_normal" pos="center"]
+    [chara_hide name="wilnas" time="200" wait="true"]
+    [chara_show name="luoh" storage="luoh_normal" pos="center" time="300" wait="true"]
     #ルオー
     くっ...！
     [p]
@@ -389,6 +406,8 @@
     闇の塊が入っていた。
     [p]
 
+    [chara_hide name="luoh" time="200" wait="true"]
+    [chara_show name="wilnas" storage="wilnas_normal" pos="center" time="300" wait="true"]
     #ウィルナス
     実食、実食！
     [p]
@@ -410,7 +429,8 @@
     #
     君はルオーから受け取った。
     [p]
-    [playbgm storage="night_bgm" loop="true"]
+    [playbgm storage="ending_bgm" loop="true"]
+    [chara_show name="luoh" storage="luoh_normal" pos="center" time="300" wait="true"]
 
     #ルオー
     先に言っておくがね、
@@ -428,11 +448,13 @@
     ハッピーバレンタイン。
     [p]
 
+    [chara_show name="wilnas" storage="wilnas_normal" pos="left" time="300" wait="true"]
     #ウィルナス
     ハッピー、ハッピー！
     [p]
     バレやがるタイン！
     [p]
+    [chara_hide name="wilnas" time="200" wait="true"]
 
     #
     チョコレートは、非常に美味だった。[br]それはつまり、それだけの努力と[br]空の民への興味。[br]そして、特異点たる存在への、[br]せめてもの慈悲であった。
@@ -446,7 +468,8 @@
 
 
 *receive_from_wamdus_end
-    [playbgm storage="night_bgm" loop="true"]
+    [playbgm storage="ending_bgm" loop="true"]
+    [chara_show name="wamdus" storage="wamdus_normal" pos="center" time="300" wait="true"]
     #
     君はワムデュスから受け取った。
     [p]
@@ -462,6 +485,7 @@
     #
     それならばと、受け取ったチョコを渡そうとするが、
     [p]
+    [chara_show name="siete" storage="siete_normal" pos="right" time="300" wait="true"]
     それをシエテが制する。
     [p]
 
@@ -486,6 +510,7 @@
     [p]
     ～ワムデュスEND～
     [l]
+    [chara_hide name="siete" time="300" wait="true"]
     [chara_hide name="wamdus" time="500" wait="true"]
     [clearscreen time="1500"]
     [jump storage="TitleScene"]
@@ -493,7 +518,8 @@
 
 
 *receive_from_galleon_end
-    [playbgm storage="night_bgm" loop="true"]
+    [playbgm storage="ending_bgm" loop="true"]
+    [chara_show name="galleon" storage="galleon_normal" pos="center" time="300" wait="true"]
     #
     君はガレヲンから受け取った。
     [p]

@@ -9,4 +9,5 @@
 #ロジャー
 「それが……これだ！」
 [p]
+[focus time="500"]
 [overlay_end]

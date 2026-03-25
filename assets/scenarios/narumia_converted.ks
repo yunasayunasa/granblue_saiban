@@ -39,7 +39,7 @@
     [s]
 
 *order_hot_chocolate
-    [playbgm storage="night_bgm" loop="true"]
+    [playbgm storage="ending_bgm" loop="true"]
     [chara_hide name="sandalphon"]
     [chara_show name="narumia" storage="narumia_normal" pos="center" time="500" wait="true"]
     君はホットチョコレートを注文した。
@@ -48,6 +48,7 @@
     #ナルメア
     熱いからお姉さんがふーふーして[br]冷ましてあげるね、ふー、ふー...[br]はい、あーん
     [p]
+    [chara_jump name="narumia"]
 
     美味しい？よかった！
     [p]
@@ -131,10 +132,12 @@
     [p]
     もう少し寛ぐことにした。
     [p]
+    [chara_hide name="sandalphon" time="300" wait="true"]
+    [chara_hide name="narumia" time="300" wait="true"]
     [jump target="*three_girls_appear_common"]
 
 *answer_delicious
-    [playbgm storage="night_bgm" loop="true"]
+    [playbgm storage="ending_bgm" loop="true"]
     君は美味しいと答えた。
     [p]
 [chara_hide name="narumia"]
@@ -181,10 +184,12 @@
 
     何やら殺気立っている様子だ。
     [p]
+    [focus time="400"]
 
     ; ディアンサのセリフ
-  
+
     #ディアンサ
+    [chara_jump name="diantha"]
     団長さん！はい！チョコレート！[br]受け取って！
     [p]
 
@@ -226,9 +231,12 @@
 
     嫌！嫌あああああ！[br]お願い！捨てないで！私を...、愛して...
     [p]
+    [vibrate time="350"]
+    [chara_zoom name="nier" scale="1.3" restore="true" restore_time="200"]
 
     ; デス登場
     [chara_show name="death" storage="death_stand" pos="right"]
+    [focus color="660000" time="400"]
     #デス
     愛シイ人、人ノ愛ハ移リ行クモノ。[br]永遠ノ愛ヲ求メルナラ、答エハヒトツ...
     [p]
@@ -239,10 +247,12 @@
     [p]
 
     デス、お願い。
-    [fadein color=FF0000 time=100]
-    [vibrate time=500]
+    [playse storage="blood"]
+    [fadeout color="FF0000" time="200"]
+    [vibrate time="500"]
 
     [l]
+    [fadeout time="600"]
     [p]
 
     #
@@ -256,6 +266,7 @@
     ずっと、ずっと一緒だよ...。
     [p]
 [chara_hide name="nier"]
+    [chara_hide name="death" time="200" wait="true"]
     [chara_show name="roger" storage="roger_normal" pos="center" time="500" wait="true"]
     #ロジャー
     うわあああああ！まずい！
@@ -273,11 +284,12 @@
     [jump target="*three_girls_appear_common"]
 
 *receive_nier_good_end
-    [playbgm storage="night_bgm" loop="true"]
+    [playbgm storage="ending_bgm" loop="true"]
     君はニーアからチョコを受け取った。
     [p]
 
     [chara_show name="nier" storage="nier_normal" pos="center" time="300" wait="true"]
+    [shake name="nier" time="300" power="5"]
     #ニーア
     嬉しい...！私ね、団長さんの為なら[br]なんでもできる...。[br]団長さんが愛してくれるなら、なんでも...。
     [p]

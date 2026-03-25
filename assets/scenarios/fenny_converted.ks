@@ -80,11 +80,13 @@
     サブリナ！[br]実はその...団長さんとデート中なんだよ！
     [p]
     
-    [stopbgm] 
-    
+    [stopbgm]
+
     #サブリナ
     は！？
     [p]
+    [focus time="300"]
+    [chara_zoom name="sabrina" scale="1.3" restore="true" restore_time="200"]
     
     #フェニー
     だから...その...邪魔しないで欲しいんだよ！！！
@@ -128,9 +130,11 @@
     #フェニー
     ああーーーーー！！！
     [p]
+    [vibrate time="300"]
+    [chara_zoom name="fenny" scale="1.4" restore="true" restore_time="200"]
     チョコが、チョコがなくなってるんだよ！！？
     [p]
-   
+
 
     [chara_show name="ruria" storage="ruria_normal" pos="right"]
     #ルリア
@@ -143,7 +147,8 @@
     [p]
     まさかこれは...
     [p]
-   
+    [focus time="400"]
+
 
     [chara_show name="fenny" storage="fenny_normal" pos="left"]
     #フェニー
@@ -159,7 +164,7 @@
     [p]
 
     ; 裁判シーンへの導入
-    [playbgm storage="bgm_action" loop="true"] 
+    [playbgm storage="bgm_action" loop="true"]
     これよりチョコ裁判議論が始まります。
     [p]
     証言者達は次々と証言をするので、[br]おかしな証言を「指摘」しましょう。
@@ -178,7 +183,7 @@
     [chara_hide name="fenny" time="500" wait="true"]
     [jump storage="TrialScene" params="{ layoutDataKey: 'trial_ch1' }"]
     [s]
-   
+
 
 ; ----- 器材ルート -----
 *buy_equipment_route
@@ -221,6 +226,7 @@
     [s]
 
 *equipment_ask_hauhet_end
+    [playbgm storage="ending_bgm" loop="true"]
     [chara_hide name="fenny" time="200" wait="true"]
     [chara_show name="hauhet" storage="hauhet_normal" pos="center"]
     #ハウヘト
@@ -230,10 +236,12 @@
     [p]
     熱伝導効率を最大に高めるためにはこのヒヒイロボウル！
     [p]
+    [chara_zoom name="hauhet" scale="1.2" restore="true" restore_time="100"]
     これは良いものよ...。
     [p]
     ヒヒイロカネはその希少性から市場にほぼ出回ることはないわ。[br]だからこそそれを贅沢に使ったこのヒヒイロボウルは...[br]
     [p]
+    [shake name="hauhet" time="600" power="6"]
     [chara_hide name="hauhet" time="200" wait="true"]
     [chara_show name="fenny" storage="fenny_normal" pos="center"]
     #フェニー
@@ -272,9 +280,11 @@
     #フェニー
     ああーーーーー！！！
     [p]
+    [vibrate time="300"]
+    [chara_zoom name="fenny" scale="1.4" restore="true" restore_time="200"]
     チョコが、チョコがなくなってるんだよ！！？
     [p]
-   
+
 
     [chara_show name="ruria" storage="ruria_normal" pos="right"]
     #ルリア
@@ -287,7 +297,8 @@
     [p]
     まさかこれは...
     [p]
-   
+    [focus time="400"]
+
 
     [chara_show name="fenny" storage="fenny_normal" pos="left"]
     #フェニー
@@ -303,7 +314,7 @@
     [p]
 
     ; 裁判シーンへの導入
-    [playbgm storage="bgm_action" loop="true"] 
+    [playbgm storage="bgm_action" loop="true"]
     これよりチョコ裁判議論が始まります。
     [p]
     証言者達は次々と証言をするので、[br]おかしな証言を「指摘」しましょう。

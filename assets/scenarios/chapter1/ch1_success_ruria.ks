@@ -25,6 +25,8 @@
 「剣拓の欠片……？ こんな場所に落ちてるなんて、もしかして……」
 [p]
 [playse storage="shock"]
+[vibrate time="300"]
+[focus time="500"]
 #
 （シエテ……！？）
 [p]
