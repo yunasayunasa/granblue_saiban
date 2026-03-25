@@ -279,9 +279,8 @@
     BAD END
     [l]
     [p]
-    [er]
-    #
-    [jump target="*three_girls_appear_common"]
+    [clearscreen time="1500"]
+    [jump storage="TitleScene"]
 
 *receive_nier_good_end
     [playbgm storage="ending_bgm" loop="true"]

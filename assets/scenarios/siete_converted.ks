@@ -123,8 +123,8 @@
     再演算再演算！
     [p]
     [chara_hide name="roger" time="500" wait="true"]
-
-    [jump target="*spar_with_siete"]
+    [clearscreen time="1500"]
+    [jump storage="TitleScene"]
 
 *spar_dodge_left
     #
