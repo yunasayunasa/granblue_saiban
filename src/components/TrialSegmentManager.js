@@ -753,11 +753,12 @@ export default class TrialSegmentManager {
         // 1. 画面フラッシュ
         scene.cameras.main.flash(200, 255, 255, 255);
 
-        // 2. ガラス粉砕音 (SoundManager経由で安全に再生)
+        // 2. 粉砕音 (se_break があれば優先、なければ glass にフォールバック)
+        const breakKey = scene.cache.audio.has('se_break') ? 'se_break' : 'glass';
         if (this.soundManager) {
-            this.soundManager.playSe('glass').catch(() => { });
+            this.soundManager.playSe(breakKey).catch(() => { });
         } else {
-            scene.sound.play('glass', { volume: 0.5 });
+            scene.sound.play(breakKey, { volume: 0.8 });
         }
 
         // 3. 破片の生成とアニメーション

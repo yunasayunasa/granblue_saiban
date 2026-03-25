@@ -101,7 +101,8 @@
     "smash": "assets/smash.mp3",
     "correct": "assets/smash.mp3",
     "shock": "assets/smash.mp3",
-    "glass": "assets/smash.mp3"
+    "glass": "assets/smash.mp3",
+    "se_break": "assets/audio/se_break.mp3"
   },
   "//": "--- ここからが新しいカテゴリです ---",
   "prefabs": [
