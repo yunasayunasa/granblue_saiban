@@ -258,12 +258,12 @@
     [chara_new name="siete" jname="シエテ"]
 
     ; プロローグ開始
-    [fadein]
     [fadeout]
     [stopbgm]
     [er]
     [playbgm storage="cafe" loop="true"]
     [bg storage="bg_enzan_world" time="1000"]
+    [fadein]
     [wait time=1000]
 
     君は、どこか見覚えのある空間にいる。そうだ、確かこの後彼が...

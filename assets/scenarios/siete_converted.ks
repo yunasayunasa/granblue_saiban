@@ -110,12 +110,35 @@
     [s]
 
 *spar_block_sword_badend
-    [bg storage="bg_inship" time="500"]
-    BAD END
+    [stopbgm]
+    [chara_hide name="siete" time="200" wait="true"]
+    #
+    君は、暗闇から目を覚ました。
     [p]
+    どうやら気絶していたらしい。
+    [p]
+    [chara_show name="siete" storage="siete_normal" pos="center" time="500" wait="true"]
+    #シエテ
+    ごめん！団長ちゃん！
+    [p]
+    団長ちゃんならこれぐらいなら大丈夫と思って、
+    [p]
+    強く打ち込みすぎちゃった！
+    [p]
+    本当ごめんね！
+    [p]
+    [chara_hide name="siete" time="200" wait="true"]
+    #
+    ベッドの横の時計を見ると、
+    [p]
+    既に0時を回っていた。
+    [p]
+    バレンタインは、終わったのだ。
+    [p]
+    BAD END
+    [l]
 
     ; ロジャー登場
-    [chara_hide name="siete" time="200" wait="true"]
     [chara_show name="roger" storage="roger_normal" pos="center" time="500" wait="true"]
     #ロジャー
     ありゃ！バレンタインおわちゃた！
