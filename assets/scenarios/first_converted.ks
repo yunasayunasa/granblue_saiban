@@ -16,7 +16,7 @@
     [bg storage="bg_enzan_world" time="1000"]
     [wait time=1000]
 
-    君は、見たこともない空間にいる。[br]幻想的な一面の花畑、[br]とても現実とは思えない。
+    君は、見たこともない空間にいる。[br]一面の幻想的な風景、[br]とても現実とは思えない。
     [p]
 
     [chara_show name="roger" storage="roger_normal" pos="center"]

@@ -210,6 +210,7 @@
     グランシャリ...
     [p]
     [playbgm storage="ending_bgm" loop="true"]
+    [chara_show name="siete" storage="siete_normal" pos="center"]
     #シエテ
     え？俺に？[br]くれるのかい？ありがとう、団長ちゃん！[br]とても嬉しいよ！
     [p]

@@ -53,4 +53,5 @@
 [p]
 誰かを想い、誰かに想われたチョコの味は、[br]きっとどんな高級品よりも甘かったに違いない。
 [p]
+[stopbgm time="500"]
 [jump storage="chapter1/ending.ks"]

@@ -227,6 +227,7 @@
     [p]
     無理だ。1人では━ [br]君は押し迫る海の生物達の中に消えていった...。
     [p]
+    [chara_hide name="zombie" time="200" wait="true"]
     [stopbgm time="1000"]
     [link target="*pseudo_prologue_start" text="再演算する"] 
     [link target="*start_return_title" text="あきらめる"]
@@ -349,7 +350,8 @@
 *pseudo_select_hard
     [jump target="*auguste_arrival"]
 
-*true_ending 
+*true_ending
+    [bg storage="bg_auguste" time="1000"]
     [playbgm storage="bgm_action" loop="true"]
     [chara_show name="kaki" storage="kaki" pos="left"]
     [chara_show name="nni" storage="nni" pos="right"]

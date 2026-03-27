@@ -184,18 +184,11 @@ export default class TrialScene extends BaseGameScene {
 
     handleTimeUp() {
         console.log('[TrialScene] Time Up!');
-        this.events.emit('TIME_UP');
-
-        // GameFlowManagerを通じてゲームオーバーへ
-        const engineAPI = this.registry.get('engineAPI');
-        if (engineAPI) {
-            engineAPI.fireGameFlowEvent('GAME_OVER');
-        } else {
-            const systemScene = this.scene.get('SystemScene');
-            if (systemScene && systemScene.gameFlowManager) {
-                systemScene.gameFlowManager.handleEvent('GAME_OVER');
-            }
+        if (this.timerEvent) {
+            this.timerEvent.destroy();
+            this.timerEvent = null;
         }
+        this.events.emit('TRIAL_TIMEOUT');
     }
 
     setPause(pause) {
