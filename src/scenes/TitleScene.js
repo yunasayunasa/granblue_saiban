@@ -32,7 +32,7 @@ export default class TitleScene extends BaseGameScene {
         const logo = this.add.image(cx, cy - 60, 'title_logo')
             .setAlpha(0)
             .setDepth(2);
-        const logoScale = Math.min((W * 0.65) / logo.width, (H * 0.45) / logo.height);
+        const logoScale = Math.min((W * 0.65) / logo.width, (H * 0.45) / logo.height) * 1.2;
         logo.setScale(logoScale);
 
         // ── ホワイトフラッシュ用オーバーレイ ──
@@ -43,7 +43,7 @@ export default class TitleScene extends BaseGameScene {
         // ── TOUCH SCREEN テキスト ──
         const touchText = this.add.text(cx, H * 0.83, 'TOUCH SCREEN', {
             fontFamily: '"Noto Sans JP", sans-serif',
-            fontSize: '26px',
+            fontSize: '31px',
             fill: '#ffffff',
             letterSpacing: 6,
             stroke: '#000000',
