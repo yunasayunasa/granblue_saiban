@@ -7,7 +7,8 @@ export default class TitleScene extends BaseGameScene {
 
     create() {
         super.create();
-        this.initSceneWithData();
+        // JSONレイアウト（旧タイトル）をバイパスし、直接onSetupCompleteへ
+        this.finalizeSetup([]);
     }
 
     onSetupComplete() {
