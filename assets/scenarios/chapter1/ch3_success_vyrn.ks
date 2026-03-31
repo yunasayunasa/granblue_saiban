@@ -1,5 +1,7 @@
 ; chapter1/ch3_success_vyrn.ks
 [cm]
+[chara_show name="roger" storage="roger_normal" pos="left" time="200" wait="false"]
+[chara_show name="vyrn" storage="vyrn_normal" pos="right" time="200" wait="true"]
 [playse storage="correct"]
 [playbgm storage="gyakuten_bgm" loop="true"]
 #ロジャー
@@ -20,9 +22,12 @@
 #ビィ
 「ア、アブネェ……！ おいらとしたことが、証拠隠滅しきれてなかったかぁ～！」
 [p]
+[chara_show name="ruria" storage="ruria_normal" pos="center" time="200" wait="true"]
 #ルリア
 「ビィさん！ やっぱりビィさんが食べてしまったんですか？」
 [p]
+[chara_hide name="ruria" time="200" wait="false"]
+[chara_show name="siete" storage="siete_normal" pos="center" time="200" wait="true"]
 #シエテ
 「やれやれ。トカゲくん、腹ペコだったのかい？」
 [p]
@@ -37,6 +42,7 @@
 「…………。」
 [p]
 #フェニー
+[chara_hide name="siete" time="200" wait="true"]
 [chara_show name="fenny" storage="fenny_smile" pos="center" time="300" wait="true"]
 「もー！ ビィくんたら、食いしん坊なんだよ！」
 [p]
@@ -53,5 +59,8 @@
 [p]
 誰かを想い、誰かに想われたチョコの味は、[br]きっとどんな高級品よりも甘かったに違いない。
 [p]
+[chara_hide name="roger" time="200" wait="false"]
+[chara_hide name="vyrn" time="200" wait="false"]
+[chara_hide name="fenny" time="200" wait="true"]
 [stopbgm time="500"]
 [jump storage="chapter1/ending.ks"]

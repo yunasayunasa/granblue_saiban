@@ -1,5 +1,7 @@
 ; chapter1/ch1_success_ruria.ks
 [cm]
+[chara_show name="roger" storage="roger_normal" pos="left" time="200" wait="false"]
+[chara_show name="ruria" storage="ruria_normal" pos="right" time="200" wait="true"]
 [playse storage="correct"]
 #ロジャー
 「異議あり！と言いたいところだけど、これは紛れもない証拠だね！」
@@ -15,6 +17,7 @@
 [p]
 「でも、私が着いた時には、もうチョコは……箱の半分くらいなくなっていたんです！」
 [p]
+[chara_show name="fenny" storage="fenny_normal" pos="center" time="200" wait="true"]
 #フェニー
 「ええっ！？ じゃあ、ルリアが犯人じゃないんだよ？」
 [p]
@@ -33,4 +36,7 @@
 #システム
 （ルリアへの追求が完了しました。次の議論へ進みます）
 [p]
+[chara_hide name="roger" time="200" wait="false"]
+[chara_hide name="ruria" time="200" wait="false"]
+[chara_hide name="fenny" time="200" wait="true"]
 [overlay_end]

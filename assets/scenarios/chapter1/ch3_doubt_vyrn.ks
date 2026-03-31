@@ -1,5 +1,7 @@
 ; chapter1/ch3_doubt_vyrn.ks
 [cm]
+[chara_show name="roger" storage="roger_normal" pos="left" time="200" wait="false"]
+[chara_show name="vyrn" storage="vyrn_normal" pos="right" time="200" wait="true"]
 #
 本当にチョコのくずなんて付いてないのか？
 [p]
@@ -17,4 +19,6 @@
 #システム
 （証言が更新されました）
 [p]
+[chara_hide name="roger" time="200" wait="false"]
+[chara_hide name="vyrn" time="200" wait="true"]
 [overlay_end]
