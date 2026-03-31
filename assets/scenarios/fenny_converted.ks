@@ -71,7 +71,8 @@
     #サブリナ
     何か悩みがあるならなんでも言って。[br]ようやく一緒にいられるんだから...
     [p]
-    
+
+    [chara_show name="fenny" storage="fenny_normal" pos="left"]
     #フェニー
     サブリナ！[br]実はその...団長さんとデート中なんだよ！
     [p]
