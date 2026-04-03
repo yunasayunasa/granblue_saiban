@@ -204,7 +204,7 @@
                                         "text": "入り口まで行ったんです",
                                         "choices": [
                                             {
-                                                "text": "ではこれを見てもらおう！",
+                                                "text": "入り口より奥にいた！",
                                                 "evidence_required": "blue_hair",
                                                 "pre_present_scenario": "chapter1/ch1_pre_present.ks",
                                                 "correct": true,
@@ -224,7 +224,7 @@
                 "charaId": "ruria",
                 "position": "center",
                 "style": "typewriter",
-                "text": "ビィとも遊んでないし……ただ、あの甘い匂いが、どうしても気になってしまって……。",
+                "text": "ビィさんとも遊んでないし……ただ、あの甘い匂いが、どうしても気になってしまって……。",
                 "highlights": []
             }
         ]

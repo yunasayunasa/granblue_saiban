@@ -153,7 +153,7 @@
                                         "text": "みんなで",
                                         "choices": [
                                             {
-                                                "text": "その証拠これだ！",
+                                                "text": "君はキッチンにいた！",
                                                 "evidence_required": "blue_feather",
                                                 "pre_present_scenario": "chapter1/ch1_pre_present.ks",
                                                 "correct": true,
@@ -175,12 +175,12 @@
                                 ]
                             },
                             {
-                                "text": "それはいつの話だ？",
+                                "text": "それはいつの話？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t1_place.ks"
                             },
                             {
-                                "text": "本当に一日中いたのか？",
+                                "text": "本当に一日中いたの？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t1_content.ks"
                             }
@@ -199,12 +199,12 @@
                         "text": "夕方まで",
                         "choices": [
                             {
-                                "text": "それはいつの話だ？",
+                                "text": "それはいつの話？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t2_time.ks"
                             },
                             {
-                                "text": "本当にずっと一緒だったのか？",
+                                "text": "本当にずっと一緒だったの？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t2_alone.ks"
                             },
@@ -228,12 +228,12 @@
                         "text": "見てない",
                         "choices": [
                             {
-                                "text": "キッチンを知らないはずはない！",
+                                "text": "キッチンを知らないはずない！",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t3_kitchen.ks"
                             },
                             {
-                                "text": "ではこれを見てもらおう！",
+                                "text": "だったらこの証拠は何！？",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch2_fail_t3_present.ks"
                             }

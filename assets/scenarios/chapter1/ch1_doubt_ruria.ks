@@ -2,14 +2,14 @@
 [cm]
 [chara_show name="fenny" storage="fenny_normal" pos="left" time="200" wait="false"]
 [chara_show name="ruria" storage="ruria_normal" pos="right" time="200" wait="true"]
-#
-「本当に何も見ていないのか？」
+#グラン
+「本当に何も見ていないの？」
 [p]
 #ルリア
 「は、はい……。本当にお部屋にいたんですぅ。」
 [p]
 #フェニー
-「でも、ルリア。さっきキッチンの入り口で蒼い光が見えたってサブリナが言ってたんだよ！」
+「でも、ルリア。さっきキッチンの入り口で蒼い髪が見えたってサブリナが言ってたんだよ！」
 [p]
 #ルリア
 「えっ！？ そ、それは……」

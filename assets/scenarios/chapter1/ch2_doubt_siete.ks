@@ -2,11 +2,11 @@
 [cm]
 [chara_show name="fenny" storage="fenny_normal" pos="left" time="200" wait="false"]
 [chara_show name="siete" storage="siete_normal" pos="right" time="200" wait="true"]
-#
+#グラン
 「修練場に誰かいたのか？」
 [p]
 #シエテ
-「そうだね、シス……は寝てたかな。ウーノは茶を飲んでたし、ソーンは遠くを見てたよ。」
+「そうだね、オクトー……は瞑想をしてたかな。ウーノは茶を飲んでたし、ソーンは遠くを見てたよ。」
 [p]
 #フェニー
 「シエテ、おかしいんだよ！十天衆のみんながそんなに一箇所に集まるなんて……」

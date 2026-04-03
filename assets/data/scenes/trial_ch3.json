@@ -189,10 +189,10 @@
                 "charaId": "vyrn",
                 "position": "left",
                 "style": "typewriter",
-                "text": "おいら、ずっと団長のそばにいたじゃないか。な、団長？{se:laugh}",
+                "text": "おいら、ずっとオマエのそばにいたじゃないか。な？{se:laugh}",
                 "highlights": [
                     {
-                        "text": "ずっと団長のそばに",
+                        "text": "ずっとオマエのそばに",
                         "choices": [
                             {
                                 "text": "それは嘘だ！",
@@ -221,10 +221,10 @@
                 "text": "ルリアにシエテ……あいつらだって怪しいじゃないか！ おいらは何もやってないぞ！",
                 "highlights": [
                     {
-                        "text": "潔白",
+                        "text": "怪しい",
                         "choices": [
                             {
-                                "text": "その証拠これだ！",
+                                "text": "ルリアとシエテは関係なかった！",
                                 "evidence_required": "blue_hair",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch3_fail_t5_evidence.ks"
@@ -235,7 +235,7 @@
                                 "failure_scenario": "chapter1/ch3_fail_t5_innocent.ks"
                             },
                             {
-                                "text": "怪しいのはお前だ！",
+                                "text": "怪しいのは君だ！",
                                 "correct": false,
                                 "failure_scenario": "chapter1/ch3_fail_t5_suspect.ks"
                             }
@@ -254,24 +254,24 @@
                         "text": "どこにも付いてねぇ",
                         "choices": [
                             {
-                                "text": "「一口も」なんておかしい！",
+                                "text": "どこにもなんておかしい！",
                                 "action": "update_testimony",
                                 "pre_update_scenario": "chapter1/ch3_doubt_vyrn.ks",
                                 "target": "t6",
-                                "new_text": "オイラは今日、林檎しか食べてねぇ！ チョコなんて一口も……！",
+                                "new_text": "オイラは今日、林檎しか食べてねぇ！ あんなに美味いチョコなんてしらねぇ……！",
                                 "new_highlights": [
                                     {
                                         "text": "一口も",
                                         "choices": [
                                             {
-                                                "text": "その証拠これだ！",
+                                                "text": "あんなに美味い、なんておかしい！",
                                                 "evidence_required": "chocolate_crumbs",
                                                 "pre_present_scenario": "chapter1/ch3_pre_vyrn1.ks",
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch3_success_vyrn.ks"
                                             },
                                             {
-                                                "text": "林檎を食べたのはいつだ？",
+                                                "text": "林檎を食べたのはいつ？",
                                                 "correct": false,
                                                 "failure_scenario": "chapter1/ch3_fail_t6b_apple.ks"
                                             },
