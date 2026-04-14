@@ -25,8 +25,19 @@ export default class UIScene extends Phaser.Scene {
             const systemScene = this.scene.get('SystemScene');
             if (systemScene) {
                 systemScene.events.on('transition-complete', this.onSceneTransition, this);
+                // ★ ScenarioManagerからのモード変更通知を受け取り、インジケータを更新
+                systemScene.events.on('gamemode-changed', this.onGameModeChanged, this);
             } else {
                 console.warn("UIScene: SystemSceneが見つかりませんでした。");
+            }
+
+            // ★ 初期状態ではインジケータを空にしておく
+            this.onGameModeChanged('normal');
+
+            // ★ mode_indicator は表示専用。誤って入力を奪わないよう無効化
+            const modeIndicator = this.uiElements.get('mode_indicator');
+            if (modeIndicator && modeIndicator.disableInteractive) {
+                modeIndicator.disableInteractive();
             }
 
             // buildUiFromLayout 完了後、messageWindow のクリック送りリスナーを登録
@@ -52,6 +63,23 @@ export default class UIScene extends Phaser.Scene {
     }
     setActiveNovelManager(manager) {
         this.activeNovelManager = manager;
+    }
+
+    /**
+     * ScenarioManager のモード変更 ('normal' / 'skip' / 'auto') に応じて
+     * 画面上のモードインジケータを更新する。
+     * @param {string} mode
+     */
+    onGameModeChanged(mode) {
+        const indicator = this.uiElements.get('mode_indicator');
+        if (!indicator) return;
+        if (mode === 'skip') {
+            indicator.setText('Skip: ON');
+        } else if (mode === 'auto') {
+            indicator.setText('Auto: ON');
+        } else {
+            indicator.setText('');
+        }
     }
     /***
      * 
@@ -661,6 +689,7 @@ export default class UIScene extends Phaser.Scene {
         const systemScene = this.scene.get('SystemScene');
         if (systemScene) {
             systemScene.events.off('transition-complete', this.onSceneTransition, this);
+            systemScene.events.off('gamemode-changed', this.onGameModeChanged, this);
         }
     }
 }

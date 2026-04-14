@@ -1,6 +1,7 @@
 import BaseGameScene from './BaseGameScene.js';
 import EvidenceManager from '../components/EvidenceManager.js';
 import EvidenceSelectOverlay from '../components/EvidenceSelectOverlay.js';
+import EngineAPI from '../core/EngineAPI.js';
 
 
 /**
@@ -125,14 +126,14 @@ export default class TrialScene extends BaseGameScene {
 
         // ★ 裁判クリア時の処理
         this.events.on('TRIAL_COMPLETE', () => {
-            console.log('[TrialScene] TRIAL_COMPLETE received. Shutting down TrialScene and starting ending in GameScene.');
+            console.log('[TrialScene] TRIAL_COMPLETE received. Returning to title via GameFlowManager.');
             // タイマーを止める
             if (this.timerEvent) {
                 this.timerEvent.destroy();
                 this.timerEvent = null;
             }
-            // TrialScene をシャットダウンし、GameScene でエンディングシナリオを再生
-            this.scene.start('GameScene', { scenario: 'chapter1/ending.ks' });
+            // GameFlowManager経由でタイトルへ戻る (InGame状態からRETURN_TO_TITLE遷移)
+            EngineAPI.fireGameFlowEvent('RETURN_TO_TITLE');
         });
 
         // ★ リセット要求の処理

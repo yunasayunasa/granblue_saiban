@@ -73,12 +73,11 @@ export default class SystemScene extends Phaser.Scene {
 
         this.events.on('request-subscene', this._handleRequestSubScene, this);
         this.events.on('request-gamemode-toggle', (mode) => {
-            const gameScene = this.scene.get('GameScene');
-            if (gameScene && gameScene.scene.isActive() && gameScene.scenarioManager) {
-                const currentMode = gameScene.scenarioManager.mode;
-                const newMode = currentMode === mode ? 'normal' : mode;
-                gameScene.scenarioManager.setMode(newMode);
-                // console.log(`モード変更: ${currentMode} -> ${newMode}`);
+            // UISceneのtoggleGameModeは activeNovelManager (現在アクティブな
+            // NovelOverlayScene か GameScene のScenarioManager) に正しくルーティングする
+            const uiScene = this.scene.get('UIScene');
+            if (uiScene && typeof uiScene.toggleGameMode === 'function') {
+                uiScene.toggleGameMode(mode);
             }
         });
         this.events.on('request-scene-resume', (sceneKey) => {

@@ -56,6 +56,31 @@
       }
     },
     {
+      "name": "mode_indicator",
+      "type": "Text",
+      "x": 230,
+      "y": 46,
+      "depth": 10,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 1,
+      "registryKey": "Text",
+      "text": "",
+      "style": {
+        "fontFamily": "Courier",
+        "fontSize": "28px",
+        "fontStyle": "bold",
+        "color": "#ffd700",
+        "stroke": "#000000",
+        "strokeThickness": 4,
+        "align": "left"
+      },
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
       "name": "menu_button",
       "type": "Text",
       "x": 117,

@@ -9,4 +9,4 @@
 真実は、闇の中に消えていく……。
 [p]
 [clearscreen time="1500"]
-[fire_game_flow_event event="RETURN_TO_TITLE"]
+[overlay_end]
