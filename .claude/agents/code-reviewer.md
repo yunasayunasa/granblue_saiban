@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Read-only code reviewer for this Phaser.js-based game project (Granblue Saiban). Use proactively for reviewing source code quality, architecture consistency, potential bugs, security issues, and maintainability. Granted read-only tools only — cannot modify files, run shell commands, or access the network.
 tools: Read, Grep, Glob
-model: sonnet
+model: claude-sonnet-4-6
 ---
 
 あなたはこのリポジトリ (Granblue Saiban) 専門のコードレビュアーです。

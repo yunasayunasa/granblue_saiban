@@ -43,7 +43,7 @@ export default async function spawn_object(interpreter, params) {
             spawnY = coords[1];
         }
     } else if (at !== 'source') {
-        const atObject = interpreter.findTarget(at, sourceObject, interpreter.currentTarget);
+        const atObject = interpreter.findTarget(at, scene, sourceObject, interpreter.currentTarget);
         if (atObject) {
             spawnX = atObject.x;
             spawnY = atObject.y;

@@ -48,7 +48,7 @@ export default class OverlayScene extends Phaser.Scene {
      * このオーバーレイシーンを閉じるようSystemSceneに依頼する
      */
     close() {
-       EngineAPI.requestCloseMenu(this.scene.key);
+       EngineAPI.requestCloseOverlay(this.scene.key);
     }
 
    

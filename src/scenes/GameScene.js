@@ -253,7 +253,7 @@ export default class GameScene extends Phaser.Scene {
                 }
             }
 
-            await rebuildScene(this, loadedState, this.restoredBgmKey);
+            await rebuildScene(this, loadedState);
 
             this.events.emit('force-hud-update');
 
@@ -277,7 +277,7 @@ export default class GameScene extends Phaser.Scene {
     }
 }
 
-async function rebuildScene(scene, loadedState, restoredBgmKey) {
+async function rebuildScene(scene, loadedState) {
     // console.log("--- 世界の再構築を開始 ---", loadedState);
     const manager = scene.scenarioManager;
     try {
@@ -327,7 +327,7 @@ async function rebuildScene(scene, loadedState, restoredBgmKey) {
 
         // 5. BGMを復元
         // console.log("[rebuildScene] Step 5: Restoring BGM...");
-        const targetBgmKey = restoredBgmKey || loadedState.sound.bgm;
+        const targetBgmKey = loadedState.sound?.bgm;
         if (targetBgmKey) {
             manager.soundManager.playBgm(targetBgmKey);
         } else {

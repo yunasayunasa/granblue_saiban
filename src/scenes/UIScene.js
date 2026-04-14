@@ -29,30 +29,18 @@ export default class UIScene extends Phaser.Scene {
                 console.warn("UIScene: SystemSceneが見つかりませんでした。");
             }
 
-            // ▼▼▼【ログ爆弾 START】▼▼▼
-            // buildUiFromLayout が完了した後、安全に messageWindow を取得してリスナーを設定
+            // buildUiFromLayout 完了後、messageWindow のクリック送りリスナーを登録
             const messageWindow = this.uiElements.get('message_window');
             if (messageWindow) {
-                // setInteractiveは registerUiElement の中で呼ばれているはずだが、念のため
                 messageWindow.setInteractive();
-
-                // 既存のリスナーを一度クリアしてから登録する
-                messageWindow.off('pointerdown');
-                messageWindow.on('pointerdown', (pointer) => {
-                    console.log("%c[LOG BOMB | UIScene] messageWindow received a pointerdown event!", "background: orange; color: black;");
-
+                messageWindow.on('pointerdown', () => {
                     if (this.activeNovelManager) {
-                        console.log("%c[LOG BOMB | UIScene] -> Found activeNovelManager. Calling onClick().", "background: orange; color: black;");
                         this.activeNovelManager.onClick();
-                    } else {
-                        console.log("%c[LOG BOMB | UIScene] -> activeNovelManager is null. Doing nothing.", "background: orange; color: black;");
                     }
                 });
-                console.log("%c[LOG BOMB] UIScene: pointerdown listener for 'message_window' is now active.", "color: orange;");
             } else {
-                console.error("[LOG BOMB] UIScene: Could not find 'message_window' after UI build.");
+                console.error("[UIScene] Could not find 'message_window' after UI build.");
             }
-            // ▲▲▲【ログ爆-弾 END】▲▲▲
 
             this.isFullyReady = true;
             this.events.emit('scene-ready');

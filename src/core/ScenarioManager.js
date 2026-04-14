@@ -522,7 +522,7 @@ export default class ScenarioManager {
         }
         // 背景の状態を保存
         if (this.layers.background.list.length > 0) {
-            state.layers.background = this.layers.background.list[0].texture.key;
+            state.background = this.layers.background.list[0].texture.key;
         }
         return state;
     }
