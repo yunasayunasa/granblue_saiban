@@ -4,6 +4,7 @@
     [chara_new name="fenny" jname="フェニー"]
     [chara_new name="narumia" jname="ナルメア"]
     [chara_new name="siete" jname="シエテ"]
+    [chara_new name="vyrn" jname="ビィ"]
 
     ; プロローグ開始
      [fadein]
