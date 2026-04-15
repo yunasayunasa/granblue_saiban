@@ -1,6 +1,7 @@
 import BaseGameScene from './BaseGameScene.js';
 import EvidenceManager from '../components/EvidenceManager.js';
 import EvidenceSelectOverlay from '../components/EvidenceSelectOverlay.js';
+import EngineAPI from '../core/EngineAPI.js';
 
 
 /**
@@ -125,14 +126,14 @@ export default class TrialScene extends BaseGameScene {
 
         // ★ 裁判クリア時の処理
         this.events.on('TRIAL_COMPLETE', () => {
-            console.log('[TrialScene] TRIAL_COMPLETE received. Shutting down TrialScene and starting ending in GameScene.');
+            console.log('[TrialScene] TRIAL_COMPLETE received. Returning to title via GameFlowManager.');
             // タイマーを止める
             if (this.timerEvent) {
                 this.timerEvent.destroy();
                 this.timerEvent = null;
             }
-            // TrialScene をシャットダウンし、GameScene でエンディングシナリオを再生
-            this.scene.start('GameScene', { scenario: 'chapter1/ending.ks' });
+            // GameFlowManager経由でタイトルへ戻る (InGame状態からRETURN_TO_TITLE遷移)
+            EngineAPI.fireGameFlowEvent('RETURN_TO_TITLE');
         });
 
         // ★ リセット要求の処理
@@ -220,5 +221,27 @@ export default class TrialScene extends BaseGameScene {
     update(time, delta) {
         if (this.isPaused) return;
         super.update(time, delta);
+    }
+
+    shutdown() {
+        // Trial 系のシーンイベントを解除 (シーン再入時の多重登録防止)
+        this.events.off('START_DEBATE', this.startDebate, this);
+        this.events.off('PAUSE_TRIAL');
+        this.events.off('RESUME_TRIAL');
+        this.events.off('TRIAL_COMPLETE');
+        this.events.off('RESTART_DEBATE_REQUEST');
+
+        // タイマー破棄
+        if (this.timerEvent) {
+            this.timerEvent.destroy();
+            this.timerEvent = null;
+        }
+
+        // EvidenceSelectOverlay のリスナー解除
+        if (this.evidenceSelectOverlay && this.evidenceSelectOverlay.off) {
+            this.evidenceSelectOverlay.off('CLOSE_OVERLAY');
+        }
+
+        super.shutdown();
     }
 }

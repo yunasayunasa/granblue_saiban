@@ -141,30 +141,14 @@ export default class StateManager extends Phaser.Events.EventEmitter {
 
         return {
             saveDate: new Date().toLocaleString('ja-JP'),
-            variables: { f: this.f }, 
+            variables: { f: this.f },
             scenario: scenarioState,
             layers: {
                 background: backgroundState,
                 characters: characterStates,
             },
             sound: {
-                // ★★★ 3. 変数をオブジェクトのプロパティとして設定する ★★★
                 bgm: currentBgmKey
-            }
-        };
-    
-        
-        return {
-            saveDate: new Date().toLocaleString('ja-JP'),
-            variables: { f: this.f }, 
-            scenario: scenarioState,
-            layers: {
-                background: backgroundState,
-                characters: characterStates,
-            },
-            sound: {
-                bgm: scenarioManager.soundManager.getCurrentBgmKey(),
-                
             }
         };
     }

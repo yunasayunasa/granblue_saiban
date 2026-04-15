@@ -1,5 +1,6 @@
 ; chapter1/ch2_doubt_siete.ks
 [cm]
+[chara_show name="roger" storage="roger_normal" pos="center" time="200" wait="false"]
 [chara_show name="fenny" storage="fenny_normal" pos="left" time="200" wait="false"]
 [chara_show name="siete" storage="siete_normal" pos="right" time="200" wait="true"]
 #グラン
@@ -19,6 +20,7 @@
 #システム
 （証言が更新されました）
 [p]
+[chara_hide name="roger" time="200" wait="false"]
 [chara_hide name="fenny" time="200" wait="false"]
 [chara_hide name="siete" time="200" wait="true"]
 [overlay_end]

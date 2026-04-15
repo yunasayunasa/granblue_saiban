@@ -21,6 +21,7 @@ export default class ScenarioManager {
         this.isStopped = false;
         this.mode = 'normal';
         this.autoTimer = null;
+        this.isSkipLoopRunning = false;
         this.tagHandlers = new Map();
         this.ifStack = [];
         this.callStack = [];
@@ -425,27 +426,31 @@ export default class ScenarioManager {
 
     // ★★★ モードを切り替えるためのメソッド ★★★
     setMode(newMode) {
-        if (this.mode === newMode && newMode !== 'skip') {
-            // スキップモードでない時に同じボタンが押されたら、モードをノーマルに戻す
-            this.mode = 'normal';
-            if (this.autoTimer) this.autoTimer.remove();
-            // console.log(`モード変更: ${newMode} -> normal`);
+        if (this.mode === newMode) {
+            // 同一モードを指定された場合は何もしない(呼び出し側が既にトグルを解決している想定)
             return;
         }
 
-        // console.log(`モード変更: ${this.mode} -> ${newMode}`);
+        const oldMode = this.mode;
         this.mode = newMode;
 
-        if (this.autoTimer) this.autoTimer.remove();
+        // オートタイマーの後始末 (skip/normalへ遷移する場合も含めて必ずクリア)
+        if (this.autoTimer) {
+            this.autoTimer.remove();
+            this.autoTimer = null;
+        }
+
+        // UIへの通知 (SystemScene.events経由でUIScene等にブロードキャスト)
+        const systemScene = this.scene.scene.get('SystemScene');
+        if (systemScene) {
+            systemScene.events.emit('gamemode-changed', newMode);
+        }
 
         if (this.mode === 'skip') {
-            // ★ もしクリック待ち状態なら、即座に次の行へ進める（レスポンス改善）
-            if (this.isWaitingClick) {
-                this.onClick();
-                return; // skipLoopはonClickの中から間接的に呼ばれる
+            // 既存のskipLoop重複起動を避けるためのガード
+            if (!this.isSkipLoopRunning) {
+                this.skipLoop();
             }
-            // ★★★ スキップループを開始 ★★★
-            this.skipLoop();
         } else if (this.mode === 'auto') {
             this.startAutoMode();
         }
@@ -453,21 +458,34 @@ export default class ScenarioManager {
 
     // ★★★ スキップ専用のループメソッドを新設 ★★★
     skipLoop() {
+        this.isSkipLoopRunning = true;
+
         // 選択肢待ちなら、モードを一時中断して止める（選択肢後に自動再開させるため）
         if (this.isWaitingChoice) {
             this.suspendedMode = 'skip';
             this.mode = 'normal';
+            this.isSkipLoopRunning = false;
+            const systemScene = this.scene.scene.get('SystemScene');
+            if (systemScene) systemScene.events.emit('gamemode-changed', 'normal');
             return;
         }
 
         // スキップモードでない、または終了状態ならループを止める
-        if (this.mode !== 'skip' || this.isEnd) {
+        if (this.mode !== 'skip' || this.isEnd || this.isStopped) {
             // console.log("スキップを停止します。");
-            this.mode = 'normal'; // 通常モードに戻す
+            this.isSkipLoopRunning = false;
             return;
         }
 
+        // タイピング中ならスキップして完了させる
+        if (this.messageWindow && this.messageWindow.isTyping) {
+            this.messageWindow.skipTyping();
+        }
+
         // isWaitingClickを強制的に解除し、次の行へ
+        if (this.isWaitingClick) {
+            this.messageWindow.hideNextArrow();
+        }
         this.isWaitingClick = false;
         this.next();
 
@@ -522,7 +540,7 @@ export default class ScenarioManager {
         }
         // 背景の状態を保存
         if (this.layers.background.list.length > 0) {
-            state.layers.background = this.layers.background.list[0].texture.key;
+            state.background = this.layers.background.list[0].texture.key;
         }
         return state;
     }

@@ -13,18 +13,13 @@ export default async function set_data(interpreter, params) {
     const stateManager = interpreter.scene.registry.get('stateManager');
     if (!stateManager) return;
 
-    // ▼▼▼【デバッグログを追加】▼▼▼
-    // console.log(`%c[DEBUG | set_data]これから評価する値(value):`, 'color: orange;', value, `(型: ${typeof value})`);
-
-    let finalValue;
-    try {
-        finalValue = stateManager.eval(value);
-    } catch (e) {
+    // stateManager.eval は内部で catch するため失敗時は undefined が返る。
+    // 評価不能だった場合は元の生文字列にフォールバックして警告を出す。
+    let finalValue = stateManager.eval(value);
+    if (finalValue === undefined) {
+        console.warn(`[set_data] Failed to evaluate "${value}". Falling back to raw value.`);
         finalValue = value;
     }
-    
-    // ▼▼▼【デバッグログを追加】▼▼▼
-    // console.log(`%c[DEBUG | set_data]評価後の値(finalValue):`, 'color: orange;', finalValue, `(型: ${typeof finalValue})`);
 
     stateManager.setF(key, finalValue);
 }

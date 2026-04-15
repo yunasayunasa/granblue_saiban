@@ -1,10 +1,10 @@
-// src/main.js (直接クラス渡し形式での最終修正 - ステップ1-1)
+// src/main.js
 
+// UIScene / GameScene は SystemScene が `this.scene.add(...)` で動的に登録するため、
+// ここでは import しない (重複読み込みと意図不明なコメント行の温床になっていた)。
 import PreloadScene from './scenes/PreloadScene.js';
 import SystemScene from './scenes/SystemScene.js';
-import UIScene from './scenes/UIScene.js';
-import GameScene from './scenes/GameScene.js';
-import { uiRegistry as rawUiRegistry, sceneUiVisibility } from './ui/index.js'; // ★元データを別名でインポート
+import { uiRegistry as rawUiRegistry, sceneUiVisibility } from './ui/index.js';
 import { eventTagHandlers } from './handlers/events/index.js';
 import SaveLoadScene from './scenes/SaveLoadScene.js';
 import ConfigScene from './scenes/ConfigScene.js';
@@ -17,7 +17,7 @@ import EditorPlugin from './plugins/EditorPlugin.js';
 import JumpScene from './scenes/JumpScene.js';
 import TitleScene from './scenes/TitleScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
-import TrialScene from './scenes/TrialScene.js'; // ★ 追加
+import TrialScene from './scenes/TrialScene.js';
 // ★★★ 新設：uiRegistryを自動処理する非同期関数 ★★★
 // pathから動的にモジュールをimportするため、asyncにする
 async function processUiRegistry(registry) {
@@ -52,9 +52,6 @@ async function processUiRegistry(registry) {
 
 const config = {
     type: Phaser.AUTO,
-    input: {
-        topOnly: false
-    },
     scale: {
         mode: Phaser.Scale.FIT,
         // ★★★ 変更点1: 親要素のIDを変更 ★★★
@@ -63,14 +60,12 @@ const config = {
         width: 1280,
         height: 720
     },
-    // ★★★ 修正箇所: シーン設定を直接クラスを渡す形式に維持 ★★★
+    // UIScene / GameScene は SystemScene から動的に add されるので、配列には含めない
     scene: [
         PreloadScene,
         SystemScene,
-        //  UIScene,       
-        //  GameScene,   
-        TitleScene,      // ★ 追加
-        GameOverScene,   // ★ 追加
+        TitleScene,
+        GameOverScene,
         SaveLoadScene,
         ConfigScene,
         BacklogScene,
@@ -82,31 +77,20 @@ const config = {
         TrialScene
     ],
     input: {
+        topOnly: false,
         activePointers: 3 // 同時に3つのタッチを認識できるようにする
     },
-    // ★★★ 変更点2: EditorPluginをグローバルプラグインとして登録 ★★★
     plugins: {
         global: [
-            // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-            // ★★★ start: true に戻し、Phaserに起動を完全に任せる ★★★
             { key: 'EditorPlugin', plugin: EditorPlugin, start: true }
-            // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
         ]
     },
-    /* physics: {
-         default: 'arcade',
-         arcade: {
-             gravity: { y: 800 }, // 標準の重力
-             debug: true // 開発中はtrueにして当たり判定を可視化
-         }
-     }*/
     physics: {
-        default: 'matter', // ★ デフォルトを 'matter' に変更
+        default: 'matter',
         matter: {
             gravity: {
-                y: 1 // Matter.jsの重力はスケールが違う。1が標準的
+                y: 1 // Matter.js の重力はスケールが違う。1 が標準的
             }
-
         }
     }
 };
@@ -116,47 +100,15 @@ window.onload = async () => {
     if (urlParams.has('debug')) {
         document.body.classList.add('debug-mode');
     }
-    // ★ステップ1: 必要なデータを先に非同期で準備する
+    // ステップ1: 必要なデータを先に非同期で準備する
     const processedUiRegistry = await processUiRegistry(rawUiRegistry);
-    // ★★★ 1. 処理後のuiRegistryの中身をコンソールに出力 ★★★
-    // console.log("%c[main.js] Final processed uiRegistry:", "color: limegreen; font-weight: bold;", processedUiRegistry);
 
     // Phaser Gameインスタンスを生成
     const game = new Phaser.Game(config);
 
-
-    /*  game.input.on('pointerdown', (pointer) => {
-      console.log('====================================================');
-      console.log(`%c[GLOBAL DEBUG] Pointer Down Event at (${pointer.x}, ${pointer.y})`, "color: magenta; font-size: 1.2em;");
-      
-      // 現在アクティブな全てのシーンを取得
-      const activeScenes = game.scene.getScenes(true);
-  
-      console.log(`%c[GLOBAL DEBUG] Active Scenes (${activeScenes.length}):`, "color: magenta;");
-      activeScenes.forEach(scene => {
-          console.log(`  - Key: ${scene.scene.key}, Status: ${game.scene.getStatus(scene)}`);
-      });
-  
-      // どのGameObjectがクリックされたかを特定する
-      // game.input.hitTest() を使って、クリック位置にあるインタラクティブなオブジェクトのリストを取得
-      const hitTestResults = game.input.hitTest(pointer, activeScenes, game.cameras.main);
-  
-      if (hitTestResults.length > 0) {
-          console.log(`%c[GLOBAL DEBUG] Hit Test Results (${hitTestResults.length}):`, "color: magenta;");
-          hitTestResults.forEach((obj, index) => {
-              console.log(`  [${index}] GameObject Name: ${obj.name}, Scene: ${obj.scene.scene.key}, Depth: ${obj.depth}`);
-          });
-      } else {
-          console.log("%c[GLOBAL DEBUG] No interactive objects found at this position.", "color: magenta;");
-      }
-      console.log('====================================================');
-  });*/
-
-    // ★ステップ2: ゲームインスタンスができた直後に、準備したデータを登録する
+    // ステップ2: ゲームインスタンスができた直後に、準備したデータを登録する
     // これにより、どのシーンが起動するよりも先にデータが利用可能になることが保証される
     game.registry.set('uiRegistry', processedUiRegistry);
     game.registry.set('sceneUiVisibility', sceneUiVisibility);
     game.registry.set('eventTagHandlers', eventTagHandlers);
-
-
 };

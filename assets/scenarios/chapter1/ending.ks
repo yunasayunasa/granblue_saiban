@@ -14,5 +14,4 @@
 ～逆転追求裁判・完食エンド～
 [p]
 [clearscreen time="1500"]
-[jump storage="TitleScene"]
-[fire_game_flow_event event="RETURN_TO_TITLE"]
+[overlay_end]

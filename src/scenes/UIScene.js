@@ -25,34 +25,33 @@ export default class UIScene extends Phaser.Scene {
             const systemScene = this.scene.get('SystemScene');
             if (systemScene) {
                 systemScene.events.on('transition-complete', this.onSceneTransition, this);
+                // ★ ScenarioManagerからのモード変更通知を受け取り、インジケータを更新
+                systemScene.events.on('gamemode-changed', this.onGameModeChanged, this);
             } else {
                 console.warn("UIScene: SystemSceneが見つかりませんでした。");
             }
 
-            // ▼▼▼【ログ爆弾 START】▼▼▼
-            // buildUiFromLayout が完了した後、安全に messageWindow を取得してリスナーを設定
+            // ★ 初期状態ではインジケータを空にしておく
+            this.onGameModeChanged('normal');
+
+            // ★ mode_indicator は表示専用。誤って入力を奪わないよう無効化
+            const modeIndicator = this.uiElements.get('mode_indicator');
+            if (modeIndicator && modeIndicator.disableInteractive) {
+                modeIndicator.disableInteractive();
+            }
+
+            // buildUiFromLayout 完了後、messageWindow のクリック送りリスナーを登録
             const messageWindow = this.uiElements.get('message_window');
             if (messageWindow) {
-                // setInteractiveは registerUiElement の中で呼ばれているはずだが、念のため
                 messageWindow.setInteractive();
-
-                // 既存のリスナーを一度クリアしてから登録する
-                messageWindow.off('pointerdown');
-                messageWindow.on('pointerdown', (pointer) => {
-                    console.log("%c[LOG BOMB | UIScene] messageWindow received a pointerdown event!", "background: orange; color: black;");
-
+                messageWindow.on('pointerdown', () => {
                     if (this.activeNovelManager) {
-                        console.log("%c[LOG BOMB | UIScene] -> Found activeNovelManager. Calling onClick().", "background: orange; color: black;");
                         this.activeNovelManager.onClick();
-                    } else {
-                        console.log("%c[LOG BOMB | UIScene] -> activeNovelManager is null. Doing nothing.", "background: orange; color: black;");
                     }
                 });
-                console.log("%c[LOG BOMB] UIScene: pointerdown listener for 'message_window' is now active.", "color: orange;");
             } else {
-                console.error("[LOG BOMB] UIScene: Could not find 'message_window' after UI build.");
+                console.error("[UIScene] Could not find 'message_window' after UI build.");
             }
-            // ▲▲▲【ログ爆-弾 END】▲▲▲
 
             this.isFullyReady = true;
             this.events.emit('scene-ready');
@@ -64,6 +63,23 @@ export default class UIScene extends Phaser.Scene {
     }
     setActiveNovelManager(manager) {
         this.activeNovelManager = manager;
+    }
+
+    /**
+     * ScenarioManager のモード変更 ('normal' / 'skip' / 'auto') に応じて
+     * 画面上のモードインジケータを更新する。
+     * @param {string} mode
+     */
+    onGameModeChanged(mode) {
+        const indicator = this.uiElements.get('mode_indicator');
+        if (!indicator) return;
+        if (mode === 'skip') {
+            indicator.setText('Skip: ON');
+        } else if (mode === 'auto') {
+            indicator.setText('Auto: ON');
+        } else {
+            indicator.setText('');
+        }
     }
     /***
      * 
@@ -673,6 +689,7 @@ export default class UIScene extends Phaser.Scene {
         const systemScene = this.scene.get('SystemScene');
         if (systemScene) {
             systemScene.events.off('transition-complete', this.onSceneTransition, this);
+            systemScene.events.off('gamemode-changed', this.onGameModeChanged, this);
         }
     }
 }

@@ -958,8 +958,8 @@ export default class TrialSegmentManager {
             console.error('[TrialManager] Timeout scenario error:', e);
         }
 
-        // シナリオ完了後、GameFlowManager経由でゲームオーバーへ
-        EngineAPI.fireGameFlowEvent('GAME_OVER');
+        // シナリオ完了後、GameFlowManager経由でタイトルへ戻る
+        EngineAPI.fireGameFlowEvent('RETURN_TO_TITLE');
     }
 
     update(time, delta) {

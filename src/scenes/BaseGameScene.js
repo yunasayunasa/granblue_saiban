@@ -129,7 +129,7 @@ export default class BaseGameScene extends Phaser.Scene {
             console.warn(`[BaseGameScene] No layout data: ${key}`);
             this.finalizeSetup([]);
         }
-        this.matter.world.on('beforeupdate', () => {
+        this._onBeforeUpdate = () => {
             const g = this.matter.world.engine.gravity;
             this.children.list.forEach(obj => {
                 if (obj.body && obj.getData('ignoreGravity')) {
@@ -137,7 +137,8 @@ export default class BaseGameScene extends Phaser.Scene {
                     Phaser.Physics.Matter.Matter.Body.applyForce(obj.body, obj.body.position, f);
                 }
             });
-        });
+        };
+        this.matter.world.on('beforeupdate', this._onBeforeUpdate);
     }
 
     createAnimationsFromLayout(data) {
@@ -521,30 +522,33 @@ export default class BaseGameScene extends Phaser.Scene {
                 });
             }
         }
-        this.matter.world.on('collisionstart', (event) => {
+        this._onCollisionStart = (event) => {
             event.pairs.forEach(pair => {
                 if (pair.bodyA.gameObject && pair.bodyB.gameObject) {
                     this.handleCollision(pair.bodyA.gameObject, pair.bodyB.gameObject, pair);
                     this.handleCollision(pair.bodyB.gameObject, pair.bodyA.gameObject, pair);
                 }
             });
-        });
-        this.matter.world.on('collisionactive', (event) => {
+        };
+        this._onCollisionActive = (event) => {
             event.pairs.forEach(pair => {
                 if ((pair.bodyA.isSensor || pair.bodyB.isSensor) && pair.bodyA.gameObject && pair.bodyB.gameObject) {
                     this.handleOverlap(pair.bodyA.gameObject, pair.bodyB.gameObject, 'active');
                     this.handleOverlap(pair.bodyB.gameObject, pair.bodyA.gameObject, 'active');
                 }
             });
-        });
-        this.matter.world.on('collisionend', (event) => {
+        };
+        this._onCollisionEnd = (event) => {
             event.pairs.forEach(pair => {
                 if ((pair.bodyA.isSensor || pair.bodyB.isSensor) && pair.bodyA.gameObject && pair.bodyB.gameObject) {
                     this.handleOverlap(pair.bodyA.gameObject, pair.bodyB.gameObject, 'end');
                     this.handleOverlap(pair.bodyB.gameObject, pair.bodyA.gameObject, 'end');
                 }
             });
-        });
+        };
+        this.matter.world.on('collisionstart', this._onCollisionStart);
+        this.matter.world.on('collisionactive', this._onCollisionActive);
+        this.matter.world.on('collisionend', this._onCollisionEnd);
         if (this.onSetupComplete) this.onSetupComplete();
         this.events.emit('scene-ready');
     }
@@ -629,5 +633,23 @@ export default class BaseGameScene extends Phaser.Scene {
         return layout;
     }
 
-    shutdown() { super.shutdown(); }
+    shutdown() {
+        // Matter.js world イベントの解除 (シーン再入時の多重登録防止)
+        if (this.matter && this.matter.world) {
+            if (this._onBeforeUpdate) this.matter.world.off('beforeupdate', this._onBeforeUpdate);
+            if (this._onCollisionStart) this.matter.world.off('collisionstart', this._onCollisionStart);
+            if (this._onCollisionActive) this.matter.world.off('collisionactive', this._onCollisionActive);
+            if (this._onCollisionEnd) this.matter.world.off('collisionend', this._onCollisionEnd);
+        }
+        this._onBeforeUpdate = null;
+        this._onCollisionStart = null;
+        this._onCollisionActive = null;
+        this._onCollisionEnd = null;
+
+        // SystemScene の start_tutorial リスナーも解除
+        const sysScene = this.scene.get('SystemScene');
+        if (sysScene && sysScene.events) {
+            sysScene.events.off('start_tutorial', this.handleStartTutorial, this);
+        }
+    }
 }

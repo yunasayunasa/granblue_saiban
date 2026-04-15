@@ -155,7 +155,7 @@
                                             {
                                                 "text": "君はキッチンにいた！",
                                                 "evidence_required": "blue_feather",
-                                                "pre_present_scenario": "chapter1/ch1_pre_present.ks",
+                                                "pre_present_scenario": "chapter1/ch2_pre_present.ks",
                                                 "correct": true,
                                                 "success_scenario": "chapter1/ch2_success_siete.ks",
                                                 "next_trial_data": "scenes/trial_ch3.json"
